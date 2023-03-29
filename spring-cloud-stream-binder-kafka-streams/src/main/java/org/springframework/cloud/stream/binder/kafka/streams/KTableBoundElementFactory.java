@@ -42,8 +42,8 @@ class KTableBoundElementFactory extends AbstractBindingTargetFactory<KTable> {
 	private final KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue;
 
 	KTableBoundElementFactory(BindingServiceProperties bindingServiceProperties,
-							EncodingDecodingBindAdviceHandler encodingDecodingBindAdviceHandler,
-							KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue) {
+			EncodingDecodingBindAdviceHandler encodingDecodingBindAdviceHandler,
+			KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue) {
 		super(KTable.class);
 		this.bindingServiceProperties = bindingServiceProperties;
 		this.encodingDecodingBindAdviceHandler = encodingDecodingBindAdviceHandler;
@@ -68,11 +68,11 @@ class KTableBoundElementFactory extends AbstractBindingTargetFactory<KTable> {
 
 		KTableBoundElementFactory.KTableWrapperHandler wrapper = new KTableBoundElementFactory.KTableWrapperHandler();
 		ProxyFactory proxyFactory = new ProxyFactory(
-				KTableBoundElementFactory.KTableWrapper.class, KTable.class);
+				KTableBoundElementFactory.KTableWrapper.class,KTable.class);
 		proxyFactory.addAdvice(wrapper);
 
 		final KTable proxy = (KTable) proxyFactory.getProxy();
-		this.kafkaStreamsBindingInformationCatalogue.addBindingNamePerTarget(proxy, name);
+		this.kafkaStreamsBindingInformationCatalogue.addBindingNamePerTarget(proxy,name);
 		return proxy;
 	}
 
@@ -98,7 +98,7 @@ class KTableBoundElementFactory extends AbstractBindingTargetFactory<KTable> {
 		private KTable<Object, Object> delegate;
 
 		public void wrap(KTable<Object, Object> delegate) {
-			Assert.notNull(delegate, "delegate cannot be null");
+			Assert.notNull(delegate,"delegate cannot be null");
 			if (this.delegate == null) {
 				this.delegate = delegate;
 			}

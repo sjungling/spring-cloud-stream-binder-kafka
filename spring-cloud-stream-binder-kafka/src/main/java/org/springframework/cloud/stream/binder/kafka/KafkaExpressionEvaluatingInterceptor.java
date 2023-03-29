@@ -48,19 +48,19 @@ public class KafkaExpressionEvaluatingInterceptor implements ChannelInterceptor 
 	 * @param messageKeyExpression the routing key expression.
 	 * @param evaluationContext the evaluation context.
 	 */
-	public KafkaExpressionEvaluatingInterceptor(Expression messageKeyExpression, EvaluationContext evaluationContext) {
-		Assert.notNull(messageKeyExpression != null, "A message key expression is required");
-		Assert.notNull(evaluationContext, "the 'evaluationContext' cannot be null");
+	public KafkaExpressionEvaluatingInterceptor(Expression messageKeyExpression,EvaluationContext evaluationContext) {
+		Assert.notNull(messageKeyExpression != null,"A message key expression is required");
+		Assert.notNull(evaluationContext,"the 'evaluationContext' cannot be null");
 		this.messageKeyExpression = messageKeyExpression;
 		this.evaluationContext = evaluationContext;
 	}
 
 	@Override
-	public Message<?> preSend(Message<?> message, MessageChannel channel) {
+	public Message<?> preSend(Message<?> message,MessageChannel channel) {
 		MessageBuilder<?> builder = MessageBuilder.fromMessage(message);
 		if (this.messageKeyExpression != null) {
 			builder.setHeader(MESSAGE_KEY_HEADER,
-					this.messageKeyExpression.getValue(this.evaluationContext, message));
+					this.messageKeyExpression.getValue(this.evaluationContext,message));
 		}
 		return builder.build();
 	}

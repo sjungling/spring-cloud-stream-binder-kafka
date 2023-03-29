@@ -90,12 +90,12 @@ public class CollectionSerde<E> implements Serde<Collection<E>> {
 	 * @param serde specify an explicit Serde
 	 * @param collectionsClass type of the Collection class
 	 */
-	public CollectionSerde(Serde<E> serde, Class<?> collectionsClass) {
+	public CollectionSerde(Serde<E> serde,Class<?> collectionsClass) {
 		this.collectionClass = collectionsClass;
 		this.inner =
 				Serdes.serdeFrom(
 						new CollectionSerializer<>(serde.serializer()),
-						new CollectionDeserializer<>(serde.deserializer(), collectionsClass));
+						new CollectionDeserializer<>(serde.deserializer(),collectionsClass));
 	}
 
 	/**
@@ -105,13 +105,13 @@ public class CollectionSerde<E> implements Serde<Collection<E>> {
 	 * @param targetTypeForJsonSerde target type used by the JsonSerde
 	 * @param collectionsClass type of the Collection class
 	 */
-	public CollectionSerde(Class<?> targetTypeForJsonSerde, Class<?> collectionsClass) {
+	public CollectionSerde(Class<?> targetTypeForJsonSerde,Class<?> collectionsClass) {
 		this.collectionClass = collectionsClass;
 		try (JsonSerde<E> jsonSerde = new JsonSerde(targetTypeForJsonSerde)) {
 
 			this.inner = Serdes.serdeFrom(
 					new CollectionSerializer<>(jsonSerde.serializer()),
-					new CollectionDeserializer<>(jsonSerde.deserializer(), collectionsClass));
+					new CollectionDeserializer<>(jsonSerde.deserializer(),collectionsClass));
 		}
 	}
 
@@ -126,9 +126,9 @@ public class CollectionSerde<E> implements Serde<Collection<E>> {
 	}
 
 	@Override
-	public void configure(Map<String, ?> configs, boolean isKey) {
-		inner.serializer().configure(configs, isKey);
-		inner.deserializer().configure(configs, isKey);
+	public void configure(Map<String, ?> configs,boolean isKey) {
+		inner.serializer().configure(configs,isKey);
+		inner.deserializer().configure(configs,isKey);
 	}
 
 	@Override
@@ -146,15 +146,16 @@ public class CollectionSerde<E> implements Serde<Collection<E>> {
 			this.inner = inner;
 		}
 
-		CollectionSerializer() { }
+		CollectionSerializer() {
+		}
 
 		@Override
-		public void configure(Map<String, ?> configs, boolean isKey) {
+		public void configure(Map<String, ?> configs,boolean isKey) {
 
 		}
 
 		@Override
-		public byte[] serialize(String topic, Collection<E> collection) {
+		public byte[] serialize(String topic,Collection<E> collection) {
 			final int size = collection.size();
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			final DataOutputStream dos = new DataOutputStream(baos);
@@ -162,13 +163,13 @@ public class CollectionSerde<E> implements Serde<Collection<E>> {
 			try {
 				dos.writeInt(size);
 				while (iterator.hasNext()) {
-					final byte[] bytes = inner.serialize(topic, iterator.next());
+					final byte[] bytes = inner.serialize(topic,iterator.next());
 					dos.writeInt(bytes.length);
 					dos.write(bytes);
 				}
 			}
 			catch (IOException e) {
-				throw new RuntimeException("Unable to serialize the provided collection", e);
+				throw new RuntimeException("Unable to serialize the provided collection",e);
 			}
 			return baos.toByteArray();
 		}
@@ -183,17 +184,17 @@ public class CollectionSerde<E> implements Serde<Collection<E>> {
 		private final Deserializer<E> valueDeserializer;
 		private final Class<?> collectionClass;
 
-		CollectionDeserializer(final Deserializer<E> valueDeserializer, Class<?> collectionClass) {
+		CollectionDeserializer(final Deserializer<E> valueDeserializer,Class<?> collectionClass) {
 			this.valueDeserializer = valueDeserializer;
 			this.collectionClass = collectionClass;
 		}
 
 		@Override
-		public void configure(Map<String, ?> configs, boolean isKey) {
+		public void configure(Map<String, ?> configs,boolean isKey) {
 		}
 
 		@Override
-		public Collection<E> deserialize(String topic, byte[] bytes) {
+		public Collection<E> deserialize(String topic,byte[] bytes) {
 			if (bytes == null || bytes.length == 0) {
 				return null;
 			}
@@ -207,12 +208,12 @@ public class CollectionSerde<E> implements Serde<Collection<E>> {
 					final byte[] valueBytes = new byte[dataInputStream.readInt()];
 					final int read = dataInputStream.read(valueBytes);
 					if (read != -1) {
-						collection.add(valueDeserializer.deserialize(topic, valueBytes));
+						collection.add(valueDeserializer.deserialize(topic,valueBytes));
 					}
 				}
 			}
 			catch (IOException e) {
-				throw new RuntimeException("Unable to deserialize collection", e);
+				throw new RuntimeException("Unable to deserialize collection",e);
 			}
 
 			return collection;

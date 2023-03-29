@@ -56,8 +56,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MultipleFunctionsInSameAppTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
-			"coffee", "electronics");
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
+			"coffee","electronics");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule.getEmbeddedKafka();
 
@@ -67,12 +67,12 @@ public class MultipleFunctionsInSameAppTests {
 
 	@BeforeClass
 	public static void setUp() {
-		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("purchase-groups", "false",
+		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("purchase-groups","false",
 				embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
 		DefaultKafkaConsumerFactory<String, String> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromEmbeddedTopics(consumer, "coffee", "electronics");
+		embeddedKafka.consumeFromEmbeddedTopics(consumer,"coffee","electronics");
 	}
 
 	@AfterClass
@@ -105,16 +105,16 @@ public class MultipleFunctionsInSameAppTests {
 				"--spring.cloud.stream.kafka.streams.binder.functions.analyze.configuration.client.id=analyze-client",
 				"--spring.cloud.stream.kafka.streams.binder.functions.anotherProcess.configuration.client.id=anotherProcess-client",
 				"--spring.cloud.stream.kafka.streams.binder.brokers=" + embeddedKafka.getBrokersAsString())) {
-			receiveAndValidate("purchases", "coffee", "electronics");
+			receiveAndValidate("purchases","coffee","electronics");
 
 			StreamsBuilderFactoryBean processStreamsBuilderFactoryBean = context
-					.getBean("&stream-builder-process", StreamsBuilderFactoryBean.class);
+					.getBean("&stream-builder-process",StreamsBuilderFactoryBean.class);
 
 			StreamsBuilderFactoryBean analyzeStreamsBuilderFactoryBean = context
-					.getBean("&stream-builder-analyze", StreamsBuilderFactoryBean.class);
+					.getBean("&stream-builder-analyze",StreamsBuilderFactoryBean.class);
 
 			StreamsBuilderFactoryBean anotherProcessStreamsBuilderFactoryBean = context
-					.getBean("&stream-builder-anotherProcess", StreamsBuilderFactoryBean.class);
+					.getBean("&stream-builder-anotherProcess",StreamsBuilderFactoryBean.class);
 
 			final Properties processStreamsConfiguration = processStreamsBuilderFactoryBean.getStreamsConfiguration();
 			final Properties analyzeStreamsConfiguration = analyzeStreamsBuilderFactoryBean.getStreamsConfiguration();
@@ -130,9 +130,9 @@ public class MultipleFunctionsInSameAppTests {
 			assertThat(anotherProcessStreamsConfiguration.get(StreamsConfig.NUM_STREAM_THREADS_CONFIG)).isEqualTo("3");
 
 			final KafkaStreamsBindingInformationCatalogue catalogue = context.getBean(KafkaStreamsBindingInformationCatalogue.class);
-			Field field = ReflectionUtils.findField(KafkaStreamsBindingInformationCatalogue.class, "outboundKStreamResolvables", Map.class);
+			Field field = ReflectionUtils.findField(KafkaStreamsBindingInformationCatalogue.class,"outboundKStreamResolvables",Map.class);
 			ReflectionUtils.makeAccessible(field);
-			final Map<Object, ResolvableType> outboundKStreamResolvables = (Map<Object, ResolvableType>) ReflectionUtils.getField(field, catalogue);
+			final Map<Object, ResolvableType> outboundKStreamResolvables = (Map<Object, ResolvableType>) ReflectionUtils.getField(field,catalogue);
 			// Since we have 2 functions with return types -- one is an array return type with 2 bindings -- assert that
 			// the catalogue contains outbound type information for all the 3 different bindings.
 			assertThat(outboundKStreamResolvables.size()).isEqualTo(3);
@@ -170,13 +170,13 @@ public class MultipleFunctionsInSameAppTests {
 				"--spring.cloud.stream.binders.kafka2.environment.spring.cloud.stream.kafka.streams.binder.configuration.client.id=analyze-client")) {
 
 			Thread.sleep(1000);
-			receiveAndValidate("purchases", "coffee", "electronics");
+			receiveAndValidate("purchases","coffee","electronics");
 
 			StreamsBuilderFactoryBean processStreamsBuilderFactoryBean = context
-					.getBean("&stream-builder-process", StreamsBuilderFactoryBean.class);
+					.getBean("&stream-builder-process",StreamsBuilderFactoryBean.class);
 
 			StreamsBuilderFactoryBean analyzeStreamsBuilderFactoryBean = context
-					.getBean("&stream-builder-analyze", StreamsBuilderFactoryBean.class);
+					.getBean("&stream-builder-analyze",StreamsBuilderFactoryBean.class);
 
 			final Properties processStreamsConfiguration = processStreamsBuilderFactoryBean.getStreamsConfiguration();
 			final Properties analyzeStreamsConfiguration = analyzeStreamsBuilderFactoryBean.getStreamsConfiguration();
@@ -194,21 +194,21 @@ public class MultipleFunctionsInSameAppTests {
 		}
 	}
 
-	private void receiveAndValidate(String in, String... out) throws InterruptedException {
+	private void receiveAndValidate(String in,String... out) throws InterruptedException {
 		Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 		DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 		try {
-			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 			template.setDefaultTopic(in);
 			template.sendDefault("coffee");
-			ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer, out[0]);
+			ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer,out[0]);
 			assertThat(cr.value().contains("coffee")).isTrue();
 
 			template.sendDefault("electronics");
-			cr = KafkaTestUtils.getSingleRecord(consumer, out[1]);
+			cr = KafkaTestUtils.getSingleRecord(consumer,out[1]);
 			assertThat(cr.value().contains("electronics")).isTrue();
 
-			Assert.isTrue(countDownLatch.await(5, TimeUnit.SECONDS), "Analyze (BiConsumer) method didn't receive all the expected records");
+			Assert.isTrue(countDownLatch.await(5,TimeUnit.SECONDS),"Analyze (BiConsumer) method didn't receive all the expected records");
 		}
 		finally {
 			pf.destroy();
@@ -221,20 +221,20 @@ public class MultipleFunctionsInSameAppTests {
 		@Bean
 		public Function<KStream<String, String>, KStream<String, String>[]> process() {
 			return input -> input.branch(
-					(s, p) -> p.equalsIgnoreCase("coffee"),
-					(s, p) -> p.equalsIgnoreCase("electronics"));
+					(s,p) -> p.equalsIgnoreCase("coffee"),
+					(s,p) -> p.equalsIgnoreCase("electronics"));
 		}
 
 		@Bean
 		public Function<KStream<String, String>, KStream<String, Long>> yetAnotherProcess() {
-			return input -> input.map((k, v) -> new KeyValue<>("foo", 1L));
+			return input -> input.map((k,v) -> new KeyValue<>("foo",1L));
 		}
 
 		@Bean
 		public BiConsumer<KStream<String, String>, KStream<String, String>> analyze() {
-			return (coffee, electronics) -> {
-				coffee.foreach((s, p) -> countDownLatch.countDown());
-				electronics.foreach((s, p) -> countDownLatch.countDown());
+			return (coffee,electronics) -> {
+				coffee.foreach((s,p) -> countDownLatch.countDown());
+				electronics.foreach((s,p) -> countDownLatch.countDown());
 			};
 		}
 

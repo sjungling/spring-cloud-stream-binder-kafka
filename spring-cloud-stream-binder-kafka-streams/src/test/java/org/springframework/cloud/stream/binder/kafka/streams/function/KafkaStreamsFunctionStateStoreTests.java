@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KafkaStreamsFunctionStateStoreTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
 			"counts");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule.getEmbeddedKafka();
@@ -79,9 +79,9 @@ public class KafkaStreamsFunctionStateStoreTests {
 		Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 		DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 		try {
-			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 			template.setDefaultTopic("words");
-			template.sendDefault(1, "foobar");
+			template.sendDefault(1,"foobar");
 			Thread.sleep(2000L);
 			StateStoreTestApplication processorApplication = context
 					.getBean(StateStoreTestApplication.class);
@@ -123,7 +123,7 @@ public class KafkaStreamsFunctionStateStoreTests {
 
 		@Bean(name = "biConsumerBean")
 		public java.util.function.BiConsumer<KStream<Object, String>, KStream<Object, String>> process() {
-			return (input0, input1) ->
+			return (input0,input1) ->
 					input0.process((ProcessorSupplier<Object, String>) () -> new Processor<Object, String>() {
 						@Override
 						@SuppressWarnings("unchecked")
@@ -133,7 +133,7 @@ public class KafkaStreamsFunctionStateStoreTests {
 						}
 
 						@Override
-						public void process(Object key, String value) {
+						public void process(Object key,String value) {
 							processed1 = true;
 						}
 
@@ -141,7 +141,7 @@ public class KafkaStreamsFunctionStateStoreTests {
 						public void close() {
 
 						}
-					}, "my-store", "other-store");
+					},"my-store","other-store");
 		}
 
 		@Bean
@@ -156,7 +156,7 @@ public class KafkaStreamsFunctionStateStoreTests {
 					}
 
 					@Override
-					public void process(Object key, String value) {
+					public void process(Object key,String value) {
 						processed2 = true;
 					}
 
@@ -164,14 +164,14 @@ public class KafkaStreamsFunctionStateStoreTests {
 					public void close() {
 
 					}
-				}, "my-store", "other-store");
+				},"my-store","other-store");
 			};
 		}
 
 		@Bean
 		public StoreBuilder myStore() {
 			return Stores.keyValueStoreBuilder(
-					Stores.persistentKeyValueStore("my-store"), Serdes.Long(),
+					Stores.persistentKeyValueStore("my-store"),Serdes.Long(),
 					Serdes.Long());
 		}
 
@@ -179,7 +179,7 @@ public class KafkaStreamsFunctionStateStoreTests {
 		public StoreBuilder otherStore() {
 			return Stores.windowStoreBuilder(
 					Stores.persistentWindowStore("other-store",
-							Duration.ofSeconds(3), Duration.ofSeconds(3),  false), Serdes.Long(),
+							Duration.ofSeconds(3),Duration.ofSeconds(3),false),Serdes.Long(),
 					Serdes.Long());
 		}
 	}

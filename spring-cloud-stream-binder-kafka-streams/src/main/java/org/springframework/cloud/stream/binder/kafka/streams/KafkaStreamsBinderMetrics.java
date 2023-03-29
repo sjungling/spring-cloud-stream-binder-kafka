@@ -96,8 +96,8 @@ public class KafkaStreamsBinderMetrics {
 							KafkaStreams kafkaStreams = streamsBuilderFactoryBean.getKafkaStreams();
 							final Map<MetricName, ? extends Metric> metrics = kafkaStreams.metrics();
 
-							prepareToBindMetrics(registry, metrics);
-							checkAndBindMetrics(registry, metrics);
+							prepareToBindMetrics(registry,metrics);
+							checkAndBindMetrics(registry,metrics);
 						}
 					}
 				}
@@ -112,7 +112,7 @@ public class KafkaStreamsBinderMetrics {
 		}
 	}
 
-	void prepareToBindMetrics(MeterRegistry registry, Map<MetricName, ? extends Metric> metrics) {
+	void prepareToBindMetrics(MeterRegistry registry,Map<MetricName, ? extends Metric> metrics) {
 		Metric startTime = null;
 		for (Map.Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
 			MetricName name = entry.getKey();
@@ -129,21 +129,21 @@ public class KafkaStreamsBinderMetrics {
 			}
 		}
 		if (startTime != null) {
-			bindMeter(registry, startTime, meterName(startTime), meterTags(startTime));
+			bindMeter(registry,startTime,meterName(startTime),meterTags(startTime));
 		}
 	}
 
-	private void bindMeter(MeterRegistry registry, Metric metric, String name, Iterable<Tag> tags) {
+	private void bindMeter(MeterRegistry registry,Metric metric,String name,Iterable<Tag> tags) {
 		if (name.endsWith("total") || name.endsWith("count")) {
-			registerCounter(registry, metric, name, tags);
+			registerCounter(registry,metric,name,tags);
 		}
 		else {
-			registerGauge(registry, metric, name, tags);
+			registerGauge(registry,metric,name,tags);
 		}
 	}
 
-	private void registerCounter(MeterRegistry registry, Metric metric, String name, Iterable<Tag> tags) {
-		FunctionCounter.builder(name, metric, toMetricValue())
+	private void registerCounter(MeterRegistry registry,Metric metric,String name,Iterable<Tag> tags) {
+		FunctionCounter.builder(name,metric,toMetricValue())
 				.tags(tags)
 				.description(metric.metricName().description())
 				.register(registry);
@@ -153,26 +153,26 @@ public class KafkaStreamsBinderMetrics {
 		return metric -> ((Number) metric.metricValue()).doubleValue();
 	}
 
-	private void registerGauge(MeterRegistry registry, Metric metric, String name, Iterable<Tag> tags) {
-		Gauge.builder(name, metric, toMetricValue())
+	private void registerGauge(MeterRegistry registry,Metric metric,String name,Iterable<Tag> tags) {
+		Gauge.builder(name,metric,toMetricValue())
 				.tags(tags)
 				.description(metric.metricName().description())
 				.register(registry);
 	}
 
 	private List<Tag> meterTags(Metric metric) {
-		return meterTags(metric, false);
+		return meterTags(metric,false);
 	}
 
 	private String meterName(Metric metric) {
 		String name = METRIC_NAME_PREFIX + metric.metricName().group() + "." + metric.metricName().name();
-		return name.replaceAll("-metrics", "").replaceAll("-", ".");
+		return name.replaceAll("-metrics","").replaceAll("-",".");
 	}
 
-	private List<Tag> meterTags(Metric metric, boolean includeCommonTags) {
+	private List<Tag> meterTags(Metric metric,boolean includeCommonTags) {
 		List<Tag> tags = new ArrayList<>();
-		metric.metricName().tags().forEach((key, value) -> tags.add(Tag.of(key, value)));
-		tags.add(Tag.of(KAFKA_VERSION_TAG_NAME, kafkaVersion));
+		metric.metricName().tags().forEach((key,value) -> tags.add(Tag.of(key,value)));
+		tags.add(Tag.of(KAFKA_VERSION_TAG_NAME,kafkaVersion));
 		return tags;
 	}
 
@@ -187,10 +187,10 @@ public class KafkaStreamsBinderMetrics {
 		return false;
 	}
 
-	void checkAndBindMetrics(MeterRegistry registry, Map<MetricName, ? extends Metric> metrics) {
+	void checkAndBindMetrics(MeterRegistry registry,Map<MetricName, ? extends Metric> metrics) {
 		if (!currentMeters.equals(metrics.keySet())) {
 			currentMeters = new HashSet<>(metrics.keySet());
-			metrics.forEach((name, metric) -> {
+			metrics.forEach((name,metric) -> {
 				//Filter out non-numeric values
 				if (!(metric.metricValue() instanceof Number)) {
 					return;
@@ -204,7 +204,7 @@ public class KafkaStreamsBinderMetrics {
 					return;
 				}
 				String meterName = meterName(metric);
-				List<Tag> meterTagsWithCommonTags = meterTags(metric, true);
+				List<Tag> meterTagsWithCommonTags = meterTags(metric,true);
 				//Kafka has metrics with lower number of tags (e.g. with/without topic or partition tag)
 				//Remove meters with lower number of tags
 				boolean hasLessTags = false;
@@ -217,7 +217,7 @@ public class KafkaStreamsBinderMetrics {
 					if (tags.size() < meterTagsWithCommonTags.size()) {
 						registry.remove(other);
 					}
-						// Check if already exists
+					// Check if already exists
 					else if (tags.size() == meterTagsWithCommonTags.size()) {
 						if (tags.equals(meterTagsWithCommonTags)) {
 							return;
@@ -233,7 +233,7 @@ public class KafkaStreamsBinderMetrics {
 				if (hasLessTags) {
 					return;
 				}
-				bindMeter(registry, metric, meterName, meterTags(metric));
+				bindMeter(registry,metric,meterName,meterTags(metric));
 			});
 		}
 	}

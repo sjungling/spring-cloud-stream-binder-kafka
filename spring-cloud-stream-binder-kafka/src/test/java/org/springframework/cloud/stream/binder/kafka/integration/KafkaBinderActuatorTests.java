@@ -68,9 +68,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 // @checkstyle:off
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
 		properties = {
-		"spring.cloud.stream.bindings.input.group=" + KafkaBinderActuatorTests.TEST_CONSUMER_GROUP,
-		"spring.cloud.stream.function.bindings.process-in-0=input",
-		"spring.cloud.stream.pollable-source=input"}
+				"spring.cloud.stream.bindings.input.group=" + KafkaBinderActuatorTests.TEST_CONSUMER_GROUP,
+				"spring.cloud.stream.function.bindings.process-in-0=input",
+				"spring.cloud.stream.pollable-source=input"}
 )
 // @checkstyle:on
 @DirtiesContext
@@ -81,7 +81,7 @@ public class KafkaBinderActuatorTests {
 	private static final String KAFKA_BROKERS_PROPERTY = "spring.kafka.bootstrap-servers";
 
 	@ClassRule
-	public static EmbeddedKafkaRule kafkaEmbedded = new EmbeddedKafkaRule(1, true);
+	public static EmbeddedKafkaRule kafkaEmbedded = new EmbeddedKafkaRule(1,true);
 
 	@BeforeClass
 	public static void setup() {
@@ -102,11 +102,11 @@ public class KafkaBinderActuatorTests {
 
 	@Test
 	public void testKafkaBinderMetricsExposed() {
-		this.kafkaTemplate.send("input", null, "foo".getBytes());
+		this.kafkaTemplate.send("input",null,"foo".getBytes());
 		this.kafkaTemplate.flush();
 
 		assertThat(this.meterRegistry.get("spring.cloud.stream.binder.kafka.offset")
-				.tag("group", TEST_CONSUMER_GROUP).tag("topic", "input").gauge()
+				.tag("group",TEST_CONSUMER_GROUP).tag("topic","input").gauge()
 				.value()).isGreaterThan(0);
 	}
 
@@ -115,9 +115,9 @@ public class KafkaBinderActuatorTests {
 	public void testKafkaBinderMetricsWhenNoMicrometer() {
 		new ApplicationContextRunner().withUserConfiguration(KafkaMetricsTestConfig.class)
 				.withPropertyValues(
-						"spring.cloud.stream.bindings.input.group", KafkaBinderActuatorTests.TEST_CONSUMER_GROUP,
-						"spring.cloud.stream.function.bindings.process-in-0", "input",
-						"spring.cloud.stream.pollable-source", "input")
+						"spring.cloud.stream.bindings.input.group",KafkaBinderActuatorTests.TEST_CONSUMER_GROUP,
+						"spring.cloud.stream.function.bindings.process-in-0","input",
+						"spring.cloud.stream.pollable-source","input")
 				.withClassLoader(new FilteredClassLoader("io.micrometer.core"))
 				.run(context -> {
 					assertThat(context.getBeanNamesForType(MeterRegistry.class))
@@ -128,25 +128,25 @@ public class KafkaBinderActuatorTests {
 							context.getBean(BindingService.class));
 					@SuppressWarnings("unchecked")
 					Map<String, List<Binding<MessageChannel>>> consumerBindings =
-						(Map<String, List<Binding<MessageChannel>>>) channelBindingServiceAccessor
-							.getPropertyValue("consumerBindings");
+							(Map<String, List<Binding<MessageChannel>>>) channelBindingServiceAccessor
+									.getPropertyValue("consumerBindings");
 					assertThat(new DirectFieldAccessor(
 							consumerBindings.get("input").get(0)).getPropertyValue(
-									"lifecycle.messageListenerContainer.beanName"))
-											.isEqualTo("setByCustomizer:input");
+							"lifecycle.messageListenerContainer.beanName"))
+							.isEqualTo("setByCustomizer:input");
 					assertThat(new DirectFieldAccessor(
 							consumerBindings.get("input").get(0)).getPropertyValue(
-									"lifecycle.beanName"))
-											.isEqualTo("setByCustomizer:input");
+							"lifecycle.beanName"))
+							.isEqualTo("setByCustomizer:input");
 					assertThat(new DirectFieldAccessor(
 							consumerBindings.get("source").get(0)).getPropertyValue(
-									"lifecycle.beanName"))
-											.isEqualTo("setByCustomizer:source");
+							"lifecycle.beanName"))
+							.isEqualTo("setByCustomizer:source");
 
 					@SuppressWarnings("unchecked")
 					Map<String, Binding<MessageChannel>> producerBindings =
-						(Map<String, Binding<MessageChannel>>) channelBindingServiceAccessor
-							.getPropertyValue("producerBindings");
+							(Map<String, Binding<MessageChannel>>) channelBindingServiceAccessor
+									.getPropertyValue("producerBindings");
 
 					assertThat(new DirectFieldAccessor(
 							producerBindings.get("output")).getPropertyValue(
@@ -161,22 +161,22 @@ public class KafkaBinderActuatorTests {
 
 		@Bean
 		public ListenerContainerCustomizer<AbstractMessageListenerContainer<?, ?>> containerCustomizer() {
-			return (c, q, g) -> c.setBeanName("setByCustomizer:" + q);
+			return (c,q,g) -> c.setBeanName("setByCustomizer:" + q);
 		}
 
 		@Bean
 		public MessageSourceCustomizer<KafkaMessageSource<?, ?>> sourceCustomizer() {
-			return (s, q, g) -> s.setBeanName("setByCustomizer:" + q);
+			return (s,q,g) -> s.setBeanName("setByCustomizer:" + q);
 		}
 
 		@Bean
 		public ConsumerEndpointCustomizer<KafkaMessageDrivenChannelAdapter<?, ?>> consumerCustomizer() {
-			return (p, q, g) -> p.setBeanName("setByCustomizer:" + q);
+			return (p,q,g) -> p.setBeanName("setByCustomizer:" + q);
 		}
 
 		@Bean
 		public ProducerMessageHandlerCustomizer<KafkaProducerMessageHandler<?, ?>> handlerCustomizer() {
-			return (handler, destinationName) -> handler.setBeanName("setByCustomizer:" + destinationName);
+			return (handler,destinationName) -> handler.setBeanName("setByCustomizer:" + destinationName);
 		}
 
 		@Bean

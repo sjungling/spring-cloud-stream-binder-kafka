@@ -34,8 +34,8 @@ public class SkipAndContinueExceptionHandler implements DeserializationException
 
 	@Override
 	public DeserializationExceptionHandler.DeserializationHandlerResponse handle(final ProcessorContext context,
-																				final ConsumerRecord<byte[], byte[]> record,
-																				final Exception exception) {
+			final ConsumerRecord<byte[], byte[]> record,
+			final Exception exception) {
 		return DeserializationExceptionHandler.DeserializationHandlerResponse.CONTINUE;
 	}
 

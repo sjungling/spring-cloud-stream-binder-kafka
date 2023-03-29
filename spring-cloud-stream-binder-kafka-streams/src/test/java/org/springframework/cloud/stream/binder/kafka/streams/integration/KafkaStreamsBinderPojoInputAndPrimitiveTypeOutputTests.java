@@ -56,7 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KafkaStreamsBinderPojoInputAndPrimitiveTypeOutputTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
 			"counts-id");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule
@@ -67,13 +67,13 @@ public class KafkaStreamsBinderPojoInputAndPrimitiveTypeOutputTests {
 	@BeforeClass
 	public static void setUp() throws Exception {
 		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group-id",
-				"false", embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		consumerProps.put("value.deserializer", LongDeserializer.class);
+				"false",embeddedKafka);
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+		consumerProps.put("value.deserializer",LongDeserializer.class);
 		DefaultKafkaConsumerFactory<Integer, Long> cf = new DefaultKafkaConsumerFactory<>(
 				consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromAnEmbeddedTopic(consumer, "counts-id");
+		embeddedKafka.consumeFromAnEmbeddedTopic(consumer,"counts-id");
 	}
 
 	@AfterClass
@@ -112,7 +112,7 @@ public class KafkaStreamsBinderPojoInputAndPrimitiveTypeOutputTests {
 		Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 		DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(
 				senderProps);
-		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 		template.setDefaultTopic("foos");
 		template.sendDefault("{\"id\":\"123\"}");
 		ConsumerRecord<Integer, Long> cr = KafkaTestUtils.getSingleRecord(consumer,
@@ -127,13 +127,13 @@ public class KafkaStreamsBinderPojoInputAndPrimitiveTypeOutputTests {
 
 		@Bean
 		public Function<KStream<Object, Product>, KStream<Integer, Long>> process() {
-			return input -> input.filter((key, product) -> product.getId() == 123)
-					.map((key, value) -> new KeyValue<>(value, value))
+			return input -> input.filter((key,product) -> product.getId() == 123)
+					.map((key,value) -> new KeyValue<>(value,value))
 					.groupByKey(Grouped.with(new JsonSerde<>(Product.class),
 							new JsonSerde<>(Product.class)))
 					.windowedBy(TimeWindows.of(Duration.ofMillis(5000)))
 					.count(Materialized.as("id-count-store-x")).toStream()
-					.map((key, value) -> new KeyValue<>(key.key().id, value));
+					.map((key,value) -> new KeyValue<>(key.key().id,value));
 		}
 	}
 

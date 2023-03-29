@@ -41,9 +41,9 @@ public class KafkaStreamsFunctionProcessorInvoker {
 	private final StreamFunctionProperties streamFunctionProperties;
 
 	public KafkaStreamsFunctionProcessorInvoker(Map<String, ResolvableType> resolvableTypeMap,
-												KafkaStreamsFunctionProcessor kafkaStreamsFunctionProcessor,
-												KafkaStreamsBindableProxyFactory[] kafkaStreamsBindableProxyFactories,
-												Map<String, Method> methods, StreamFunctionProperties streamFunctionProperties) {
+			KafkaStreamsFunctionProcessor kafkaStreamsFunctionProcessor,
+			KafkaStreamsBindableProxyFactory[] kafkaStreamsBindableProxyFactories,
+			Map<String, Method> methods,StreamFunctionProperties streamFunctionProperties) {
 		this.kafkaStreamsFunctionProcessor = kafkaStreamsFunctionProcessor;
 		this.resolvableTypeMap = resolvableTypeMap;
 		this.kafkaStreamsBindableProxyFactories = kafkaStreamsBindableProxyFactories;
@@ -57,10 +57,10 @@ public class KafkaStreamsFunctionProcessorInvoker {
 		final String[] functionUnits = StringUtils.hasText(definition) ? definition.split(";") : new String[]{};
 
 		if (functionUnits.length == 0) {
-						resolvableTypeMap.forEach((key, value) -> {
+			resolvableTypeMap.forEach((key,value) -> {
 				Optional<KafkaStreamsBindableProxyFactory> proxyFactory =
 						Arrays.stream(kafkaStreamsBindableProxyFactories).filter(p -> p.getFunctionName().equals(key)).findFirst();
-				this.kafkaStreamsFunctionProcessor.setupFunctionInvokerForKafkaStreams(value, key, proxyFactory.get(), methods.get(key), null);
+				this.kafkaStreamsFunctionProcessor.setupFunctionInvokerForKafkaStreams(value,key,proxyFactory.get(),methods.get(key),null);
 			});
 		}
 
@@ -75,14 +75,14 @@ public class KafkaStreamsFunctionProcessorInvoker {
 						Arrays.stream(kafkaStreamsBindableProxyFactories).filter(p -> p.getFunctionName().equals(derivedNameFromComposed[0])).findFirst();
 				proxyFactory.ifPresent(kafkaStreamsBindableProxyFactory ->
 						this.kafkaStreamsFunctionProcessor.setupFunctionInvokerForKafkaStreams(resolvableTypeMap.get(composedFunctions[0]),
-						derivedNameFromComposed[0], kafkaStreamsBindableProxyFactory, methods.get(derivedNameFromComposed[0]), resolvableTypeMap.get(composedFunctions[composedFunctions.length - 1]), composedFunctions));
+								derivedNameFromComposed[0],kafkaStreamsBindableProxyFactory,methods.get(derivedNameFromComposed[0]),resolvableTypeMap.get(composedFunctions[composedFunctions.length - 1]),composedFunctions));
 			}
 			else {
 				Optional<KafkaStreamsBindableProxyFactory> proxyFactory =
 						Arrays.stream(kafkaStreamsBindableProxyFactories).filter(p -> p.getFunctionName().equals(functionUnit)).findFirst();
 				proxyFactory.ifPresent(kafkaStreamsBindableProxyFactory ->
-						this.kafkaStreamsFunctionProcessor.setupFunctionInvokerForKafkaStreams(resolvableTypeMap.get(functionUnit), functionUnit,
-						kafkaStreamsBindableProxyFactory, methods.get(functionUnit), null));
+						this.kafkaStreamsFunctionProcessor.setupFunctionInvokerForKafkaStreams(resolvableTypeMap.get(functionUnit),functionUnit,
+								kafkaStreamsBindableProxyFactory,methods.get(functionUnit),null));
 			}
 		}
 	}

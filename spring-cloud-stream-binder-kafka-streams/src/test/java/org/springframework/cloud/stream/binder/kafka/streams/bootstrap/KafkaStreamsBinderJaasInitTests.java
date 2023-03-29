@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KafkaStreamsBinderJaasInitTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1, true, 10);
+	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1,true,10);
 
 	private static String JAVA_LOGIN_CONFIG_PARAM_VALUE;
 
@@ -52,7 +52,7 @@ public class KafkaStreamsBinderJaasInitTests {
 	@AfterClass
 	public static void afterAll() {
 		if (JAVA_LOGIN_CONFIG_PARAM_VALUE != null) {
-			System.setProperty(JaasUtils.JAVA_LOGIN_CONFIG_PARAM, JAVA_LOGIN_CONFIG_PARAM_VALUE);
+			System.setProperty(JaasUtils.JAVA_LOGIN_CONFIG_PARAM,JAVA_LOGIN_CONFIG_PARAM_VALUE);
 		}
 	}
 

@@ -46,17 +46,17 @@ public class CollectionSerdeTest {
 		foos.add(foo1);
 		foos.add(foo2);
 
-		CollectionSerde<Foo> collectionSerde = new CollectionSerde<>(Foo.class, ArrayList.class);
-		byte[] serialized = collectionSerde.serializer().serialize("", foos);
+		CollectionSerde<Foo> collectionSerde = new CollectionSerde<>(Foo.class,ArrayList.class);
+		byte[] serialized = collectionSerde.serializer().serialize("",foos);
 
-		Collection<Foo> deserialized = collectionSerde.deserializer().deserialize("", serialized);
+		Collection<Foo> deserialized = collectionSerde.deserializer().deserialize("",serialized);
 
 		Iterator<Foo> iterator = deserialized.iterator();
-		Foo foo1Retrieved  = iterator.next();
+		Foo foo1Retrieved = iterator.next();
 		assertThat(foo1Retrieved.getData()).isEqualTo("data-1");
 		assertThat(foo1Retrieved.getNum()).isEqualTo(1);
 
-		Foo foo2Retrieved  = iterator.next();
+		Foo foo2Retrieved = iterator.next();
 		assertThat(foo2Retrieved.getData()).isEqualTo("data-2");
 		assertThat(foo2Retrieved.getNum()).isEqualTo(2);
 

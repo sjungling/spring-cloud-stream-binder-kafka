@@ -84,7 +84,7 @@ public class KafkaStreamsMessageConversionDelegate {
 	 * @param outboundBindTarget outbound KStream target
 	 * @return serialized KStream
 	 */
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({"rawtypes","unchecked"})
 	public KStream serializeOnOutbound(KStream<?, ?> outboundBindTarget) {
 		String contentType = this.kstreamBindingInformationCatalogue
 				.getContentType(outboundBindTarget);
@@ -92,19 +92,19 @@ public class KafkaStreamsMessageConversionDelegate {
 		final PerRecordContentTypeHolder perRecordContentTypeHolder = new PerRecordContentTypeHolder();
 
 		final KStream<?, ?> kStreamWithEnrichedHeaders = outboundBindTarget
-			.filter((k, v) -> v != null)
-			.mapValues((v) -> {
-				Message<?> message = v instanceof Message<?> ? (Message<?>) v
-						: MessageBuilder.withPayload(v).build();
-				Map<String, Object> headers = new HashMap<>(message.getHeaders());
-				if (!StringUtils.isEmpty(contentType)) {
-					headers.put(MessageHeaders.CONTENT_TYPE, contentType);
-				}
-				MessageHeaders messageHeaders = new MessageHeaders(headers);
-				final Message<?> convertedMessage = messageConverter.toMessage(message.getPayload(), messageHeaders);
-				perRecordContentTypeHolder.setContentType((String) messageHeaders.get(MessageHeaders.CONTENT_TYPE));
-				return convertedMessage.getPayload();
-			});
+				.filter((k,v) -> v != null)
+				.mapValues((v) -> {
+					Message<?> message = v instanceof Message<?> ? (Message<?>) v
+							: MessageBuilder.withPayload(v).build();
+					Map<String, Object> headers = new HashMap<>(message.getHeaders());
+					if (!StringUtils.isEmpty(contentType)) {
+						headers.put(MessageHeaders.CONTENT_TYPE,contentType);
+					}
+					MessageHeaders messageHeaders = new MessageHeaders(headers);
+					final Message<?> convertedMessage = messageConverter.toMessage(message.getPayload(),messageHeaders);
+					perRecordContentTypeHolder.setContentType((String) messageHeaders.get(MessageHeaders.CONTENT_TYPE));
+					return convertedMessage.getPayload();
+				});
 
 		kStreamWithEnrichedHeaders.process(() -> new Processor() {
 
@@ -116,13 +116,13 @@ public class KafkaStreamsMessageConversionDelegate {
 			}
 
 			@Override
-			public void process(Object key, Object value) {
+			public void process(Object key,Object value) {
 				if (perRecordContentTypeHolder.contentType != null) {
 					this.context.headers().remove(MessageHeaders.CONTENT_TYPE);
 					final Header header;
 					try {
 						header = new RecordHeader(MessageHeaders.CONTENT_TYPE,
-									new ObjectMapper().writeValueAsBytes(perRecordContentTypeHolder.contentType));
+								new ObjectMapper().writeValueAsBytes(perRecordContentTypeHolder.contentType));
 						this.context.headers().add(header);
 					}
 					catch (Exception e) {
@@ -149,19 +149,19 @@ public class KafkaStreamsMessageConversionDelegate {
 	 * @param bindingTarget inbound KStream target
 	 * @return deserialized KStream
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked","rawtypes"})
 	public KStream deserializeOnInbound(Class<?> valueClass,
 			KStream<?, ?> bindingTarget) {
 		MessageConverter messageConverter = this.compositeMessageConverter;
 		final PerRecordContentTypeHolder perRecordContentTypeHolder = new PerRecordContentTypeHolder();
 
-		resolvePerRecordContentType(bindingTarget, perRecordContentTypeHolder);
+		resolvePerRecordContentType(bindingTarget,perRecordContentTypeHolder);
 
 		// Deserialize using a branching strategy
 		KStream<?, ?>[] branch = bindingTarget.branch(
 				// First filter where the message is converted and return true if
 				// everything went well, return false otherwise.
-				(o, o2) -> {
+				(o,o2) -> {
 					boolean isValidRecord = false;
 
 					try {
@@ -174,24 +174,24 @@ public class KafkaStreamsMessageConversionDelegate {
 								if (o2 instanceof Message) {
 									m1 = perRecordContentTypeHolder.contentType != null
 											? MessageBuilder.fromMessage((Message<?>) o2)
-													.setHeader(
-															MessageHeaders.CONTENT_TYPE,
-															perRecordContentTypeHolder.contentType)
-													.build()
+											.setHeader(
+													MessageHeaders.CONTENT_TYPE,
+													perRecordContentTypeHolder.contentType)
+											.build()
 											: (Message<?>) o2;
 								}
 								else {
 									m1 = perRecordContentTypeHolder.contentType != null
 											? MessageBuilder.withPayload(o2).setHeader(
-													MessageHeaders.CONTENT_TYPE,
-													perRecordContentTypeHolder.contentType)
-													.build()
+											MessageHeaders.CONTENT_TYPE,
+											perRecordContentTypeHolder.contentType)
+											.build()
 											: MessageBuilder.withPayload(o2).build();
 								}
-								convertAndSetMessage(o, valueClass, messageConverter, m1);
+								convertAndSetMessage(o,valueClass,messageConverter,m1);
 							}
 							else {
-								keyValueThreadLocal.set(new KeyValue<>(o, o2));
+								keyValueThreadLocal.set(new KeyValue<>(o,o2));
 							}
 							isValidRecord = true;
 						}
@@ -211,9 +211,9 @@ public class KafkaStreamsMessageConversionDelegate {
 				},
 				// second filter that catches any messages for which an exception thrown
 				// in the first filter above.
-				(k, v) -> true);
+				(k,v) -> true);
 		// process errors from the second filter in the branch above.
-		processErrorFromDeserialization(bindingTarget, branch[1], failedWithDeserException);
+		processErrorFromDeserialization(bindingTarget,branch[1],failedWithDeserException);
 
 		// first branch above is the branch where the messages are converted, let it go
 		// through further processing.
@@ -224,7 +224,7 @@ public class KafkaStreamsMessageConversionDelegate {
 		});
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked","rawtypes"})
 	private void resolvePerRecordContentType(KStream<?, ?> outboundBindTarget,
 			PerRecordContentTypeHolder perRecordContentTypeHolder) {
 		outboundBindTarget.process(() -> new Processor() {
@@ -237,7 +237,7 @@ public class KafkaStreamsMessageConversionDelegate {
 			}
 
 			@Override
-			public void process(Object key, Object value) {
+			public void process(Object key,Object value) {
 				final Headers headers = this.context.headers();
 				final Iterable<Header> contentTypes = headers
 						.headers(MessageHeaders.CONTENT_TYPE);
@@ -245,7 +245,7 @@ public class KafkaStreamsMessageConversionDelegate {
 					final String contentType = new String(
 							contentTypes.iterator().next().value());
 					// remove leading and trailing quotes
-					final String cleanContentType = StringUtils.replace(contentType, "\"",
+					final String cleanContentType = StringUtils.replace(contentType,"\"",
 							"");
 					perRecordContentTypeHolder.setContentType(cleanContentType);
 				}
@@ -258,19 +258,19 @@ public class KafkaStreamsMessageConversionDelegate {
 		});
 	}
 
-	private void convertAndSetMessage(Object o, Class<?> valueClass,
-			MessageConverter messageConverter, Message<?> msg) {
+	private void convertAndSetMessage(Object o,Class<?> valueClass,
+			MessageConverter messageConverter,Message<?> msg) {
 		Object result = valueClass.isAssignableFrom(msg.getPayload().getClass())
-				? msg.getPayload() : messageConverter.fromMessage(msg, valueClass);
+				? msg.getPayload() : messageConverter.fromMessage(msg,valueClass);
 
-		Assert.notNull(result, "Failed to convert message " + msg);
+		Assert.notNull(result,"Failed to convert message " + msg);
 
-		keyValueThreadLocal.set(new KeyValue<>(o, result));
+		keyValueThreadLocal.set(new KeyValue<>(o,result));
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked","rawtypes"})
 	private void processErrorFromDeserialization(KStream<?, ?> bindingTarget,
-			KStream<?, ?> branch, Exception[] exception) {
+			KStream<?, ?> branch,Exception[] exception) {
 		branch.process(() -> new Processor() {
 			ProcessorContext context;
 
@@ -280,7 +280,7 @@ public class KafkaStreamsMessageConversionDelegate {
 			}
 
 			@Override
-			public void process(Object o, Object o2) {
+			public void process(Object o,Object o2) {
 				// Only continue if the record was not a tombstone.
 				if (o2 != null) {
 					if (KafkaStreamsMessageConversionDelegate.this.kstreamBindingInformationCatalogue
@@ -291,19 +291,19 @@ public class KafkaStreamsMessageConversionDelegate {
 							// We need to convert the key to a byte[] before sending to DLQ.
 							Serde keySerde = kstreamBindingInformationCatalogue.getKeySerde(bindingTarget);
 							Serializer keySerializer = keySerde.serializer();
-							byte[] keyBytes = keySerializer.serialize(null, o);
+							byte[] keyBytes = keySerializer.serialize(null,o);
 
-							ConsumerRecord consumerRecord = new ConsumerRecord(this.context.topic(), this.context.partition(), this.context.offset(),
-									keyBytes, message.getPayload());
+							ConsumerRecord consumerRecord = new ConsumerRecord(this.context.topic(),this.context.partition(),this.context.offset(),
+									keyBytes,message.getPayload());
 
 							KafkaStreamsMessageConversionDelegate.this.sendToDlqAndContinue
-									.sendToDlq(consumerRecord, exception[0]);
+									.sendToDlq(consumerRecord,exception[0]);
 						}
 						else {
-							ConsumerRecord consumerRecord = new ConsumerRecord(this.context.topic(), this.context.partition(), this.context.offset(),
-									o, o2);
+							ConsumerRecord consumerRecord = new ConsumerRecord(this.context.topic(),this.context.partition(),this.context.offset(),
+									o,o2);
 							KafkaStreamsMessageConversionDelegate.this.sendToDlqAndContinue
-									.sendToDlq(consumerRecord, exception[0]);
+									.sendToDlq(consumerRecord,exception[0]);
 						}
 					}
 					else if (KafkaStreamsMessageConversionDelegate.this.kstreamBinderConfigurationProperties

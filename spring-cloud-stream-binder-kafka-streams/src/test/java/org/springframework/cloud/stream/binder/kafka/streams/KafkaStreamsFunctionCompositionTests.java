@@ -55,8 +55,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KafkaStreamsFunctionCompositionTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
-			"fooFuncanotherFooFunc-out-0", "bar");
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
+			"fooFuncanotherFooFunc-out-0","bar");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule.getEmbeddedKafka();
 
@@ -68,13 +68,13 @@ public class KafkaStreamsFunctionCompositionTests {
 
 	@BeforeClass
 	public static void setUp() {
-		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("fn-composition-group", "false",
+		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("fn-composition-group","false",
 				embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,StringDeserializer.class);
 		DefaultKafkaConsumerFactory<String, String> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromEmbeddedTopics(consumer, "fooFuncanotherFooFunc-out-0", "bar");
+		embeddedKafka.consumeFromEmbeddedTopics(consumer,"fooFuncanotherFooFunc-out-0","bar");
 	}
 
 	@AfterClass
@@ -97,7 +97,7 @@ public class KafkaStreamsFunctionCompositionTests {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 			DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("fooFuncanotherFooFunc-in-0");
 				template.sendDefault("foobar!!");
 				//Verify non-composed funcions can be run standalone with composed function chains, i.e foo|bar;buzz
@@ -105,10 +105,10 @@ public class KafkaStreamsFunctionCompositionTests {
 				template.sendDefault("this is crazy!!!");
 				Thread.sleep(1000);
 
-				ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer, "fooFuncanotherFooFunc-out-0");
+				ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer,"fooFuncanotherFooFunc-out-0");
 				assertThat(cr.value().contains("foobar!!")).isTrue();
 
-				Assert.isTrue(countDownLatch1.await(5, TimeUnit.SECONDS), "anotherProcess consumer didn't trigger.");
+				Assert.isTrue(countDownLatch1.await(5,TimeUnit.SECONDS),"anotherProcess consumer didn't trigger.");
 			}
 			finally {
 				pf.destroy();
@@ -134,17 +134,17 @@ public class KafkaStreamsFunctionCompositionTests {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 			DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("foo");
 				template.sendDefault("foobar!!");
 				template.setDefaultTopic("buzz");
 				template.sendDefault("this is crazy!!!");
 				Thread.sleep(1000);
 
-				ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer, "bar");
+				ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer,"bar");
 				assertThat(cr.value().contains("foobar!!")).isTrue();
 
-				Assert.isTrue(countDownLatch1.await(5, TimeUnit.SECONDS), "anotherProcess consumer didn't trigger.");
+				Assert.isTrue(countDownLatch1.await(5,TimeUnit.SECONDS),"anotherProcess consumer didn't trigger.");
 			}
 			finally {
 				pf.destroy();
@@ -168,13 +168,13 @@ public class KafkaStreamsFunctionCompositionTests {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 			DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("foo");
 				template.sendDefault("foobar!!");
 
 				Thread.sleep(1000);
 
-				Assert.isTrue(countDownLatch2.await(5, TimeUnit.SECONDS), "anotherProcess consumer didn't trigger.");
+				Assert.isTrue(countDownLatch2.await(5,TimeUnit.SECONDS),"anotherProcess consumer didn't trigger.");
 			}
 			finally {
 				pf.destroy();
@@ -199,7 +199,7 @@ public class KafkaStreamsFunctionCompositionTests {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 			DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("foo");
 				template.sendDefault("foobar!!");
 
@@ -208,7 +208,7 @@ public class KafkaStreamsFunctionCompositionTests {
 
 				Thread.sleep(1000);
 
-				Assert.isTrue(countDownLatch3.await(5, TimeUnit.SECONDS), "anotherProcess consumer didn't trigger.");
+				Assert.isTrue(countDownLatch3.await(5,TimeUnit.SECONDS),"anotherProcess consumer didn't trigger.");
 			}
 			finally {
 				pf.destroy();
@@ -236,16 +236,16 @@ public class KafkaStreamsFunctionCompositionTests {
 				"--spring.cloud.stream.kafka.streams.binder.brokers=" + embeddedKafka.getBrokersAsString())) {
 
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
-			senderProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+			senderProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
 			DefaultKafkaProducerFactory<String, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<String, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<String, String> template = new KafkaTemplate<>(pf,true);
 
 				template.setDefaultTopic("my-foo-2");
-				template.sendDefault("foo-1", "foo2");
+				template.sendDefault("foo-1","foo2");
 
 				template.setDefaultTopic("my-foo-1");
-				template.sendDefault("foo-1", "foo1");
+				template.sendDefault("foo-1","foo1");
 
 				Thread.sleep(1000);
 
@@ -279,18 +279,18 @@ public class KafkaStreamsFunctionCompositionTests {
 				"--spring.cloud.stream.kafka.streams.binder.brokers=" + embeddedKafka.getBrokersAsString())) {
 
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
-			senderProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+			senderProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
 			DefaultKafkaProducerFactory<String, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<String, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<String, String> template = new KafkaTemplate<>(pf,true);
 
 				template.setDefaultTopic("my-foo-2");
-				template.sendDefault("foo-1", "foo2");
+				template.sendDefault("foo-1","foo2");
 
 				Thread.sleep(1000);
 
 				template.setDefaultTopic("my-foo-1");
-				template.sendDefault("foo-1", "foo1");
+				template.sendDefault("foo-1","foo1");
 
 				Thread.sleep(1000);
 
@@ -319,16 +319,16 @@ public class KafkaStreamsFunctionCompositionTests {
 				"--spring.cloud.stream.kafka.streams.binder.brokers=" + embeddedKafka.getBrokersAsString())) {
 
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
-			senderProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+			senderProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
 			DefaultKafkaProducerFactory<String, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<String, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<String, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("foo");
-				template.sendDefault("foo", "foobar!!");
+				template.sendDefault("foo","foobar!!");
 
 				Thread.sleep(1000);
 
-				ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer, "bar");
+				ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer,"bar");
 				assertThat(cr.value().contains("foobar!!")).isTrue();
 			}
 			finally {
@@ -342,19 +342,19 @@ public class KafkaStreamsFunctionCompositionTests {
 
 		@Bean
 		public Function<KStream<String, String>, KStream<String, String>> fooFunc() {
-			return input -> input.peek((s, s2) -> {
+			return input -> input.peek((s,s2) -> {
 				System.out.println("hello: " + s2);
 			});
 		}
 
 		@Bean
 		public Function<KStream<String, String>, KStream<String, String>> anotherFooFunc() {
-			return input -> input.peek((s, s2) -> System.out.println("hello Foo: " + s2));
+			return input -> input.peek((s,s2) -> System.out.println("hello Foo: " + s2));
 		}
 
 		@Bean
 		public java.util.function.Consumer<KStream<String, String>> anotherProcess() {
-			return c -> c.foreach((s, s2) -> {
+			return c -> c.foreach((s,s2) -> {
 				System.out.println("s2s2s2::" + s2);
 				countDownLatch1.countDown();
 			});
@@ -366,14 +366,14 @@ public class KafkaStreamsFunctionCompositionTests {
 
 		@Bean
 		public Function<KStream<String, String>, KStream<String, String>> fooFunc() {
-			return input -> input.peek((s, s2) -> {
+			return input -> input.peek((s,s2) -> {
 				System.out.println("hello: " + s2);
 			});
 		}
 
 		@Bean
 		public java.util.function.Consumer<KStream<String, String>> anotherProcess() {
-			return c -> c.foreach((s, s2) -> {
+			return c -> c.foreach((s,s2) -> {
 				System.out.println("s2s2s2::" + s2);
 				countDownLatch2.countDown();
 			});
@@ -390,7 +390,7 @@ public class KafkaStreamsFunctionCompositionTests {
 
 		@Bean
 		public java.util.function.Consumer<KStream<String, String>> anotherProcess() {
-			return c -> c.foreach((s, s2) -> {
+			return c -> c.foreach((s,s2) -> {
 				System.out.println("s2s2s2::" + s2);
 				countDownLatch3.countDown();
 			});
@@ -402,7 +402,7 @@ public class KafkaStreamsFunctionCompositionTests {
 
 		@Bean
 		public BiFunction<KStream<String, String>, KTable<String, String>, KStream<String, String>> fooBiFunc() {
-			return (a, b) -> a.join(b, (value1, value2) -> value1 + value2);
+			return (a,b) -> a.join(b,(value1,value2) -> value1 + value2);
 		}
 
 		@Bean
@@ -427,7 +427,7 @@ public class KafkaStreamsFunctionCompositionTests {
 		@Bean
 		public Function<KStream<String, String>, Function<KTable<String, String>, KStream<String, String>>> curriedFunc() {
 			return a -> b ->
-					a.join(b, (value1, value2) -> value1 + value2);
+					a.join(b,(value1,value2) -> value1 + value2);
 		}
 
 		@Bean
@@ -454,7 +454,7 @@ public class KafkaStreamsFunctionCompositionTests {
 			return ks -> {
 				ks.foreach(new ForeachAction<String, String>() {
 					@Override
-					public void apply(String key, String value) {
+					public void apply(String key,String value) {
 						System.out.println();
 					}
 				});

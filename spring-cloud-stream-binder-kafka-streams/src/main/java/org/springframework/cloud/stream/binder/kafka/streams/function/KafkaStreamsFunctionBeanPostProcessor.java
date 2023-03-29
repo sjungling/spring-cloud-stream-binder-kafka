@@ -61,7 +61,7 @@ public class KafkaStreamsFunctionBeanPostProcessor implements InitializingBean, 
 
 	private static final Log LOG = LogFactory.getLog(KafkaStreamsFunctionBeanPostProcessor.class);
 
-	private static final String[] EXCLUDE_FUNCTIONS = new String[]{"functionRouter", "sendToDlqAndContinue"};
+	private static final String[] EXCLUDE_FUNCTIONS = new String[]{"functionRouter","sendToDlqAndContinue"};
 
 	private ConfigurableListableBeanFactory beanFactory;
 	private boolean onlySingleFunction;
@@ -93,8 +93,8 @@ public class KafkaStreamsFunctionBeanPostProcessor implements InitializingBean, 
 		String[] biConsumerNames = this.beanFactory.getBeanNamesForType(BiConsumer.class);
 
 		final Stream<String> concat = Stream.concat(
-				Stream.concat(Stream.of(functionNames), Stream.of(consumerNames)),
-				Stream.concat(Stream.of(biFunctionNames), Stream.of(biConsumerNames)));
+				Stream.concat(Stream.of(functionNames),Stream.of(consumerNames)),
+				Stream.concat(Stream.of(biFunctionNames),Stream.of(biConsumerNames)));
 		final List<String> collect = concat.collect(Collectors.toList());
 		collect.removeIf(s -> Arrays.stream(EXCLUDE_FUNCTIONS).anyMatch(t -> t.equals(s)));
 		collect.removeIf(Pattern.compile(".*_registration").asPredicate());
@@ -103,8 +103,8 @@ public class KafkaStreamsFunctionBeanPostProcessor implements InitializingBean, 
 		collect.stream()
 				.forEach(this::extractResolvableTypes);
 
-		kafkaStreamsOnlyResolvableTypes.keySet().forEach(k -> addResolvableTypeInfo(k, kafkaStreamsOnlyResolvableTypes.get(k)));
-		kafakStreamsOnlyMethods.keySet().forEach(k -> addResolvableTypeInfo(k, kafakStreamsOnlyMethods.get(k)));
+		kafkaStreamsOnlyResolvableTypes.keySet().forEach(k -> addResolvableTypeInfo(k,kafkaStreamsOnlyResolvableTypes.get(k)));
+		kafakStreamsOnlyMethods.keySet().forEach(k -> addResolvableTypeInfo(k,kafakStreamsOnlyMethods.get(k)));
 
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 
@@ -119,7 +119,7 @@ public class KafkaStreamsFunctionBeanPostProcessor implements InitializingBean, 
 				ResolvableType[] resolvableTypes = new ResolvableType[]{getResolvableTypes().get(s)};
 				RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(
 						KafkaStreamsBindableProxyFactory.class);
-				registerKakaStreamsProxyFactory(registry, s, resolvableTypes, rootBeanDefinition);
+				registerKakaStreamsProxyFactory(registry,s,resolvableTypes,rootBeanDefinition);
 			}
 		}
 		else {
@@ -143,7 +143,7 @@ public class KafkaStreamsFunctionBeanPostProcessor implements InitializingBean, 
 					if (!nonKafkaStreamsFunctionsFound) {
 						RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(
 								KafkaStreamsBindableProxyFactory.class);
-						registerKakaStreamsProxyFactory(registry, derivedNameFromComposed, resolvableTypes, rootBeanDefinition);
+						registerKakaStreamsProxyFactory(registry,derivedNameFromComposed,resolvableTypes,rootBeanDefinition);
 					}
 				}
 				else {
@@ -152,21 +152,21 @@ public class KafkaStreamsFunctionBeanPostProcessor implements InitializingBean, 
 						ResolvableType[] resolvableTypes = new ResolvableType[]{getResolvableTypes().get(functionUnit)};
 						RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(
 								KafkaStreamsBindableProxyFactory.class);
-						registerKakaStreamsProxyFactory(registry, functionUnit, resolvableTypes, rootBeanDefinition);
+						registerKakaStreamsProxyFactory(registry,functionUnit,resolvableTypes,rootBeanDefinition);
 					}
 				}
 			}
 		}
 	}
 
-	private void registerKakaStreamsProxyFactory(BeanDefinitionRegistry registry, String s, ResolvableType[] resolvableTypes, RootBeanDefinition rootBeanDefinition) {
+	private void registerKakaStreamsProxyFactory(BeanDefinitionRegistry registry,String s,ResolvableType[] resolvableTypes,RootBeanDefinition rootBeanDefinition) {
 		rootBeanDefinition.getConstructorArgumentValues()
 				.addGenericArgumentValue(resolvableTypes);
 		rootBeanDefinition.getConstructorArgumentValues()
 				.addGenericArgumentValue(s);
 		rootBeanDefinition.getConstructorArgumentValues()
 				.addGenericArgumentValue(getMethods().get(s));
-		registry.registerBeanDefinition("kafkaStreamsBindableProxyFactory-" + s, rootBeanDefinition);
+		registry.registerBeanDefinition("kafkaStreamsBindableProxyFactory-" + s,rootBeanDefinition);
 	}
 
 	private void extractResolvableTypes(String key) {
@@ -185,14 +185,14 @@ public class KafkaStreamsFunctionBeanPostProcessor implements InitializingBean, 
 
 			if (functionalBeanMethods.isPresent()) {
 				Method method = functionalBeanMethods.get();
-				ResolvableType resolvableType = ResolvableType.forMethodReturnType(method, classObj);
+				ResolvableType resolvableType = ResolvableType.forMethodReturnType(method,classObj);
 				final Class<?> rawClass = resolvableType.getGeneric(0).getRawClass();
 				if (rawClass == KStream.class || rawClass == KTable.class || rawClass == GlobalKTable.class) {
 					if (onlySingleFunction) {
-						resolvableTypeMap.put(key, resolvableType);
+						resolvableTypeMap.put(key,resolvableType);
 					}
 					else {
-						discoverOnlyKafkaStreamsResolvableTypes(key, resolvableType);
+						discoverOnlyKafkaStreamsResolvableTypes(key,resolvableType);
 					}
 				}
 			}
@@ -202,28 +202,28 @@ public class KafkaStreamsFunctionBeanPostProcessor implements InitializingBean, 
 								m.getName().equals("accept") && isKafkaStreamsTypeFound(m)).findFirst();
 				if (componentBeanMethods.isPresent()) {
 					Method method = componentBeanMethods.get();
-					final ResolvableType resolvableType = ResolvableType.forMethodParameter(method, 0);
+					final ResolvableType resolvableType = ResolvableType.forMethodParameter(method,0);
 					final Class<?> rawClass = resolvableType.getRawClass();
 					if (rawClass == KStream.class || rawClass == KTable.class || rawClass == GlobalKTable.class) {
 						if (onlySingleFunction) {
-							resolvableTypeMap.put(key, resolvableType);
-							this.methods.put(key, method);
+							resolvableTypeMap.put(key,resolvableType);
+							this.methods.put(key,method);
 						}
 						else {
-							discoverOnlyKafkaStreamsResolvableTypesAndMethods(key, resolvableType, method);
+							discoverOnlyKafkaStreamsResolvableTypesAndMethods(key,resolvableType,method);
 						}
 					}
 				}
 			}
 		}
 		catch (Exception e) {
-			LOG.error("Function activation issues while mapping the function: " + key, e);
+			LOG.error("Function activation issues while mapping the function: " + key,e);
 		}
 	}
 
-	private void addResolvableTypeInfo(String key, ResolvableType resolvableType) {
+	private void addResolvableTypeInfo(String key,ResolvableType resolvableType) {
 		if (kafkaStreamsOnlyResolvableTypes.size() == 1) {
-			resolvableTypeMap.put(key, resolvableType);
+			resolvableTypeMap.put(key,resolvableType);
 		}
 		else {
 			final String definition = streamFunctionProperties.getDefinition();
@@ -231,23 +231,23 @@ public class KafkaStreamsFunctionBeanPostProcessor implements InitializingBean, 
 				throw new IllegalStateException("Multiple functions found, but function definition property is not set.");
 			}
 			else if (definition.contains(key)) {
-				resolvableTypeMap.put(key, resolvableType);
+				resolvableTypeMap.put(key,resolvableType);
 			}
 		}
 	}
 
-	private void discoverOnlyKafkaStreamsResolvableTypes(String key, ResolvableType resolvableType) {
-		kafkaStreamsOnlyResolvableTypes.put(key, resolvableType);
+	private void discoverOnlyKafkaStreamsResolvableTypes(String key,ResolvableType resolvableType) {
+		kafkaStreamsOnlyResolvableTypes.put(key,resolvableType);
 	}
 
-	private void discoverOnlyKafkaStreamsResolvableTypesAndMethods(String key, ResolvableType resolvableType, Method method) {
-		kafkaStreamsOnlyResolvableTypes.put(key, resolvableType);
-		kafakStreamsOnlyMethods.put(key, method);
+	private void discoverOnlyKafkaStreamsResolvableTypesAndMethods(String key,ResolvableType resolvableType,Method method) {
+		kafkaStreamsOnlyResolvableTypes.put(key,resolvableType);
+		kafakStreamsOnlyMethods.put(key,method);
 	}
 
-	private void addResolvableTypeInfo(String key, Method method) {
+	private void addResolvableTypeInfo(String key,Method method) {
 		if (kafakStreamsOnlyMethods.size() == 1) {
-			this.methods.put(key, method);
+			this.methods.put(key,method);
 		}
 		else {
 			final String definition = streamFunctionProperties.getDefinition();
@@ -255,7 +255,7 @@ public class KafkaStreamsFunctionBeanPostProcessor implements InitializingBean, 
 				throw new IllegalStateException("Multiple functions found, but function definition property is not set.");
 			}
 			else if (definition.contains(key)) {
-				this.methods.put(key, method);
+				this.methods.put(key,method);
 			}
 		}
 	}

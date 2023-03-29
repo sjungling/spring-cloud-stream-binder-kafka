@@ -72,7 +72,7 @@ public class KafkaStreamsBinderHealthIndicator extends AbstractHealthIndicator i
 			}
 		}
 		catch (ClassNotFoundException e) {
-			throw new IllegalStateException("KafkaStreams$State class not found", e);
+			throw new IllegalStateException("KafkaStreams$State class not found",e);
 		}
 	}
 
@@ -89,14 +89,14 @@ public class KafkaStreamsBinderHealthIndicator extends AbstractHealthIndicator i
 	private final Lock lock = new ReentrantLock();
 
 	KafkaStreamsBinderHealthIndicator(KafkaStreamsRegistry kafkaStreamsRegistry,
-									KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties,
-									KafkaProperties kafkaProperties,
-									KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue) {
+			KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties,
+			KafkaProperties kafkaProperties,
+			KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue) {
 		super("Kafka-streams health check failed");
 		kafkaProperties.buildAdminProperties();
 		this.configurationProperties = kafkaStreamsBinderConfigurationProperties;
 		this.adminClientProperties = kafkaProperties.buildAdminProperties();
-		KafkaTopicProvisioner.normalalizeBootPropsWithBinder(this.adminClientProperties, kafkaProperties,
+		KafkaTopicProvisioner.normalalizeBootPropsWithBinder(this.adminClientProperties,kafkaProperties,
 				kafkaStreamsBinderConfigurationProperties);
 		this.kafkaStreamsRegistry = kafkaStreamsRegistry;
 		this.kafkaStreamsBindingInformationCatalogue = kafkaStreamsBindingInformationCatalogue;
@@ -111,10 +111,10 @@ public class KafkaStreamsBinderHealthIndicator extends AbstractHealthIndicator i
 			}
 
 			final ListTopicsResult listTopicsResult = this.adminClient.listTopics();
-			listTopicsResult.listings().get(this.configurationProperties.getHealthTimeout(), TimeUnit.SECONDS);
+			listTopicsResult.listings().get(this.configurationProperties.getHealthTimeout(),TimeUnit.SECONDS);
 
 			if (this.kafkaStreamsBindingInformationCatalogue.getStreamsBuilderFactoryBeans().isEmpty()) {
-				builder.withDetail("No Kafka Streams bindings have been established", "Kafka Streams binder did not detect any processors");
+				builder.withDetail("No Kafka Streams bindings have been established","Kafka Streams binder did not detect any processors");
 				builder.status(Status.UNKNOWN);
 			}
 			else {
@@ -139,7 +139,7 @@ public class KafkaStreamsBinderHealthIndicator extends AbstractHealthIndicator i
 			}
 		}
 		catch (Exception e) {
-			builder.withDetail("No topic information available", "Kafka broker is not reachable");
+			builder.withDetail("No topic information available","Kafka broker is not reachable");
 			builder.status(Status.DOWN);
 			builder.withException(e);
 		}
@@ -164,18 +164,18 @@ public class KafkaStreamsBinderHealthIndicator extends AbstractHealthIndicator i
 		if (isRunningResult) {
 			final Set<ThreadMetadata> threadMetadata = kafkaStreams.metadataForLocalThreads();
 			for (ThreadMetadata metadata : threadMetadata) {
-				perAppdIdDetails.put("threadName", metadata.threadName());
-				perAppdIdDetails.put("threadState", metadata.threadState());
-				perAppdIdDetails.put("adminClientId", metadata.adminClientId());
-				perAppdIdDetails.put("consumerClientId", metadata.consumerClientId());
-				perAppdIdDetails.put("restoreConsumerClientId", metadata.restoreConsumerClientId());
-				perAppdIdDetails.put("producerClientIds", metadata.producerClientIds());
-				perAppdIdDetails.put("activeTasks", taskDetails(metadata.activeTasks()));
-				perAppdIdDetails.put("standbyTasks", taskDetails(metadata.standbyTasks()));
+				perAppdIdDetails.put("threadName",metadata.threadName());
+				perAppdIdDetails.put("threadState",metadata.threadState());
+				perAppdIdDetails.put("adminClientId",metadata.adminClientId());
+				perAppdIdDetails.put("consumerClientId",metadata.consumerClientId());
+				perAppdIdDetails.put("restoreConsumerClientId",metadata.restoreConsumerClientId());
+				perAppdIdDetails.put("producerClientIds",metadata.producerClientIds());
+				perAppdIdDetails.put("activeTasks",taskDetails(metadata.activeTasks()));
+				perAppdIdDetails.put("standbyTasks",taskDetails(metadata.standbyTasks()));
 			}
 			final StreamsBuilderFactoryBean streamsBuilderFactoryBean = this.kafkaStreamsRegistry.streamBuilderFactoryBean(kafkaStreams);
 			final String applicationId = (String) streamsBuilderFactoryBean.getStreamsConfiguration().get(StreamsConfig.APPLICATION_ID_CONFIG);
-			details.put(applicationId, perAppdIdDetails);
+			details.put(applicationId,perAppdIdDetails);
 		}
 		else {
 			final StreamsBuilderFactoryBean streamsBuilderFactoryBean = this.kafkaStreamsRegistry.streamBuilderFactoryBean(kafkaStreams);
@@ -191,7 +191,7 @@ public class KafkaStreamsBinderHealthIndicator extends AbstractHealthIndicator i
 					}
 				}
 			}
-			details.put(applicationId, String.format("The processor with application.id %s is down. Current state: %s", applicationId, kafkaStreams.state()));
+			details.put(applicationId,String.format("The processor with application.id %s is down. Current state: %s",applicationId,kafkaStreams.state()));
 		}
 		return details;
 	}
@@ -199,7 +199,7 @@ public class KafkaStreamsBinderHealthIndicator extends AbstractHealthIndicator i
 	private static Map<String, Object> taskDetails(Set<TaskMetadata> taskMetadata) {
 		final Map<String, Object> details = new HashMap<>();
 		for (TaskMetadata metadata : taskMetadata) {
-			details.put("taskId", metadata.taskId());
+			details.put("taskId",metadata.taskId());
 			if (details.containsKey("partitions")) {
 				@SuppressWarnings("unchecked")
 				List<String> partitionsInfo = (List<String>) details.get("partitions");

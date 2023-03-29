@@ -58,10 +58,10 @@ public class StreamsBuilderFactoryManager implements SmartLifecycle {
 	private final KafkaProperties kafkaProperties;
 
 	StreamsBuilderFactoryManager(KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue,
-								KafkaStreamsRegistry kafkaStreamsRegistry,
-								KafkaStreamsBinderMetrics kafkaStreamsBinderMetrics,
-								KafkaStreamsMicrometerListener listener,
-								KafkaProperties kafkaProperties) {
+			KafkaStreamsRegistry kafkaStreamsRegistry,
+			KafkaStreamsBinderMetrics kafkaStreamsBinderMetrics,
+			KafkaStreamsMicrometerListener listener,
+			KafkaProperties kafkaProperties) {
 		this.kafkaStreamsBindingInformationCatalogue = kafkaStreamsBindingInformationCatalogue;
 		this.kafkaStreamsRegistry = kafkaStreamsRegistry;
 		this.kafkaStreamsBinderMetrics = kafkaStreamsBinderMetrics;
@@ -113,7 +113,7 @@ public class StreamsBuilderFactoryManager implements SmartLifecycle {
 				this.running = true;
 			}
 			catch (Exception ex) {
-				throw new KafkaException("Could not start stream: ", ex);
+				throw new KafkaException("Could not start stream: ",ex);
 			}
 		}
 	}

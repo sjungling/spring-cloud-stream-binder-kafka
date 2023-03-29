@@ -59,8 +59,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KafkaStreamsEventTypeRoutingTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
-			"foo-1", "foo-2");
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
+			"foo-1","foo-2");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule.getEmbeddedKafka();
 
@@ -70,14 +70,14 @@ public class KafkaStreamsEventTypeRoutingTests {
 
 	@BeforeClass
 	public static void setUp() {
-		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("test-group-1", "false",
+		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("test-group-1","false",
 				embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		consumerProps.put("value.deserializer", JsonDeserializer.class);
-		consumerProps.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+		consumerProps.put("value.deserializer",JsonDeserializer.class);
+		consumerProps.put(JsonDeserializer.TRUSTED_PACKAGES,"*");
 		DefaultKafkaConsumerFactory<Integer, Foo> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromEmbeddedTopics(consumer, "foo-2");
+		embeddedKafka.consumeFromEmbeddedTopics(consumer,"foo-2");
 	}
 
 	@AfterClass
@@ -102,37 +102,37 @@ public class KafkaStreamsEventTypeRoutingTests {
 				"--spring.cloud.stream.kafka.streams.binder.configuration.commit.interval.ms=1000",
 				"--spring.cloud.stream.kafka.streams.binder.brokers=" + embeddedKafka.getBrokersAsString())) {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
-			senderProps.put("value.serializer", JsonSerializer.class);
+			senderProps.put("value.serializer",JsonSerializer.class);
 			DefaultKafkaProducerFactory<Integer, Foo> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<Integer, Foo> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, Foo> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("foo-1");
 				Foo foo1 = new Foo();
 				foo1.setFoo("foo-1");
 				Headers headers = new RecordHeaders();
-				headers.add(new RecordHeader("event_type", "foo".getBytes()));
+				headers.add(new RecordHeader("event_type","foo".getBytes()));
 
-				final ProducerRecord<Integer, Foo> producerRecord1 = new ProducerRecord<>("foo-1", 0, 56, foo1, headers);
+				final ProducerRecord<Integer, Foo> producerRecord1 = new ProducerRecord<>("foo-1",0,56,foo1,headers);
 				template.send(producerRecord1);
 
 				Foo foo2 = new Foo();
 				foo2.setFoo("foo-2");
 
-				final ProducerRecord<Integer, Foo> producerRecord2 = new ProducerRecord<>("foo-1", 0, 57, foo2);
+				final ProducerRecord<Integer, Foo> producerRecord2 = new ProducerRecord<>("foo-1",0,57,foo2);
 				template.send(producerRecord2);
 
 				Foo foo3 = new Foo();
 				foo3.setFoo("foo-3");
 
-				final ProducerRecord<Integer, Foo> producerRecord3 = new ProducerRecord<>("foo-1", 0, 58, foo3, headers);
+				final ProducerRecord<Integer, Foo> producerRecord3 = new ProducerRecord<>("foo-1",0,58,foo3,headers);
 				template.send(producerRecord3);
 
 				Foo foo4 = new Foo();
 				foo4.setFoo("foo-4");
 				Headers headers1 = new RecordHeaders();
-				headers1.add(new RecordHeader("event_type", "bar".getBytes()));
+				headers1.add(new RecordHeader("event_type","bar".getBytes()));
 
-				final ProducerRecord<Integer, Foo> producerRecord4 = new ProducerRecord<>("foo-1", 0, 59, foo4, headers1);
+				final ProducerRecord<Integer, Foo> producerRecord4 = new ProducerRecord<>("foo-1",0,59,foo4,headers1);
 				template.send(producerRecord4);
 
 				final ConsumerRecords<Integer, Foo> records = KafkaTestUtils.getRecords(consumer);
@@ -147,8 +147,8 @@ public class KafkaStreamsEventTypeRoutingTests {
 					values.add(integerFooConsumerRecord.value());
 				});
 
-				assertThat(keys).containsExactlyInAnyOrder(56, 58, 59);
-				assertThat(values).containsExactlyInAnyOrder(foo1, foo3, foo4);
+				assertThat(keys).containsExactlyInAnyOrder(56,58,59);
+				assertThat(values).containsExactlyInAnyOrder(foo1,foo3,foo4);
 			}
 			finally {
 				pf.destroy();
@@ -170,40 +170,40 @@ public class KafkaStreamsEventTypeRoutingTests {
 				"--spring.cloud.stream.kafka.streams.binder.functions.consumer.applicationId=consumer-id-foo-0",
 				"--spring.cloud.stream.kafka.streams.binder.brokers=" + embeddedKafka.getBrokersAsString())) {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
-			senderProps.put("value.serializer", JsonSerializer.class);
+			senderProps.put("value.serializer",JsonSerializer.class);
 			DefaultKafkaProducerFactory<Integer, Foo> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<Integer, Foo> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, Foo> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("foo-consumer-1");
 				Foo foo1 = new Foo();
 				foo1.setFoo("foo-1");
 				Headers headers = new RecordHeaders();
-				headers.add(new RecordHeader("event_type", "foo".getBytes()));
+				headers.add(new RecordHeader("event_type","foo".getBytes()));
 
-				final ProducerRecord<Integer, Foo> producerRecord1 = new ProducerRecord<>("foo-consumer-1", 0, 56, foo1, headers);
+				final ProducerRecord<Integer, Foo> producerRecord1 = new ProducerRecord<>("foo-consumer-1",0,56,foo1,headers);
 				template.send(producerRecord1);
 
 				Foo foo2 = new Foo();
 				foo2.setFoo("foo-2");
 
-				final ProducerRecord<Integer, Foo> producerRecord2 = new ProducerRecord<>("foo-consumer-1", 0, 57, foo2);
+				final ProducerRecord<Integer, Foo> producerRecord2 = new ProducerRecord<>("foo-consumer-1",0,57,foo2);
 				template.send(producerRecord2);
 
 				Foo foo3 = new Foo();
 				foo3.setFoo("foo-3");
 
-				final ProducerRecord<Integer, Foo> producerRecord3 = new ProducerRecord<>("foo-consumer-1", 0, 58, foo3, headers);
+				final ProducerRecord<Integer, Foo> producerRecord3 = new ProducerRecord<>("foo-consumer-1",0,58,foo3,headers);
 				template.send(producerRecord3);
 
 				Foo foo4 = new Foo();
 				foo4.setFoo("foo-4");
 				Headers headers1 = new RecordHeaders();
-				headers1.add(new RecordHeader("event_type", "bar".getBytes()));
+				headers1.add(new RecordHeader("event_type","bar".getBytes()));
 
-				final ProducerRecord<Integer, Foo> producerRecord4 = new ProducerRecord<>("foo-consumer-1", 0, 59, foo4, headers1);
+				final ProducerRecord<Integer, Foo> producerRecord4 = new ProducerRecord<>("foo-consumer-1",0,59,foo4,headers1);
 				template.send(producerRecord4);
 
-				Assert.isTrue(LATCH.await(10, TimeUnit.SECONDS), "Foo");
+				Assert.isTrue(LATCH.await(10,TimeUnit.SECONDS),"Foo");
 			}
 			finally {
 				pf.destroy();
@@ -221,9 +221,9 @@ public class KafkaStreamsEventTypeRoutingTests {
 
 		@Bean
 		public java.util.function.Consumer<KTable<Integer, Foo>> consumer() {
-				return ktable -> ktable.toStream().foreach((key, value) -> {
-					LATCH.countDown();
-				});
+			return ktable -> ktable.toStream().foreach((key,value) -> {
+				LATCH.countDown();
+			});
 		}
 
 		@Bean
@@ -254,7 +254,7 @@ public class KafkaStreamsEventTypeRoutingTests {
 				return false;
 			}
 			Foo foo1 = (Foo) o;
-			return Objects.equals(foo, foo1.foo);
+			return Objects.equals(foo,foo1.foo);
 		}
 
 		@Override

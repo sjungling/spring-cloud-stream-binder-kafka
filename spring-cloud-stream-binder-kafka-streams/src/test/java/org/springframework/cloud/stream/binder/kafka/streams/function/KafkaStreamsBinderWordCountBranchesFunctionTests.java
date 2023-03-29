@@ -55,8 +55,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KafkaStreamsBinderWordCountBranchesFunctionTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
-			"counts", "foo", "bar");
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
+			"counts","foo","bar");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule.getEmbeddedKafka();
 
@@ -64,12 +64,12 @@ public class KafkaStreamsBinderWordCountBranchesFunctionTests {
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("groupx", "false",
+		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("groupx","false",
 				embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
 		DefaultKafkaConsumerFactory<String, String> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromEmbeddedTopics(consumer, "counts", "foo", "bar");
+		embeddedKafka.consumeFromEmbeddedTopics(consumer,"counts","foo","bar");
 	}
 
 	@AfterClass
@@ -111,21 +111,21 @@ public class KafkaStreamsBinderWordCountBranchesFunctionTests {
 	private void receiveAndValidate(ConfigurableApplicationContext context) throws Exception {
 		Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 		DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
-		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 		template.setDefaultTopic("words");
 		template.sendDefault("english");
-		ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer, "counts");
+		ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer,"counts");
 		assertThat(cr.value().contains("\"word\":\"english\",\"count\":1")).isTrue();
 
 		template.sendDefault("french");
 		template.sendDefault("french");
-		cr = KafkaTestUtils.getSingleRecord(consumer, "foo");
+		cr = KafkaTestUtils.getSingleRecord(consumer,"foo");
 		assertThat(cr.value().contains("\"word\":\"french\",\"count\":2")).isTrue();
 
 		template.sendDefault("spanish");
 		template.sendDefault("spanish");
 		template.sendDefault("spanish");
-		cr = KafkaTestUtils.getSingleRecord(consumer, "bar");
+		cr = KafkaTestUtils.getSingleRecord(consumer,"bar");
 		assertThat(cr.value().contains("\"word\":\"spanish\",\"count\":3")).isTrue();
 	}
 
@@ -139,7 +139,7 @@ public class KafkaStreamsBinderWordCountBranchesFunctionTests {
 
 		private Date end;
 
-		WordCount(String word, long count, Date start, Date end) {
+		WordCount(String word,long count,Date start,Date end) {
 			this.word = word;
 			this.count = count;
 			this.start = start;
@@ -186,19 +186,19 @@ public class KafkaStreamsBinderWordCountBranchesFunctionTests {
 		@SuppressWarnings({"unchecked"})
 		public Function<KStream<Object, String>, KStream<?, WordCount>[]> process() {
 
-			Predicate<Object, WordCount> isEnglish = (k, v) -> v.word.equals("english");
-			Predicate<Object, WordCount> isFrench = (k, v) -> v.word.equals("french");
-			Predicate<Object, WordCount> isSpanish = (k, v) -> v.word.equals("spanish");
+			Predicate<Object, WordCount> isEnglish = (k,v) -> v.word.equals("english");
+			Predicate<Object, WordCount> isFrench = (k,v) -> v.word.equals("french");
+			Predicate<Object, WordCount> isSpanish = (k,v) -> v.word.equals("spanish");
 
 			return input -> {
 				final Map<String, KStream<Object, WordCount>> stringKStreamMap = input
 						.flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
-						.groupBy((key, value) -> value)
+						.groupBy((key,value) -> value)
 						.windowedBy(TimeWindows.of(Duration.ofSeconds(5)))
 						.count(Materialized.as("WordCounts-branch"))
 						.toStream()
-						.map((key, value) -> new KeyValue<>(null, new WordCount(key.key(), value,
-								new Date(key.window().start()), new Date(key.window().end()))))
+						.map((key,value) -> new KeyValue<>(null,new WordCount(key.key(),value,
+								new Date(key.window().start()),new Date(key.window().end()))))
 						.split()
 						.branch(isEnglish)
 						.branch(isFrench)

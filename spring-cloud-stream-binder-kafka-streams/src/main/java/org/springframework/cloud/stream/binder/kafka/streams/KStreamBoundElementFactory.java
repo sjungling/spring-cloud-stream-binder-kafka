@@ -46,8 +46,8 @@ class KStreamBoundElementFactory extends AbstractBindingTargetFactory<KStream> {
 	private final EncodingDecodingBindAdviceHandler encodingDecodingBindAdviceHandler;
 
 	KStreamBoundElementFactory(BindingServiceProperties bindingServiceProperties,
-							KafkaStreamsBindingInformationCatalogue KafkaStreamsBindingInformationCatalogue,
-							EncodingDecodingBindAdviceHandler encodingDecodingBindAdviceHandler) {
+			KafkaStreamsBindingInformationCatalogue KafkaStreamsBindingInformationCatalogue,
+			EncodingDecodingBindAdviceHandler encodingDecodingBindAdviceHandler) {
 		super(KStream.class);
 		this.bindingServiceProperties = bindingServiceProperties;
 		this.kafkaStreamsBindingInformationCatalogue = KafkaStreamsBindingInformationCatalogue;
@@ -92,7 +92,7 @@ class KStreamBoundElementFactory extends AbstractBindingTargetFactory<KStream> {
 
 	private KStream createProxyForKStream(String name) {
 		KStreamWrapperHandler wrapper = new KStreamWrapperHandler();
-		ProxyFactory proxyFactory = new ProxyFactory(KStreamWrapper.class, KStream.class);
+		ProxyFactory proxyFactory = new ProxyFactory(KStreamWrapper.class,KStream.class);
 		proxyFactory.addAdvice(wrapper);
 
 		KStream proxy = (KStream) proxyFactory.getProxy();
@@ -103,7 +103,7 @@ class KStreamBoundElementFactory extends AbstractBindingTargetFactory<KStream> {
 				.getBindingProperties(name);
 		this.kafkaStreamsBindingInformationCatalogue.registerBindingProperties(proxy,
 				bindingProperties);
-		this.kafkaStreamsBindingInformationCatalogue.addBindingNamePerTarget(proxy, name);
+		this.kafkaStreamsBindingInformationCatalogue.addBindingNamePerTarget(proxy,name);
 		return proxy;
 	}
 
@@ -122,7 +122,7 @@ class KStreamBoundElementFactory extends AbstractBindingTargetFactory<KStream> {
 		private KStream<Object, Object> delegate;
 
 		public void wrap(KStream<Object, Object> delegate) {
-			Assert.notNull(delegate, "delegate cannot be null");
+			Assert.notNull(delegate,"delegate cannot be null");
 			if (this.delegate == null) {
 				this.delegate = delegate;
 			}

@@ -39,7 +39,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 public class KafkaBinderCustomHealthCheckTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1, true, 10);
+	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1,true,10);
 
 	@Test
 	public void testCustomHealthIndicatorIsActivated() {

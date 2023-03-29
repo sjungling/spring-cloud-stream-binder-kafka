@@ -31,16 +31,16 @@ import org.springframework.kafka.test.rule.EmbeddedKafkaRule;
 public class KafkaBinderBootstrapTest {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1, true, 10);
+	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1,true,10);
 
 	@Test
 	public void testKafkaBinderConfiguration() throws Exception {
 		ConfigurableApplicationContext applicationContext = new SpringApplicationBuilder(
 				SimpleApplication.class).web(WebApplicationType.NONE).run(
-						"--spring.cloud.stream.kafka.binder.brokers="
-								+ embeddedKafka.getEmbeddedKafka().getBrokersAsString(),
-						"--spring.cloud.stream.kafka.binder.zkNodes=" + embeddedKafka
-								.getEmbeddedKafka().getZookeeperConnectionString());
+				"--spring.cloud.stream.kafka.binder.brokers="
+						+ embeddedKafka.getEmbeddedKafka().getBrokersAsString(),
+				"--spring.cloud.stream.kafka.binder.zkNodes=" + embeddedKafka
+						.getEmbeddedKafka().getZookeeperConnectionString());
 		applicationContext.close();
 	}
 

@@ -28,5 +28,5 @@ import java.util.Map;
 @FunctionalInterface
 public interface ConsumerConfigCustomizer {
 
-	void configure(Map<String, Object> consumerProperties, String bindingName, String destination);
+	void configure(Map<String, Object> consumerProperties,String bindingName,String destination);
 }

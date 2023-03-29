@@ -31,8 +31,8 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConditionalOnClass(name = {
-		"org.springframework.boot.actuate.endpoint.annotation.Endpoint" })
-@AutoConfigureAfter({EndpointAutoConfiguration.class, KafkaStreamsBinderSupportAutoConfiguration.class})
+		"org.springframework.boot.actuate.endpoint.annotation.Endpoint"})
+@AutoConfigureAfter({EndpointAutoConfiguration.class,KafkaStreamsBinderSupportAutoConfiguration.class})
 public class KafkaStreamsTopologyEndpointAutoConfiguration {
 
 	@Bean

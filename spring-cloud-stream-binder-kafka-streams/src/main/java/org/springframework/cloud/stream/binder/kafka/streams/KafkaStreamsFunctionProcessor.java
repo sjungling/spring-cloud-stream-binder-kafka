@@ -86,16 +86,16 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 	ConfigurableEnvironment environment;
 
 	public KafkaStreamsFunctionProcessor(BindingServiceProperties bindingServiceProperties,
-										KafkaStreamsExtendedBindingProperties kafkaStreamsExtendedBindingProperties,
-										KeyValueSerdeResolver keyValueSerdeResolver,
-										KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue,
-										KafkaStreamsMessageConversionDelegate kafkaStreamsMessageConversionDelegate,
-										CleanupConfig cleanupConfig,
-										StreamFunctionProperties streamFunctionProperties,
-										KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties,
-										StreamsBuilderFactoryBeanConfigurer customizer, ConfigurableEnvironment environment) {
-		super(bindingServiceProperties, kafkaStreamsBindingInformationCatalogue, kafkaStreamsExtendedBindingProperties,
-				keyValueSerdeResolver, cleanupConfig);
+			KafkaStreamsExtendedBindingProperties kafkaStreamsExtendedBindingProperties,
+			KeyValueSerdeResolver keyValueSerdeResolver,
+			KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue,
+			KafkaStreamsMessageConversionDelegate kafkaStreamsMessageConversionDelegate,
+			CleanupConfig cleanupConfig,
+			StreamFunctionProperties streamFunctionProperties,
+			KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties,
+			StreamsBuilderFactoryBeanConfigurer customizer,ConfigurableEnvironment environment) {
+		super(bindingServiceProperties,kafkaStreamsBindingInformationCatalogue,kafkaStreamsExtendedBindingProperties,
+				keyValueSerdeResolver,cleanupConfig);
 		this.bindingServiceProperties = bindingServiceProperties;
 		this.kafkaStreamsExtendedBindingProperties = kafkaStreamsExtendedBindingProperties;
 		this.keyValueSerdeResolver = keyValueSerdeResolver;
@@ -108,19 +108,19 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 	}
 
 	private Map<String, ResolvableType> buildTypeMap(ResolvableType resolvableType,
-													KafkaStreamsBindableProxyFactory kafkaStreamsBindableProxyFactory,
-													Method method, String functionName) {
+			KafkaStreamsBindableProxyFactory kafkaStreamsBindableProxyFactory,
+			Method method,String functionName) {
 		Map<String, ResolvableType> resolvableTypeMap = new LinkedHashMap<>();
 		if (method != null) { // Component functional bean.
-			final ResolvableType firstMethodParameter = ResolvableType.forMethodParameter(method, 0);
+			final ResolvableType firstMethodParameter = ResolvableType.forMethodParameter(method,0);
 			ResolvableType currentOutputGeneric = ResolvableType.forMethodReturnType(method);
 
 			final Set<String> inputs = new LinkedHashSet<>(kafkaStreamsBindableProxyFactory.getInputs());
 			final Iterator<String> iterator = inputs.iterator();
-			populateResolvableTypeMap(firstMethodParameter, resolvableTypeMap, iterator, method, functionName);
+			populateResolvableTypeMap(firstMethodParameter,resolvableTypeMap,iterator,method,functionName);
 
 			final Class<?> outputRawclass = currentOutputGeneric.getRawClass();
-			traverseReturnTypeForComponentBeans(resolvableTypeMap, currentOutputGeneric, inputs, iterator, outputRawclass);
+			traverseReturnTypeForComponentBeans(resolvableTypeMap,currentOutputGeneric,inputs,iterator,outputRawclass);
 		}
 		else if (resolvableType != null && resolvableType.getRawClass() != null) {
 			int inputCount = 1;
@@ -142,7 +142,7 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 
 			final Iterator<String> iterator = inputs.iterator();
 
-			populateResolvableTypeMap(resolvableType, resolvableTypeMap, iterator);
+			populateResolvableTypeMap(resolvableType,resolvableTypeMap,iterator);
 
 			ResolvableType iterableResType = resolvableType;
 			int i = resolvableType.getRawClass().isAssignableFrom(BiFunction.class) ||
@@ -156,19 +156,19 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 					iterableResType = iterableResType.getGeneric(1);
 					if (iterableResType.getRawClass() != null &&
 							functionOrConsumerFound(iterableResType)) {
-						populateResolvableTypeMap(iterableResType, resolvableTypeMap, iterator);
+						populateResolvableTypeMap(iterableResType,resolvableTypeMap,iterator);
 					}
 					i++;
 				}
 				outboundResolvableType = iterableResType.getGeneric(1);
 			}
-			resolvableTypeMap.put(OUTBOUND, outboundResolvableType);
+			resolvableTypeMap.put(OUTBOUND,outboundResolvableType);
 		}
 		return resolvableTypeMap;
 	}
 
-	private void traverseReturnTypeForComponentBeans(Map<String, ResolvableType> resolvableTypeMap, ResolvableType currentOutputGeneric,
-													Set<String> inputs, Iterator<String> iterator, Class<?> outputRawclass) {
+	private void traverseReturnTypeForComponentBeans(Map<String, ResolvableType> resolvableTypeMap,ResolvableType currentOutputGeneric,
+			Set<String> inputs,Iterator<String> iterator,Class<?> outputRawclass) {
 		if (outputRawclass != null && !outputRawclass.equals(Void.TYPE)) {
 			ResolvableType iterableResType = currentOutputGeneric;
 			int i = 1;
@@ -176,13 +176,13 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 			while (i < inputs.size() && iterator.hasNext()) {
 				if (iterableResType.getRawClass() != null &&
 						functionOrConsumerFound(iterableResType)) {
-					populateResolvableTypeMap(iterableResType, resolvableTypeMap, iterator);
+					populateResolvableTypeMap(iterableResType,resolvableTypeMap,iterator);
 				}
 				iterableResType = iterableResType.getGeneric(1);
 				i++;
 			}
 			if (iterableResType.getRawClass() != null && KStream.class.isAssignableFrom(iterableResType.getRawClass())) {
-				resolvableTypeMap.put(OUTBOUND, iterableResType);
+				resolvableTypeMap.put(OUTBOUND,iterableResType);
 			}
 		}
 	}
@@ -192,26 +192,26 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 				iterableResType.getRawClass().equals(Consumer.class);
 	}
 
-	private void populateResolvableTypeMap(ResolvableType resolvableType, Map<String, ResolvableType> resolvableTypeMap,
-										Iterator<String> iterator) {
+	private void populateResolvableTypeMap(ResolvableType resolvableType,Map<String, ResolvableType> resolvableTypeMap,
+			Iterator<String> iterator) {
 		final String next = iterator.next();
-		resolvableTypeMap.put(next, resolvableType.getGeneric(0));
+		resolvableTypeMap.put(next,resolvableType.getGeneric(0));
 		if (resolvableType.getRawClass() != null &&
 				(resolvableType.getRawClass().isAssignableFrom(BiFunction.class) ||
-				resolvableType.getRawClass().isAssignableFrom(BiConsumer.class))
-			&& iterator.hasNext()) {
-			resolvableTypeMap.put(iterator.next(), resolvableType.getGeneric(1));
+						resolvableType.getRawClass().isAssignableFrom(BiConsumer.class))
+				&& iterator.hasNext()) {
+			resolvableTypeMap.put(iterator.next(),resolvableType.getGeneric(1));
 		}
 	}
 
-	private void populateResolvableTypeMap(ResolvableType resolvableType, Map<String, ResolvableType> resolvableTypeMap,
-										Iterator<String> iterator, Method method, String functionName) {
+	private void populateResolvableTypeMap(ResolvableType resolvableType,Map<String, ResolvableType> resolvableTypeMap,
+			Iterator<String> iterator,Method method,String functionName) {
 		final String next = iterator.next();
-		resolvableTypeMap.put(next, resolvableType);
+		resolvableTypeMap.put(next,resolvableType);
 		if (method != null) {
 			final Object bean = beanFactory.getBean(functionName);
 			if (BiFunction.class.isAssignableFrom(bean.getClass()) || BiConsumer.class.isAssignableFrom(bean.getClass())) {
-				resolvableTypeMap.put(iterator.next(), ResolvableType.forMethodParameter(method, 1));
+				resolvableTypeMap.put(iterator.next(),ResolvableType.forMethodParameter(method,1));
 			}
 		}
 	}
@@ -243,13 +243,13 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 	 * @param functionName bean name of the function
 	 * @param kafkaStreamsBindableProxyFactory bindable proxy factory for the Kafka Streams type
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void setupFunctionInvokerForKafkaStreams(ResolvableType resolvableType, String functionName,
-													KafkaStreamsBindableProxyFactory kafkaStreamsBindableProxyFactory, Method method,
-													ResolvableType outputResolvableType,
-													String... composedFunctionNames) {
+	@SuppressWarnings({"unchecked","rawtypes"})
+	public void setupFunctionInvokerForKafkaStreams(ResolvableType resolvableType,String functionName,
+			KafkaStreamsBindableProxyFactory kafkaStreamsBindableProxyFactory,Method method,
+			ResolvableType outputResolvableType,
+			String... composedFunctionNames) {
 		final Map<String, ResolvableType> resolvableTypes = buildTypeMap(resolvableType,
-				kafkaStreamsBindableProxyFactory, method, functionName);
+				kafkaStreamsBindableProxyFactory,method,functionName);
 
 		ResolvableType outboundResolvableType;
 		if (outputResolvableType != null) {
@@ -260,7 +260,7 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 			outboundResolvableType = resolvableTypes.remove(OUTBOUND);
 		}
 
-		Object[] adaptedInboundArguments = adaptAndRetrieveInboundArguments(resolvableTypes, functionName);
+		Object[] adaptedInboundArguments = adaptAndRetrieveInboundArguments(resolvableTypes,functionName);
 		try {
 			if (resolvableType.getRawClass() != null && resolvableType.getRawClass().equals(Consumer.class)) {
 				Consumer<Object> consumer = (Consumer) this.beanFactory.getBean(functionName);
@@ -268,7 +268,7 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 			}
 			else if (resolvableType.getRawClass() != null && resolvableType.getRawClass().equals(BiConsumer.class)) {
 				BiConsumer<Object, Object> biConsumer = (BiConsumer) this.beanFactory.getBean(functionName);
-				biConsumer.accept(adaptedInboundArguments[0], adaptedInboundArguments[1]);
+				biConsumer.accept(adaptedInboundArguments[0],adaptedInboundArguments[1]);
 			}
 			else if (method != null) { // Handling component functional beans
 				final Object bean = beanFactory.getBean(functionName);
@@ -276,17 +276,17 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 					((Consumer) bean).accept(adaptedInboundArguments[0]);
 				}
 				else if (BiConsumer.class.isAssignableFrom(bean.getClass())) {
-					((BiConsumer) bean).accept(adaptedInboundArguments[0], adaptedInboundArguments[1]);
+					((BiConsumer) bean).accept(adaptedInboundArguments[0],adaptedInboundArguments[1]);
 				}
 				else if (Function.class.isAssignableFrom(bean.getClass()) || BiFunction.class.isAssignableFrom(bean.getClass())) {
 					Object result;
 					if (BiFunction.class.isAssignableFrom(bean.getClass())) {
-						result = ((BiFunction) bean).apply(adaptedInboundArguments[0], adaptedInboundArguments[1]);
+						result = ((BiFunction) bean).apply(adaptedInboundArguments[0],adaptedInboundArguments[1]);
 					}
 					else {
 						result = ((Function) bean).apply(adaptedInboundArguments[0]);
 					}
-					result = handleCurriedFunctions(adaptedInboundArguments, result);
+					result = handleCurriedFunctions(adaptedInboundArguments,result);
 					if (result != null) {
 						final Set<String> outputs = new TreeSet<>(kafkaStreamsBindableProxyFactory.getOutputs());
 						final Iterator<String> outboundDefinitionIterator = outputs.iterator();
@@ -294,16 +294,16 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 							final String initialInput = resolvableTypes.keySet().iterator().next();
 							final StreamsBuilderFactoryBean streamsBuilderFactoryBean =
 									this.kafkaStreamsBindingInformationCatalogue.getStreamsBuilderFactoryBeanPerBinding().get(initialInput);
-							handleKStreamArrayOutbound(resolvableType, functionName, kafkaStreamsBindableProxyFactory,
-									outboundResolvableType, (Object[]) result, streamsBuilderFactoryBean);
+							handleKStreamArrayOutbound(resolvableType,functionName,kafkaStreamsBindableProxyFactory,
+									outboundResolvableType,(Object[]) result,streamsBuilderFactoryBean);
 						}
 						else {
 							if (KTable.class.isAssignableFrom(result.getClass())) {
-								handleSingleKStreamOutbound(resolvableTypes, outboundResolvableType != null ?
-										outboundResolvableType : resolvableType.getGeneric(1), ((KTable) result).toStream(), outboundDefinitionIterator);
+								handleSingleKStreamOutbound(resolvableTypes,outboundResolvableType != null ?
+										outboundResolvableType : resolvableType.getGeneric(1),((KTable) result).toStream(),outboundDefinitionIterator);
 							}
 							else {
-								handleSingleKStreamOutbound(resolvableTypes, outboundResolvableType, (KStream) result, outboundDefinitionIterator);
+								handleSingleKStreamOutbound(resolvableTypes,outboundResolvableType,(KStream) result,outboundDefinitionIterator);
 							}
 						}
 					}
@@ -313,22 +313,22 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 				Object result = null;
 				if (resolvableType.getRawClass() != null && resolvableType.getRawClass().equals(BiFunction.class)) {
 					if (composedFunctionNames != null && composedFunctionNames.length > 0) {
-						result = handleComposedFunctions(adaptedInboundArguments, result, composedFunctionNames);
+						result = handleComposedFunctions(adaptedInboundArguments,result,composedFunctionNames);
 					}
 					else {
 						BiFunction<Object, Object, Object> biFunction = (BiFunction) beanFactory.getBean(functionName);
-						result = biFunction.apply(adaptedInboundArguments[0], adaptedInboundArguments[1]);
-						result = handleCurriedFunctions(adaptedInboundArguments, result);
+						result = biFunction.apply(adaptedInboundArguments[0],adaptedInboundArguments[1]);
+						result = handleCurriedFunctions(adaptedInboundArguments,result);
 					}
 				}
 				else {
 					if (composedFunctionNames != null && composedFunctionNames.length > 0) {
-						result = handleComposedFunctions(adaptedInboundArguments, result, composedFunctionNames);
+						result = handleComposedFunctions(adaptedInboundArguments,result,composedFunctionNames);
 					}
 					else {
 						Function<Object, Object> function = (Function) beanFactory.getBean(functionName);
 						result = function.apply(adaptedInboundArguments[0]);
-						result = handleCurriedFunctions(adaptedInboundArguments, result);
+						result = handleCurriedFunctions(adaptedInboundArguments,result);
 					}
 				}
 				if (result != null) {
@@ -339,44 +339,44 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 						final String initialInput = resolvableTypes.keySet().iterator().next();
 						final StreamsBuilderFactoryBean streamsBuilderFactoryBean =
 								this.kafkaStreamsBindingInformationCatalogue.getStreamsBuilderFactoryBeanPerBinding().get(initialInput);
-						handleKStreamArrayOutbound(resolvableType, functionName, kafkaStreamsBindableProxyFactory,
-								outboundResolvableType, (Object[]) result, streamsBuilderFactoryBean);
+						handleKStreamArrayOutbound(resolvableType,functionName,kafkaStreamsBindableProxyFactory,
+								outboundResolvableType,(Object[]) result,streamsBuilderFactoryBean);
 					}
 					else {
 						if (KTable.class.isAssignableFrom(result.getClass())) {
-							handleSingleKStreamOutbound(resolvableTypes, outboundResolvableType != null ?
-									outboundResolvableType : resolvableType.getGeneric(1), ((KTable) result).toStream(), outboundDefinitionIterator);
+							handleSingleKStreamOutbound(resolvableTypes,outboundResolvableType != null ?
+									outboundResolvableType : resolvableType.getGeneric(1),((KTable) result).toStream(),outboundDefinitionIterator);
 						}
 						else {
-							handleSingleKStreamOutbound(resolvableTypes, outboundResolvableType != null ?
-									outboundResolvableType : resolvableType.getGeneric(1), (KStream) result, outboundDefinitionIterator);
+							handleSingleKStreamOutbound(resolvableTypes,outboundResolvableType != null ?
+									outboundResolvableType : resolvableType.getGeneric(1),(KStream) result,outboundDefinitionIterator);
 						}
 					}
 				}
 			}
 		}
 		catch (Exception ex) {
-			throw new BeanInitializationException("Cannot setup function invoker for this Kafka Streams function.", ex);
+			throw new BeanInitializationException("Cannot setup function invoker for this Kafka Streams function.",ex);
 		}
 	}
 
 	@SuppressWarnings({"unchecked"})
-	private Object handleComposedFunctions(Object[] adaptedInboundArguments, Object result, String... composedFunctionNames) {
+	private Object handleComposedFunctions(Object[] adaptedInboundArguments,Object result,String... composedFunctionNames) {
 		Object bean = beanFactory.getBean(composedFunctionNames[0]);
 		if (BiFunction.class.isAssignableFrom(bean.getClass())) {
-			result = ((BiFunction<Object, Object, Object>) bean).apply(adaptedInboundArguments[0], adaptedInboundArguments[1]);
+			result = ((BiFunction<Object, Object, Object>) bean).apply(adaptedInboundArguments[0],adaptedInboundArguments[1]);
 		}
 		else if (Function.class.isAssignableFrom(bean.getClass())) {
 			result = ((Function<Object, Object>) bean).apply(adaptedInboundArguments[0]);
 		}
 		// If the return is a curried function, apply it
-		result = handleCurriedFunctions(adaptedInboundArguments, result);
+		result = handleCurriedFunctions(adaptedInboundArguments,result);
 		// Apply composed functions
-		return applyComposedFunctions(result, composedFunctionNames);
+		return applyComposedFunctions(result,composedFunctionNames);
 	}
 
 	@SuppressWarnings({"unchecked"})
-	private Object applyComposedFunctions(Object result, String[] composedFunctionNames) {
+	private Object applyComposedFunctions(Object result,String[] composedFunctionNames) {
 		for (int i = 1; i < composedFunctionNames.length; i++) {
 			final Object bean = beanFactory.getBean(composedFunctionNames[i]);
 			if (Consumer.class.isAssignableFrom(bean.getClass())) {
@@ -394,7 +394,7 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 	}
 
 	@SuppressWarnings({"unchecked"})
-	private Object handleCurriedFunctions(Object[] adaptedInboundArguments, Object result) {
+	private Object handleCurriedFunctions(Object[] adaptedInboundArguments,Object result) {
 		int i = 1;
 		while (result instanceof Function || result instanceof Consumer) {
 			if (result instanceof Function) {
@@ -409,22 +409,22 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 		return result;
 	}
 
-	private void handleSingleKStreamOutbound(Map<String, ResolvableType> resolvableTypes, ResolvableType outboundResolvableType,
-											KStream<Object, Object> result, Iterator<String> outboundDefinitionIterator) {
+	private void handleSingleKStreamOutbound(Map<String, ResolvableType> resolvableTypes,ResolvableType outboundResolvableType,
+			KStream<Object, Object> result,Iterator<String> outboundDefinitionIterator) {
 		if (outboundDefinitionIterator.hasNext()) {
 			String outbound = outboundDefinitionIterator.next();
-			Object targetBean = handleSingleKStreamOutbound(result, outbound);
+			Object targetBean = handleSingleKStreamOutbound(result,outbound);
 			kafkaStreamsBindingInformationCatalogue.addOutboundKStreamResolvable(targetBean,
 					outboundResolvableType);
 
 			final String next = resolvableTypes.keySet().iterator().next();
 			final StreamsBuilderFactoryBean streamsBuilderFactoryBean = this.kafkaStreamsBindingInformationCatalogue
 					.getStreamsBuilderFactoryBeanPerBinding().get(next);
-			this.kafkaStreamsBindingInformationCatalogue.addStreamBuilderFactoryPerBinding(outbound, streamsBuilderFactoryBean);
+			this.kafkaStreamsBindingInformationCatalogue.addStreamBuilderFactoryPerBinding(outbound,streamsBuilderFactoryBean);
 		}
 	}
 
-	private Object handleSingleKStreamOutbound(KStream<Object, Object> result, String next) {
+	private Object handleSingleKStreamOutbound(KStream<Object, Object> result,String next) {
 		Object targetBean = this.applicationContext.getBean(next);
 		KStreamBoundElementFactory.KStreamWrapper
 				boundElement = (KStreamBoundElementFactory.KStreamWrapper) targetBean;
@@ -432,26 +432,26 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 		return targetBean;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void handleKStreamArrayOutbound(ResolvableType resolvableType, String functionName,
-											KafkaStreamsBindableProxyFactory kafkaStreamsBindableProxyFactory,
-											ResolvableType outboundResolvableType, Object[] result,
-											StreamsBuilderFactoryBean streamsBuilderFactoryBean) {
+	@SuppressWarnings({"unchecked","rawtypes"})
+	private void handleKStreamArrayOutbound(ResolvableType resolvableType,String functionName,
+			KafkaStreamsBindableProxyFactory kafkaStreamsBindableProxyFactory,
+			ResolvableType outboundResolvableType,Object[] result,
+			StreamsBuilderFactoryBean streamsBuilderFactoryBean) {
 		// Binding target as the output bindings were deferred in the KafkaStreamsBindableProxyFactory
 		// due to the fact that it didn't know the returned array size. At this point in the execution,
 		// we know exactly the number of outbound components (from the array length), so do the binding.
 		final int length = result.length;
 
-		List<String> outputBindings = getOutputBindings(functionName, length);
+		List<String> outputBindings = getOutputBindings(functionName,length);
 		Iterator<String> iterator = outputBindings.iterator();
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 
 		for (Object o : result) {
 			String next = iterator.next();
-			kafkaStreamsBindableProxyFactory.addOutputBinding(next, KStream.class);
+			kafkaStreamsBindableProxyFactory.addOutputBinding(next,KStream.class);
 			RootBeanDefinition rootBeanDefinition1 = new RootBeanDefinition();
 			rootBeanDefinition1.setInstanceSupplier(() -> kafkaStreamsBindableProxyFactory.getOutputHolders().get(next).getBoundTarget());
-			registry.registerBeanDefinition(next, rootBeanDefinition1);
+			registry.registerBeanDefinition(next,rootBeanDefinition1);
 
 			Object targetBean = this.applicationContext.getBean(next);
 
@@ -460,13 +460,13 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 			boundElement.wrap((KStream) o);
 
 			kafkaStreamsBindingInformationCatalogue.addOutboundKStreamResolvable(
-					targetBean, outboundResolvableType != null ? outboundResolvableType : resolvableType.getGeneric(1));
+					targetBean,outboundResolvableType != null ? outboundResolvableType : resolvableType.getGeneric(1));
 
-			this.kafkaStreamsBindingInformationCatalogue.addStreamBuilderFactoryPerBinding(next, streamsBuilderFactoryBean);
+			this.kafkaStreamsBindingInformationCatalogue.addStreamBuilderFactoryPerBinding(next,streamsBuilderFactoryBean);
 		}
 	}
 
-	private List<String> getOutputBindings(String functionName, int outputs)  {
+	private List<String> getOutputBindings(String functionName,int outputs) {
 		List<String> outputBindings = this.streamFunctionProperties.getOutputBindings(functionName);
 		List<String> outputBindingNames = new ArrayList<>();
 		if (!CollectionUtils.isEmpty(outputBindings)) {
@@ -475,7 +475,7 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 		}
 		else {
 			for (int i = 0; i < outputs; i++) {
-				outputBindingNames.add(String.format("%s-%s-%d", functionName, FunctionConstants.DEFAULT_OUTPUT_SUFFIX, i));
+				outputBindingNames.add(String.format("%s-%s-%d",functionName,FunctionConstants.DEFAULT_OUTPUT_SUFFIX,i));
 			}
 		}
 		return outputBindingNames;
@@ -484,7 +484,7 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 
 	@SuppressWarnings({"unchecked"})
 	private Object[] adaptAndRetrieveInboundArguments(Map<String, ResolvableType> stringResolvableTypeMap,
-													String functionName) {
+			String functionName) {
 		Object[] arguments = new Object[stringResolvableTypeMap.size()];
 		int i = 0;
 		for (String input : stringResolvableTypeMap.keySet()) {
@@ -496,9 +496,9 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 				//Retrieve the StreamsConfig created for this method if available.
 				//Otherwise, create the StreamsBuilderFactory and get the underlying config.
 				if (!this.methodStreamsBuilderFactoryBeanMap.containsKey(functionName)) {
-					StreamsBuilderFactoryBean streamsBuilderFactoryBean = buildStreamsBuilderAndRetrieveConfig(functionName, applicationContext,
-							input, kafkaStreamsBinderConfigurationProperties, customizer, this.environment, bindingProperties);
-					this.methodStreamsBuilderFactoryBeanMap.put(functionName, streamsBuilderFactoryBean);
+					StreamsBuilderFactoryBean streamsBuilderFactoryBean = buildStreamsBuilderAndRetrieveConfig(functionName,applicationContext,
+							input,kafkaStreamsBinderConfigurationProperties,customizer,this.environment,bindingProperties);
+					this.methodStreamsBuilderFactoryBeanMap.put(functionName,streamsBuilderFactoryBean);
 				}
 				try {
 					StreamsBuilderFactoryBean streamsBuilderFactoryBean =
@@ -510,49 +510,49 @@ public class KafkaStreamsFunctionProcessor extends AbstractKafkaStreamsBinderPro
 					extendedConsumerProperties.setApplicationId(applicationId);
 					//get state store spec
 
-					Serde<?> keySerde = this.keyValueSerdeResolver.getInboundKeySerde(extendedConsumerProperties, stringResolvableTypeMap.get(input));
+					Serde<?> keySerde = this.keyValueSerdeResolver.getInboundKeySerde(extendedConsumerProperties,stringResolvableTypeMap.get(input));
 					LOG.info("Key Serde used for " + input + ": " + keySerde.getClass().getName());
 					Serde<?> valueSerde = bindingServiceProperties.getConsumerProperties(input).isUseNativeDecoding() ?
-						getValueSerde(input, extendedConsumerProperties, stringResolvableTypeMap.get(input)) : Serdes.ByteArray();
+							getValueSerde(input,extendedConsumerProperties,stringResolvableTypeMap.get(input)) : Serdes.ByteArray();
 					LOG.info("Value Serde used for " + input + ": " + valueSerde.getClass().getName());
-					final Topology.AutoOffsetReset autoOffsetReset = getAutoOffsetReset(input, extendedConsumerProperties);
+					final Topology.AutoOffsetReset autoOffsetReset = getAutoOffsetReset(input,extendedConsumerProperties);
 
 					if (parameterType.isAssignableFrom(KStream.class)) {
-						KStream<?, ?> stream = getKStream(input, bindingProperties, extendedConsumerProperties,
-								streamsBuilder, keySerde, valueSerde, autoOffsetReset, i == 0);
+						KStream<?, ?> stream = getKStream(input,bindingProperties,extendedConsumerProperties,
+								streamsBuilder,keySerde,valueSerde,autoOffsetReset,i == 0);
 						KStreamBoundElementFactory.KStreamWrapper kStreamWrapper =
 								(KStreamBoundElementFactory.KStreamWrapper) targetBean;
 						//wrap the proxy created during the initial target type binding with real object (KStream)
 						kStreamWrapper.wrap((KStream<Object, Object>) stream);
 
-						this.kafkaStreamsBindingInformationCatalogue.addKeySerde((KStream<?, ?>) kStreamWrapper, keySerde);
+						this.kafkaStreamsBindingInformationCatalogue.addKeySerde((KStream<?, ?>) kStreamWrapper,keySerde);
 
-						this.kafkaStreamsBindingInformationCatalogue.addStreamBuilderFactoryPerBinding(input, streamsBuilderFactoryBean);
+						this.kafkaStreamsBindingInformationCatalogue.addStreamBuilderFactoryPerBinding(input,streamsBuilderFactoryBean);
 						this.kafkaStreamsBindingInformationCatalogue.addConsumerPropertiesPerSbfb(streamsBuilderFactoryBean,
 								bindingServiceProperties.getConsumerProperties(input));
 
 						if (KStream.class.isAssignableFrom(stringResolvableTypeMap.get(input).getRawClass())) {
 							final Class<?> valueClass =
 									(stringResolvableTypeMap.get(input).getGeneric(1).getRawClass() != null)
-									? (stringResolvableTypeMap.get(input).getGeneric(1).getRawClass()) : Object.class;
+											? (stringResolvableTypeMap.get(input).getGeneric(1).getRawClass()) : Object.class;
 							if (this.kafkaStreamsBindingInformationCatalogue.isUseNativeDecoding(
 									(KStream<?, ?>) kStreamWrapper)) {
 								arguments[i] = stream;
 							}
 							else {
 								arguments[i] = this.kafkaStreamsMessageConversionDelegate.deserializeOnInbound(
-										valueClass, stream);
+										valueClass,stream);
 							}
 						}
 
 						if (arguments[i] == null) {
 							arguments[i] = stream;
 						}
-						Assert.notNull(arguments[i], "Problems encountered while adapting the function argument.");
+						Assert.notNull(arguments[i],"Problems encountered while adapting the function argument.");
 					}
 					else {
-						handleKTableGlobalKTableInputs(arguments, i, input, parameterType, targetBean, streamsBuilderFactoryBean,
-								streamsBuilder, extendedConsumerProperties, keySerde, valueSerde, autoOffsetReset, i == 0);
+						handleKTableGlobalKTableInputs(arguments,i,input,parameterType,targetBean,streamsBuilderFactoryBean,
+								streamsBuilder,extendedConsumerProperties,keySerde,valueSerde,autoOffsetReset,i == 0);
 					}
 					i++;
 				}

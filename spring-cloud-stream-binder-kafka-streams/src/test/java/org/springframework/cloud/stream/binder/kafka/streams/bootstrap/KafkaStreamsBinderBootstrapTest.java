@@ -49,7 +49,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 public class KafkaStreamsBinderBootstrapTest {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1, true, 10);
+	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1,true,10);
 
 	@Before
 	public void before() {
@@ -60,19 +60,19 @@ public class KafkaStreamsBinderBootstrapTest {
 	public void testKStreamBinderWithCustomEnvironmentCanStart() {
 		ConfigurableApplicationContext applicationContext = new SpringApplicationBuilder(
 				SimpleKafkaStreamsApplication.class).web(WebApplicationType.NONE).run(
-						"--spring.cloud.function.definition=input1;input2;input3",
-						"--spring.cloud.stream.kafka.streams.bindings.input1-in-0.consumer.application-id"
-								+ "=testKStreamBinderWithCustomEnvironmentCanStart",
+				"--spring.cloud.function.definition=input1;input2;input3",
+				"--spring.cloud.stream.kafka.streams.bindings.input1-in-0.consumer.application-id"
+						+ "=testKStreamBinderWithCustomEnvironmentCanStart",
 				"--spring.cloud.stream.kafka.streams.bindings.input2-in-0.consumer.application-id"
 						+ "=testKStreamBinderWithCustomEnvironmentCanStart-foo",
 				"--spring.cloud.stream.kafka.streams.bindings.input3-in-0.consumer.application-id"
 						+ "=testKStreamBinderWithCustomEnvironmentCanStart-foobar",
-						"--spring.cloud.stream.bindings.input1-in-0.destination=foo",
-						"--spring.cloud.stream.bindings.input1-in-0.binder=kstreamBinder",
-						"--spring.cloud.stream.binders.kstreamBinder.type=kstream",
-						"--spring.cloud.stream.binders.kstreamBinder.environment"
-								+ ".spring.cloud.stream.kafka.streams.binder.brokers"
-								+ "=" + embeddedKafka.getEmbeddedKafka().getBrokersAsString(),
+				"--spring.cloud.stream.bindings.input1-in-0.destination=foo",
+				"--spring.cloud.stream.bindings.input1-in-0.binder=kstreamBinder",
+				"--spring.cloud.stream.binders.kstreamBinder.type=kstream",
+				"--spring.cloud.stream.binders.kstreamBinder.environment"
+						+ ".spring.cloud.stream.kafka.streams.binder.brokers"
+						+ "=" + embeddedKafka.getEmbeddedKafka().getBrokersAsString(),
 				"--spring.cloud.stream.bindings.input2-in-0.destination=bar",
 				"--spring.cloud.stream.bindings.input2-in-0.binder=ktableBinder",
 				"--spring.cloud.stream.binders.ktableBinder.type=ktable",
@@ -100,8 +100,8 @@ public class KafkaStreamsBinderBootstrapTest {
 						+ "=testKafkaStreamsBinderWithStandardConfigurationCanStart-foo",
 				"--spring.cloud.stream.kafka.streams.bindings.input3-in-0.consumer.application-id"
 						+ "=testKafkaStreamsBinderWithStandardConfigurationCanStart-foobar",
-						"--spring.cloud.stream.kafka.streams.binder.brokers="
-								+ embeddedKafka.getEmbeddedKafka().getBrokersAsString());
+				"--spring.cloud.stream.kafka.streams.binder.brokers="
+						+ embeddedKafka.getEmbeddedKafka().getBrokersAsString());
 
 		applicationContext.close();
 	}
@@ -123,20 +123,20 @@ public class KafkaStreamsBinderBootstrapTest {
 						+ embeddedKafka.getEmbeddedKafka().getBrokersAsString());
 
 		Map<String, Object> streamConfigGlobalProperties = applicationContext
-				.getBean("streamConfigGlobalProperties", Map.class);
+				.getBean("streamConfigGlobalProperties",Map.class);
 		// Make sure that global stream configs do not contain individual binding config set on second function.
 		assertThat(streamConfigGlobalProperties.containsKey("spring.json.value.type.method")).isFalse();
 
 		// Make sure that only input2 function gets the specific binding property set on it.
-		final StreamsBuilderFactoryBean input1SBFB = applicationContext.getBean("&stream-builder-input1", StreamsBuilderFactoryBean.class);
+		final StreamsBuilderFactoryBean input1SBFB = applicationContext.getBean("&stream-builder-input1",StreamsBuilderFactoryBean.class);
 		final Properties streamsConfiguration1 = input1SBFB.getStreamsConfiguration();
 		assertThat(streamsConfiguration1.containsKey("spring.json.value.type.method")).isFalse();
 
-		final StreamsBuilderFactoryBean input2SBFB = applicationContext.getBean("&stream-builder-input2", StreamsBuilderFactoryBean.class);
+		final StreamsBuilderFactoryBean input2SBFB = applicationContext.getBean("&stream-builder-input2",StreamsBuilderFactoryBean.class);
 		final Properties streamsConfiguration2 = input2SBFB.getStreamsConfiguration();
 		assertThat(streamsConfiguration2.containsKey("spring.json.value.type.method")).isTrue();
 
-		final StreamsBuilderFactoryBean input3SBFB = applicationContext.getBean("&stream-builder-input3", StreamsBuilderFactoryBean.class);
+		final StreamsBuilderFactoryBean input3SBFB = applicationContext.getBean("&stream-builder-input3",StreamsBuilderFactoryBean.class);
 		final Properties streamsConfiguration3 = input3SBFB.getStreamsConfiguration();
 		assertThat(streamsConfiguration3.containsKey("spring.json.value.type.method")).isFalse();
 		applicationContext.getBean(KeyValueSerdeResolver.class);
@@ -158,8 +158,8 @@ public class KafkaStreamsBinderBootstrapTest {
 		applicationContext.close();
 	}
 
-	public static JavaType determineType(byte[] data, Headers headers) {
-		return TypeFactory.defaultInstance().constructParametricType(Map.class, String.class, String.class);
+	public static JavaType determineType(byte[] data,Headers headers) {
+		return TypeFactory.defaultInstance().constructParametricType(Map.class,String.class,String.class);
 	}
 
 	@SpringBootApplication

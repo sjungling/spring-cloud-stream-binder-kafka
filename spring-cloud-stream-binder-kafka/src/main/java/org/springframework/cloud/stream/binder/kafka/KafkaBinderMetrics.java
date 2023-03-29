@@ -93,9 +93,9 @@ public class KafkaBinderMetrics
 	Map<String, Long> unconsumedMessages = new ConcurrentHashMap<>();
 
 	public KafkaBinderMetrics(KafkaMessageChannelBinder binder,
-							KafkaBinderConfigurationProperties binderConfigurationProperties,
-							ConsumerFactory<?, ?> defaultConsumerFactory,
-							@Nullable MeterRegistry meterRegistry) {
+			KafkaBinderConfigurationProperties binderConfigurationProperties,
+			ConsumerFactory<?, ?> defaultConsumerFactory,
+			@Nullable MeterRegistry meterRegistry) {
 
 		this.binder = binder;
 		this.binderConfigurationProperties = binderConfigurationProperties;
@@ -105,9 +105,9 @@ public class KafkaBinderMetrics
 	}
 
 	public KafkaBinderMetrics(KafkaMessageChannelBinder binder,
-							KafkaBinderConfigurationProperties binderConfigurationProperties) {
+			KafkaBinderConfigurationProperties binderConfigurationProperties) {
 
-		this(binder, binderConfigurationProperties, null, null);
+		this(binder,binderConfigurationProperties,null,null);
 	}
 
 	public void setTimeout(int timeout) {
@@ -138,65 +138,65 @@ public class KafkaBinderMetrics
 			String topic = topicInfo.getKey();
 			String group = topicInfo.getValue().getConsumerGroup();
 
-			final Gauge register = Gauge.builder(OFFSET_LAG_METRIC_NAME, this,
-					(o) -> computeAndGetUnconsumedMessages(topic, group)).tag("group", group)
-					.tag("topic", topic)
+			final Gauge register = Gauge.builder(OFFSET_LAG_METRIC_NAME,this,
+					(o) -> computeAndGetUnconsumedMessages(topic,group)).tag("group",group)
+					.tag("topic",topic)
 					.description("Unconsumed messages for a particular group and topic")
 					.register(registry);
 
 			if (!(register instanceof NoopGauge)) {
 				//Schedule a task to compute the unconsumed messages for this group/topic every minute.
-				this.scheduler.scheduleWithFixedDelay(computeUnconsumedMessagesRunnable(topic, group, this.metadataConsumers),
-						10, DELAY_BETWEEN_TASK_EXECUTION, TimeUnit.SECONDS);
+				this.scheduler.scheduleWithFixedDelay(computeUnconsumedMessagesRunnable(topic,group,this.metadataConsumers),
+						10,DELAY_BETWEEN_TASK_EXECUTION,TimeUnit.SECONDS);
 			}
 		}
 	}
 
-	private Runnable computeUnconsumedMessagesRunnable(String topic, String group, Map<String, Consumer<?, ?>> metadataConsumers) {
+	private Runnable computeUnconsumedMessagesRunnable(String topic,String group,Map<String, Consumer<?, ?>> metadataConsumers) {
 		return () -> {
 			try {
-				long lag = findTotalTopicGroupLag(topic, group, this.metadataConsumers);
-				this.unconsumedMessages.put(topic + "-" + group, lag);
+				long lag = findTotalTopicGroupLag(topic,group,this.metadataConsumers);
+				this.unconsumedMessages.put(topic + "-" + group,lag);
 			}
 			catch (Exception ex) {
-				LOG.debug("Cannot generate metric for topic: " + topic, ex);
+				LOG.debug("Cannot generate metric for topic: " + topic,ex);
 			}
 		};
 	}
 
-	private long computeAndGetUnconsumedMessages(String topic, String group) {
+	private long computeAndGetUnconsumedMessages(String topic,String group) {
 		ExecutorService exec = Executors.newCachedThreadPool();
 		Future<Long> future = exec.submit(() -> {
 
 			long lag = 0;
 			try {
-				lag = findTotalTopicGroupLag(topic, group, this.metadataConsumers);
+				lag = findTotalTopicGroupLag(topic,group,this.metadataConsumers);
 			}
 			catch (Exception ex) {
-				LOG.debug("Cannot generate metric for topic: " + topic, ex);
+				LOG.debug("Cannot generate metric for topic: " + topic,ex);
 			}
 			return lag;
 		});
 		try {
-			return future.get(this.timeout, TimeUnit.SECONDS);
+			return future.get(this.timeout,TimeUnit.SECONDS);
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
-			return this.unconsumedMessages.getOrDefault(topic + "-" + group, 0L);
+			return this.unconsumedMessages.getOrDefault(topic + "-" + group,0L);
 		}
 		catch (ExecutionException | TimeoutException ex) {
-			return this.unconsumedMessages.getOrDefault(topic + "-" + group, 0L);
+			return this.unconsumedMessages.getOrDefault(topic + "-" + group,0L);
 		}
 		finally {
 			exec.shutdownNow();
 		}
 	}
 
-	private long findTotalTopicGroupLag(String topic, String group, Map<String, Consumer<?, ?>> metadataConsumers) {
+	private long findTotalTopicGroupLag(String topic,String group,Map<String, Consumer<?, ?>> metadataConsumers) {
 		long lag = 0;
 		Consumer<?, ?> metadataConsumer = metadataConsumers.computeIfAbsent(
 				group,
-				(g) -> createConsumerFactory().createConsumer(g, "monitoring"));
+				(g) -> createConsumerFactory().createConsumer(g,"monitoring"));
 		List<PartitionInfo> partitionInfos = metadataConsumer
 				.partitionsFor(topic);
 		List<TopicPartition> topicPartitions = new LinkedList<>();

@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
 public class SerdesProvidedAsBeansTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true);
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true);
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule.getEmbeddedKafka();
 
@@ -71,7 +71,7 @@ public class SerdesProvidedAsBeansTests {
 
 			final Method method = SerdeProvidedAsBeanApp.class.getMethod("process");
 
-			ResolvableType resolvableType = ResolvableType.forMethodReturnType(method, SerdeProvidedAsBeanApp.class);
+			ResolvableType resolvableType = ResolvableType.forMethodReturnType(method,SerdeProvidedAsBeanApp.class);
 
 			final KeyValueSerdeResolver keyValueSerdeResolver = context.getBean(KeyValueSerdeResolver.class);
 			final BindingServiceProperties bindingServiceProperties = context.getBean(BindingServiceProperties.class);
@@ -80,16 +80,16 @@ public class SerdesProvidedAsBeansTests {
 			final ConsumerProperties consumerProperties = bindingServiceProperties.getBindingProperties("process-in-0").getConsumer();
 			final KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties = kafkaStreamsExtendedBindingProperties.getExtendedConsumerProperties("input");
 			kafkaStreamsExtendedBindingProperties.getExtendedConsumerProperties("input");
-			final Serde<?> inboundValueSerde = keyValueSerdeResolver.getInboundValueSerde(consumerProperties, kafkaStreamsConsumerProperties, resolvableType.getGeneric(0));
+			final Serde<?> inboundValueSerde = keyValueSerdeResolver.getInboundValueSerde(consumerProperties,kafkaStreamsConsumerProperties,resolvableType.getGeneric(0));
 
-			Assert.isTrue(inboundValueSerde instanceof FooSerde, "Inbound Value Serde is not matched");
+			Assert.isTrue(inboundValueSerde instanceof FooSerde,"Inbound Value Serde is not matched");
 
 			final ProducerProperties producerProperties = bindingServiceProperties.getBindingProperties("process-out-0").getProducer();
 			final KafkaStreamsProducerProperties kafkaStreamsProducerProperties = kafkaStreamsExtendedBindingProperties.getExtendedProducerProperties("output");
 			kafkaStreamsExtendedBindingProperties.getExtendedProducerProperties("output");
-			final Serde<?> outboundValueSerde = keyValueSerdeResolver.getOutboundValueSerde(producerProperties, kafkaStreamsProducerProperties, resolvableType.getGeneric(1));
+			final Serde<?> outboundValueSerde = keyValueSerdeResolver.getOutboundValueSerde(producerProperties,kafkaStreamsProducerProperties,resolvableType.getGeneric(1));
 
-			Assert.isTrue(outboundValueSerde instanceof FooSerde, "Outbound Value Serde is not matched");
+			Assert.isTrue(outboundValueSerde instanceof FooSerde,"Outbound Value Serde is not matched");
 		}
 	}
 

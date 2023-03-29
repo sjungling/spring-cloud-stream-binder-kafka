@@ -81,8 +81,8 @@ import org.springframework.messaging.converter.MessageConverter;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnMissingBean(Binder.class)
-@Import({ KafkaAutoConfiguration.class, KafkaBinderHealthIndicatorConfiguration.class })
-@EnableConfigurationProperties({ KafkaExtendedBindingProperties.class })
+@Import({KafkaAutoConfiguration.class,KafkaBinderHealthIndicatorConfiguration.class})
+@EnableConfigurationProperties({KafkaExtendedBindingProperties.class})
 public class KafkaBinderConfiguration {
 
 	@Bean
@@ -94,12 +94,12 @@ public class KafkaBinderConfiguration {
 	@Bean
 	KafkaTopicProvisioner provisioningProvider(
 			KafkaBinderConfigurationProperties configurationProperties,
-			ObjectProvider<AdminClientConfigCustomizer> adminClientConfigCustomizer, KafkaProperties kafkaProperties) {
+			ObjectProvider<AdminClientConfigCustomizer> adminClientConfigCustomizer,KafkaProperties kafkaProperties) {
 		return new KafkaTopicProvisioner(configurationProperties,
-				kafkaProperties, adminClientConfigCustomizer.getIfUnique());
+				kafkaProperties,adminClientConfigCustomizer.getIfUnique());
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({"rawtypes","unchecked"})
 	@Bean
 	KafkaMessageChannelBinder kafkaMessageChannelBinder(
 			KafkaBinderConfigurationProperties configurationProperties,
@@ -114,13 +114,13 @@ public class KafkaBinderConfiguration {
 			ObjectProvider<ClientFactoryCustomizer> clientFactoryCustomizer,
 			ObjectProvider<ConsumerConfigCustomizer> consumerConfigCustomizer,
 			ObjectProvider<ProducerConfigCustomizer> producerConfigCustomizer,
-			ProducerListener producerListener, KafkaExtendedBindingProperties kafkaExtendedBindingProperties
-			) {
+			ProducerListener producerListener,KafkaExtendedBindingProperties kafkaExtendedBindingProperties
+		) {
 
 		KafkaMessageChannelBinder kafkaMessageChannelBinder = new KafkaMessageChannelBinder(
-				configurationProperties, provisioningProvider,
-				listenerContainerCustomizer, sourceCustomizer, rebalanceListener.getIfUnique(),
-				dlqPartitionFunction.getIfUnique(), dlqDestinationResolver.getIfUnique());
+				configurationProperties,provisioningProvider,
+				listenerContainerCustomizer,sourceCustomizer,rebalanceListener.getIfUnique(),
+				dlqPartitionFunction.getIfUnique(),dlqDestinationResolver.getIfUnique());
 		kafkaMessageChannelBinder.setProducerListener(producerListener);
 		kafkaMessageChannelBinder
 				.setExtendedBindingProperties(kafkaExtendedBindingProperties);
@@ -167,7 +167,7 @@ public class KafkaBinderConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnMissingBean(value = KafkaBinderMetrics.class, name = "outerContext")
+	@ConditionalOnMissingBean(value = KafkaBinderMetrics.class,name = "outerContext")
 	@ConditionalOnClass(name = "io.micrometer.core.instrument.MeterRegistry")
 	protected class KafkaBinderMetricsConfiguration {
 
@@ -180,7 +180,7 @@ public class KafkaBinderConfiguration {
 				MeterRegistry meterRegistry) {
 
 			return new KafkaBinderMetrics(kafkaMessageChannelBinder,
-					configurationProperties, null, meterRegistry);
+					configurationProperties,null,meterRegistry);
 		}
 
 		@ConditionalOnClass(name = "org.springframework.kafka.core.MicrometerConsumerListener")
@@ -229,10 +229,10 @@ public class KafkaBinderConfiguration {
 				KafkaBinderConfigurationProperties configurationProperties,
 				ConfigurableApplicationContext context) {
 
-			MeterRegistry meterRegistry = context.getBean("outerContext", ApplicationContext.class)
+			MeterRegistry meterRegistry = context.getBean("outerContext",ApplicationContext.class)
 					.getBean(MeterRegistry.class);
 			return new KafkaBinderMetrics(kafkaMessageChannelBinder,
-					configurationProperties, null, meterRegistry);
+					configurationProperties,null,meterRegistry);
 		}
 
 		@ConditionalOnClass(name = "org.springframework.kafka.core.MicrometerConsumerListener")
@@ -245,7 +245,7 @@ public class KafkaBinderConfiguration {
 
 				return new ClientFactoryCustomizer() {
 
-					MeterRegistry meterRegistry = context.getBean("outerContext", ApplicationContext.class)
+					MeterRegistry meterRegistry = context.getBean("outerContext",ApplicationContext.class)
 							.getBean(MeterRegistry.class);
 
 					@Override

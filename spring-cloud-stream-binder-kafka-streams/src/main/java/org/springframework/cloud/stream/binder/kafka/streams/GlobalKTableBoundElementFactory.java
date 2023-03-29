@@ -44,8 +44,8 @@ public class GlobalKTableBoundElementFactory
 	private final KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue;
 
 	GlobalKTableBoundElementFactory(BindingServiceProperties bindingServiceProperties,
-									EncodingDecodingBindAdviceHandler encodingDecodingBindAdviceHandler,
-									KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue) {
+			EncodingDecodingBindAdviceHandler encodingDecodingBindAdviceHandler,
+			KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue) {
 		super(GlobalKTable.class);
 		this.bindingServiceProperties = bindingServiceProperties;
 		this.encodingDecodingBindAdviceHandler = encodingDecodingBindAdviceHandler;
@@ -77,7 +77,7 @@ public class GlobalKTableBoundElementFactory
 		proxyFactory.addAdvice(wrapper);
 
 		final GlobalKTable proxy = (GlobalKTable) proxyFactory.getProxy();
-		this.kafkaStreamsBindingInformationCatalogue.addBindingNamePerTarget(proxy, name);
+		this.kafkaStreamsBindingInformationCatalogue.addBindingNamePerTarget(proxy,name);
 		return proxy;
 	}
 
@@ -102,7 +102,7 @@ public class GlobalKTableBoundElementFactory
 		private GlobalKTable<Object, Object> delegate;
 
 		public void wrap(GlobalKTable<Object, Object> delegate) {
-			Assert.notNull(delegate, "delegate cannot be null");
+			Assert.notNull(delegate,"delegate cannot be null");
 			if (this.delegate == null) {
 				this.delegate = delegate;
 			}

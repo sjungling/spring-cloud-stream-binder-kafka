@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.fail;
  */
 public class KafkaTopicProvisionerTests {
 
-	AdminClientConfigCustomizer adminClientConfigCustomizer = adminClientProperties -> adminClientProperties.put("foo", "bar");
+	AdminClientConfigCustomizer adminClientConfigCustomizer = adminClientProperties -> adminClientProperties.put("foo","bar");
 
 	@SuppressWarnings("rawtypes")
 	@Test
@@ -60,15 +60,15 @@ public class KafkaTopicProvisionerTests {
 				ts.getFile().getAbsolutePath());
 		binderConfig.setBrokers("localhost:9092");
 		KafkaTopicProvisioner provisioner = new KafkaTopicProvisioner(binderConfig,
-				bootConfig, adminClientConfigCustomizer);
+				bootConfig,adminClientConfigCustomizer);
 		AdminClient adminClient = provisioner.createAdminClient();
 		assertThat(KafkaTestUtils.getPropertyValue(adminClient,
 				"client.selector.channelBuilder")).isInstanceOf(SslChannelBuilder.class);
 		Map configs = KafkaTestUtils.getPropertyValue(adminClient,
-				"client.selector.channelBuilder.configs", Map.class);
+				"client.selector.channelBuilder.configs",Map.class);
 		assertThat(
 				((List) configs.get(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG)).get(0))
-						.isEqualTo("localhost:1234");
+				.isEqualTo("localhost:1234");
 		assertThat(configs.get("foo")).isEqualTo("bar");
 		adminClient.close();
 	}
@@ -89,15 +89,15 @@ public class KafkaTopicProvisionerTests {
 				ts.getFile().getAbsolutePath());
 		binderConfig.setBrokers("localhost:1234");
 		KafkaTopicProvisioner provisioner = new KafkaTopicProvisioner(binderConfig,
-				bootConfig, adminClientConfigCustomizer);
+				bootConfig,adminClientConfigCustomizer);
 		AdminClient adminClient = provisioner.createAdminClient();
 		assertThat(KafkaTestUtils.getPropertyValue(adminClient,
 				"client.selector.channelBuilder")).isInstanceOf(SslChannelBuilder.class);
 		Map configs = KafkaTestUtils.getPropertyValue(adminClient,
-				"client.selector.channelBuilder.configs", Map.class);
+				"client.selector.channelBuilder.configs",Map.class);
 		assertThat(
 				((List) configs.get(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG)).get(0))
-						.isEqualTo("localhost:1234");
+				.isEqualTo("localhost:1234");
 		adminClient.close();
 	}
 
@@ -109,7 +109,7 @@ public class KafkaTopicProvisionerTests {
 		binderConfig.getConfiguration().put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG,
 				"localhost:1234");
 		try {
-			new KafkaTopicProvisioner(binderConfig, bootConfig, adminClientConfigCustomizer);
+			new KafkaTopicProvisioner(binderConfig,bootConfig,adminClientConfigCustomizer);
 			fail("Expected illegal state");
 		}
 		catch (IllegalStateException e) {

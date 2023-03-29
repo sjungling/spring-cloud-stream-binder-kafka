@@ -100,8 +100,8 @@ public class KafkaStreamsBinderSupportAutoConfiguration {
 	@Bean
 	@ConfigurationProperties(prefix = "spring.cloud.stream.kafka.streams.binder")
 	public KafkaStreamsBinderConfigurationProperties binderConfigurationProperties(
-			KafkaProperties kafkaProperties, ConfigurableEnvironment environment,
-			BindingServiceProperties properties, ConfigurableApplicationContext context) throws Exception {
+			KafkaProperties kafkaProperties,ConfigurableEnvironment environment,
+			BindingServiceProperties properties,ConfigurableApplicationContext context) throws Exception {
 		final Map<String, BinderConfiguration> binderConfigurations = getBinderConfigurations(
 				properties);
 		for (Map.Entry<String, BinderConfiguration> entry : binderConfigurations
@@ -112,18 +112,18 @@ public class KafkaStreamsBinderSupportAutoConfiguration {
 					|| binderType.equals(KTABLE_BINDER_TYPE)
 					|| binderType.equals(GLOBALKTABLE_BINDER_TYPE))) {
 				Map<String, Object> binderProperties = new HashMap<>();
-				this.flatten(null, binderConfiguration.getProperties(), binderProperties);
+				this.flatten(null,binderConfiguration.getProperties(),binderProperties);
 				environment.getPropertySources().addFirst(
-						new MapPropertySource(entry.getKey() + "-kafkaStreamsBinderEnv", binderProperties));
+						new MapPropertySource(entry.getKey() + "-kafkaStreamsBinderEnv",binderProperties));
 
 				Binder binder = new Binder(ConfigurationPropertySources.get(environment),
 						new PropertySourcesPlaceholdersResolver(environment),
-						IntegrationUtils.getConversionService(context.getBeanFactory()), null);
+						IntegrationUtils.getConversionService(context.getBeanFactory()),null);
 				final Constructor<KafkaStreamsBinderConfigurationProperties> kafkaStreamsBinderConfigurationPropertiesConstructor =
-						ReflectionUtils.accessibleConstructor(KafkaStreamsBinderConfigurationProperties.class, KafkaProperties.class);
+						ReflectionUtils.accessibleConstructor(KafkaStreamsBinderConfigurationProperties.class,KafkaProperties.class);
 				final KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties =
-						BeanUtils.instantiateClass(kafkaStreamsBinderConfigurationPropertiesConstructor, kafkaProperties);
-				final BindResult<KafkaStreamsBinderConfigurationProperties> bind = binder.bind("spring.cloud.stream.kafka.streams.binder", Bindable.ofInstance(kafkaStreamsBinderConfigurationProperties));
+						BeanUtils.instantiateClass(kafkaStreamsBinderConfigurationPropertiesConstructor,kafkaProperties);
+				final BindResult<KafkaStreamsBinderConfigurationProperties> bind = binder.bind("spring.cloud.stream.kafka.streams.binder",Bindable.ofInstance(kafkaStreamsBinderConfigurationProperties));
 				context.getBeanFactory().registerSingleton(
 						entry.getKey() + "-KafkaStreamsBinderConfigurationProperties",
 						bind.get());
@@ -153,15 +153,15 @@ public class KafkaStreamsBinderSupportAutoConfiguration {
 
 	// TODO: Lifted from core - good candidate for exposing as a utility method in core.
 	@SuppressWarnings("unchecked")
-	private void flatten(String propertyName, Object value,
+	private void flatten(String propertyName,Object value,
 			Map<String, Object> flattenedProperties) {
 		if (value instanceof Map) {
-			((Map<Object, Object>) value).forEach((k, v) -> flatten(
-					(propertyName != null ? propertyName + "." : "") + k, v,
+			((Map<Object, Object>) value).forEach((k,v) -> flatten(
+					(propertyName != null ? propertyName + "." : "") + k,v,
 					flattenedProperties));
 		}
 		else {
-			flattenedProperties.put(propertyName, value.toString());
+			flattenedProperties.put(propertyName,value.toString());
 		}
 	}
 
@@ -184,7 +184,7 @@ public class KafkaStreamsBinderSupportAutoConfiguration {
 	@Bean("streamConfigGlobalProperties")
 	public Map<String, Object> streamConfigGlobalProperties(
 			@Qualifier("binderConfigurationProperties") KafkaStreamsBinderConfigurationProperties configProperties,
-			KafkaStreamsConfiguration kafkaStreamsConfiguration, ConfigurableEnvironment environment,
+			KafkaStreamsConfiguration kafkaStreamsConfiguration,ConfigurableEnvironment environment,
 			SendToDlqAndContinue sendToDlqAndContinue) {
 
 		Properties properties = kafkaStreamsConfiguration.asProperties();
@@ -259,7 +259,7 @@ public class KafkaStreamsBinderSupportAutoConfiguration {
 			properties.put(
 					StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG,
 					RecoveringDeserializationExceptionHandler.class);
-			properties.put(RecoveringDeserializationExceptionHandler.KSTREAM_DESERIALIZATION_RECOVERER, sendToDlqAndContinue);
+			properties.put(RecoveringDeserializationExceptionHandler.KSTREAM_DESERIALIZATION_RECOVERER,sendToDlqAndContinue);
 		}
 
 		if (!ObjectUtils.isEmpty(configProperties.getConfiguration())) {
@@ -268,24 +268,24 @@ public class KafkaStreamsBinderSupportAutoConfiguration {
 
 		Map<String, Object> mergedConsumerConfig = new HashMap<>(configProperties.mergedConsumerConfiguration());
 		//Adding consumer. prefix if they are missing (in order to differentiate them from other property categories such as stream, producer etc.)
-		addPrefix(properties, mergedConsumerConfig, CONSUMER_PROPERTIES_PREFIX);
+		addPrefix(properties,mergedConsumerConfig,CONSUMER_PROPERTIES_PREFIX);
 
 		Map<String, Object> mergedProducerConfig = new HashMap<>(configProperties.mergedProducerConfiguration());
 		//Adding producer. prefix if they are missing (in order to differentiate them from other property categories such as stream, consumer etc.)
-		addPrefix(properties, mergedProducerConfig, PRODUCER_PROPERTIES_PREFIX);
+		addPrefix(properties,mergedProducerConfig,PRODUCER_PROPERTIES_PREFIX);
 
 		if (!properties.containsKey(StreamsConfig.REPLICATION_FACTOR_CONFIG)) {
 			properties.put(StreamsConfig.REPLICATION_FACTOR_CONFIG,
 					(int) configProperties.getReplicationFactor());
 		}
 		return properties.entrySet().stream().collect(
-				Collectors.toMap((e) -> String.valueOf(e.getKey()), Map.Entry::getValue));
+				Collectors.toMap((e) -> String.valueOf(e.getKey()),Map.Entry::getValue));
 	}
 
-	private void addPrefix(Properties properties, Map<String, Object> mergedConsProdConfig, String prefix) {
+	private void addPrefix(Properties properties,Map<String, Object> mergedConsProdConfig,String prefix) {
 		Map<String, Object> mergedConfigs = new HashMap<>();
 		for (String key : mergedConsProdConfig.keySet()) {
-			mergedConfigs.put(key.startsWith(prefix) ? key : prefix + key, mergedConsProdConfig.get(key));
+			mergedConfigs.put(key.startsWith(prefix) ? key : prefix + key,mergedConsProdConfig.get(key));
 		}
 		if (!ObjectUtils.isEmpty(mergedConfigs)) {
 			properties.putAll(mergedConfigs);
@@ -295,12 +295,12 @@ public class KafkaStreamsBinderSupportAutoConfiguration {
 	@Bean
 	public KafkaStreamsMessageConversionDelegate messageConversionDelegate(
 			@Qualifier(IntegrationContextUtils.ARGUMENT_RESOLVER_MESSAGE_CONVERTER_BEAN_NAME)
-					CompositeMessageConverter compositeMessageConverter,
+			CompositeMessageConverter compositeMessageConverter,
 			SendToDlqAndContinue sendToDlqAndContinue,
 			KafkaStreamsBindingInformationCatalogue KafkaStreamsBindingInformationCatalogue,
 			@Qualifier("binderConfigurationProperties") KafkaStreamsBinderConfigurationProperties binderConfigurationProperties) {
-		return new KafkaStreamsMessageConversionDelegate(compositeMessageConverter, sendToDlqAndContinue,
-				KafkaStreamsBindingInformationCatalogue, binderConfigurationProperties);
+		return new KafkaStreamsMessageConversionDelegate(compositeMessageConverter,sendToDlqAndContinue,
+				KafkaStreamsBindingInformationCatalogue,binderConfigurationProperties);
 	}
 
 	@Bean
@@ -309,21 +309,21 @@ public class KafkaStreamsBinderSupportAutoConfiguration {
 			KafkaStreamsBindingInformationCatalogue KafkaStreamsBindingInformationCatalogue,
 			EncodingDecodingBindAdviceHandler encodingDecodingBindAdviceHandler) {
 		return new KStreamBoundElementFactory(bindingServiceProperties,
-				KafkaStreamsBindingInformationCatalogue, encodingDecodingBindAdviceHandler);
+				KafkaStreamsBindingInformationCatalogue,encodingDecodingBindAdviceHandler);
 	}
 
 	@Bean
 	public KTableBoundElementFactory kTableBoundElementFactory(
-			BindingServiceProperties bindingServiceProperties, EncodingDecodingBindAdviceHandler encodingDecodingBindAdviceHandler,
+			BindingServiceProperties bindingServiceProperties,EncodingDecodingBindAdviceHandler encodingDecodingBindAdviceHandler,
 			KafkaStreamsBindingInformationCatalogue KafkaStreamsBindingInformationCatalogue) {
-		return new KTableBoundElementFactory(bindingServiceProperties, encodingDecodingBindAdviceHandler, KafkaStreamsBindingInformationCatalogue);
+		return new KTableBoundElementFactory(bindingServiceProperties,encodingDecodingBindAdviceHandler,KafkaStreamsBindingInformationCatalogue);
 	}
 
 	@Bean
 	public GlobalKTableBoundElementFactory globalKTableBoundElementFactory(
-			BindingServiceProperties properties, EncodingDecodingBindAdviceHandler encodingDecodingBindAdviceHandler,
+			BindingServiceProperties properties,EncodingDecodingBindAdviceHandler encodingDecodingBindAdviceHandler,
 			KafkaStreamsBindingInformationCatalogue KafkaStreamsBindingInformationCatalogue) {
-		return new GlobalKTableBoundElementFactory(properties, encodingDecodingBindAdviceHandler, KafkaStreamsBindingInformationCatalogue);
+		return new GlobalKTableBoundElementFactory(properties,encodingDecodingBindAdviceHandler,KafkaStreamsBindingInformationCatalogue);
 	}
 
 	@Bean
@@ -343,14 +343,14 @@ public class KafkaStreamsBinderSupportAutoConfiguration {
 			@Qualifier("streamConfigGlobalProperties") Object streamConfigGlobalProperties,
 			@Qualifier("binderConfigurationProperties")KafkaStreamsBinderConfigurationProperties properties) {
 		return new KeyValueSerdeResolver(
-				(Map<String, Object>) streamConfigGlobalProperties, properties);
+				(Map<String, Object>) streamConfigGlobalProperties,properties);
 	}
 
 	@Bean
 	public InteractiveQueryService interactiveQueryServices(
 			KafkaStreamsRegistry kafkaStreamsRegistry,
 			@Qualifier("binderConfigurationProperties")KafkaStreamsBinderConfigurationProperties properties) {
-		return new InteractiveQueryService(kafkaStreamsRegistry, properties);
+		return new InteractiveQueryService(kafkaStreamsRegistry,properties);
 	}
 
 	@Bean
@@ -363,25 +363,25 @@ public class KafkaStreamsBinderSupportAutoConfiguration {
 			KafkaStreamsBindingInformationCatalogue catalogue,
 			KafkaStreamsRegistry kafkaStreamsRegistry,
 			@Nullable KafkaStreamsBinderMetrics kafkaStreamsBinderMetrics,
-			@Nullable KafkaStreamsMicrometerListener listener, KafkaProperties kafkaProperties) {
-		return new StreamsBuilderFactoryManager(catalogue, kafkaStreamsRegistry, kafkaStreamsBinderMetrics, listener, kafkaProperties);
+			@Nullable KafkaStreamsMicrometerListener listener,KafkaProperties kafkaProperties) {
+		return new StreamsBuilderFactoryManager(catalogue,kafkaStreamsRegistry,kafkaStreamsBinderMetrics,listener,kafkaProperties);
 	}
 
 	@Bean
 	@Conditional(FunctionDetectorCondition.class)
 	public KafkaStreamsFunctionProcessor kafkaStreamsFunctionProcessor(BindingServiceProperties bindingServiceProperties,
-																	KafkaStreamsExtendedBindingProperties kafkaStreamsExtendedBindingProperties,
-																	KeyValueSerdeResolver keyValueSerdeResolver,
-																	KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue,
-																	KafkaStreamsMessageConversionDelegate kafkaStreamsMessageConversionDelegate,
-																	ObjectProvider<CleanupConfig> cleanupConfig,
-																	StreamFunctionProperties streamFunctionProperties,
-																	@Qualifier("binderConfigurationProperties") KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties,
-																	ObjectProvider<StreamsBuilderFactoryBeanConfigurer> customizerProvider, ConfigurableEnvironment environment) {
-		return new KafkaStreamsFunctionProcessor(bindingServiceProperties, kafkaStreamsExtendedBindingProperties,
-				keyValueSerdeResolver, kafkaStreamsBindingInformationCatalogue, kafkaStreamsMessageConversionDelegate,
-				cleanupConfig.getIfUnique(), streamFunctionProperties, kafkaStreamsBinderConfigurationProperties,
-				customizerProvider.getIfUnique(), environment);
+			KafkaStreamsExtendedBindingProperties kafkaStreamsExtendedBindingProperties,
+			KeyValueSerdeResolver keyValueSerdeResolver,
+			KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue,
+			KafkaStreamsMessageConversionDelegate kafkaStreamsMessageConversionDelegate,
+			ObjectProvider<CleanupConfig> cleanupConfig,
+			StreamFunctionProperties streamFunctionProperties,
+			@Qualifier("binderConfigurationProperties") KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties,
+			ObjectProvider<StreamsBuilderFactoryBeanConfigurer> customizerProvider,ConfigurableEnvironment environment) {
+		return new KafkaStreamsFunctionProcessor(bindingServiceProperties,kafkaStreamsExtendedBindingProperties,
+				keyValueSerdeResolver,kafkaStreamsBindingInformationCatalogue,kafkaStreamsMessageConversionDelegate,
+				cleanupConfig.getIfUnique(),streamFunctionProperties,kafkaStreamsBinderConfigurationProperties,
+				customizerProvider.getIfUnique(),environment);
 	}
 
 	@Bean
@@ -390,7 +390,7 @@ public class KafkaStreamsBinderSupportAutoConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnMissingBean(value = KafkaStreamsBinderMetrics.class, name = "outerContext")
+	@ConditionalOnMissingBean(value = KafkaStreamsBinderMetrics.class,name = "outerContext")
 	@ConditionalOnClass(name = "io.micrometer.core.instrument.MeterRegistry")
 	protected class KafkaStreamsBinderMetricsConfiguration {
 
@@ -425,7 +425,7 @@ public class KafkaStreamsBinderSupportAutoConfiguration {
 		@ConditionalOnMissingClass("org.springframework.kafka.core.MicrometerConsumerListener")
 		public KafkaStreamsBinderMetrics kafkaStreamsBinderMetrics(ConfigurableApplicationContext context) {
 
-			MeterRegistry meterRegistry = context.getBean("outerContext", ApplicationContext.class)
+			MeterRegistry meterRegistry = context.getBean("outerContext",ApplicationContext.class)
 					.getBean(MeterRegistry.class);
 			return new KafkaStreamsBinderMetrics(meterRegistry);
 		}

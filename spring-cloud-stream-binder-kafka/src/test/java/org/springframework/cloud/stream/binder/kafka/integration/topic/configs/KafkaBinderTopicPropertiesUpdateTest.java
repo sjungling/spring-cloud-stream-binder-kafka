@@ -42,14 +42,14 @@ public class KafkaBinderTopicPropertiesUpdateTest extends BaseKafkaBinderTopicPr
 	@Test
 	public void testKafkaBinderUpdateTopicConfiguration() throws Exception {
 		Map<String, Object> adminClientConfig = new HashMap<>();
-		adminClientConfig.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaEmbedded.getEmbeddedKafka().getBrokersAsString());
+		adminClientConfig.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,kafkaEmbedded.getEmbeddedKafka().getBrokersAsString());
 		AdminClient adminClient = AdminClient.create(adminClientConfig);
-		ConfigResource standardInConfigResource = new ConfigResource(ConfigResource.Type.TOPIC, "standard-in");
-		ConfigResource standardOutConfigResource = new ConfigResource(ConfigResource.Type.TOPIC, "standard-out");
+		ConfigResource standardInConfigResource = new ConfigResource(ConfigResource.Type.TOPIC,"standard-in");
+		ConfigResource standardOutConfigResource = new ConfigResource(ConfigResource.Type.TOPIC,"standard-out");
 		DescribeConfigsResult describeConfigsResult = adminClient.describeConfigs(Arrays
-				.asList(standardInConfigResource, standardOutConfigResource));
+				.asList(standardInConfigResource,standardOutConfigResource));
 		KafkaFuture<Map<ConfigResource, Config>> kafkaFuture = describeConfigsResult.all();
-		Map<ConfigResource, Config> configResourceConfigMap = kafkaFuture.get(3, TimeUnit.SECONDS);
+		Map<ConfigResource, Config> configResourceConfigMap = kafkaFuture.get(3,TimeUnit.SECONDS);
 		Config standardInTopicConfig = configResourceConfigMap.get(standardInConfigResource);
 		assertThat(standardInTopicConfig.get("retention.ms").value()).isEqualTo("9001");
 

@@ -55,7 +55,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 public class KafkaStreamsRetryTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true);
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true);
 
 	private static final EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule.getEmbeddedKafka();
 
@@ -96,8 +96,8 @@ public class KafkaStreamsRetryTests {
 				"--spring.cloud.stream.kafka.streams.default.consumer.application-id=testRetryTemplateOnTableTypes",
 				"--spring.cloud.stream.kafka.streams.binder.brokers=" + embeddedKafka.getBrokersAsString())) {
 
-			assertThat(context.getBean("tableTypes-in-0-RetryTemplate", RetryTemplate.class)).isNotNull();
-			assertThat(context.getBean("tableTypes-in-1-RetryTemplate", RetryTemplate.class)).isNotNull();
+			assertThat(context.getBean("tableTypes-in-0-RetryTemplate",RetryTemplate.class)).isNotNull();
+			assertThat(context.getBean("tableTypes-in-1-RetryTemplate",RetryTemplate.class)).isNotNull();
 		}
 	}
 
@@ -120,7 +120,7 @@ public class KafkaStreamsRetryTests {
 						"=org.apache.kafka.common.serialization.Serdes$StringSerde",
 				"--spring.cloud.stream.kafka.streams.binder.brokers=" + embeddedKafka.getBrokersAsString())) {
 			sendAndValidate(LATCH2);
-			assertThatThrownBy(() -> context.getBean("process-in-0-RetryTemplate", RetryTemplate.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
+			assertThatThrownBy(() -> context.getBean("process-in-0-RetryTemplate",RetryTemplate.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
 		}
 	}
 
@@ -128,10 +128,10 @@ public class KafkaStreamsRetryTests {
 		Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 		DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 		try {
-			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 			template.setDefaultTopic("words");
 			template.sendDefault("foobar");
-			Assert.isTrue(latch.await(10, TimeUnit.SECONDS), "Foo");
+			Assert.isTrue(latch.await(10,TimeUnit.SECONDS),"Foo");
 		}
 		finally {
 			pf.destroy();
@@ -151,7 +151,7 @@ public class KafkaStreamsRetryTests {
 						}
 
 						@Override
-						public void process(Object o, String s) {
+						public void process(Object o,String s) {
 							retryTemplate.execute(context -> {
 								LATCH1.countDown();
 								throw new RuntimeException();
@@ -166,7 +166,7 @@ public class KafkaStreamsRetryTests {
 
 		@Bean
 		public BiConsumer<KTable<?, ?>, GlobalKTable<?, ?>> tableTypes() {
-			return (t, g) -> {
+			return (t,g) -> {
 			};
 		}
 	}
@@ -199,7 +199,7 @@ public class KafkaStreamsRetryTests {
 						}
 
 						@Override
-						public void process(Object o, String s) {
+						public void process(Object o,String s) {
 							fooRetryTemplate().execute(context -> {
 								LATCH2.countDown();
 								throw new RuntimeException();

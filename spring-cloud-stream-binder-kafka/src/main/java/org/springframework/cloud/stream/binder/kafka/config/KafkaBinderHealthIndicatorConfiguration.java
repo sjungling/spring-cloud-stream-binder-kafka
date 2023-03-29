@@ -69,7 +69,7 @@ public class KafkaBinderHealthIndicatorConfiguration {
 		}
 		ConsumerFactory<?, ?> consumerFactory = new DefaultKafkaConsumerFactory<>(props);
 		KafkaBinderHealthIndicator indicator = new KafkaBinderHealthIndicator(
-				kafkaMessageChannelBinder, consumerFactory);
+				kafkaMessageChannelBinder,consumerFactory);
 		indicator.setTimeout(configurationProperties.getHealthTimeout());
 		indicator.setConsiderDownWhenAnyPartitionHasNoLeader(configurationProperties.isConsiderDownWhenAnyPartitionHasNoLeader());
 		return indicator;

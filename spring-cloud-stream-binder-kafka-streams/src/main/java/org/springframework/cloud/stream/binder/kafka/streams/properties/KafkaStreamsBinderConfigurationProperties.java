@@ -108,16 +108,16 @@ public class KafkaStreamsBinderConfigurationProperties
 	@Deprecated
 	public void setSerdeError(
 			KafkaStreamsBinderConfigurationProperties.SerdeError serdeError) {
-			this.serdeError = serdeError;
-			if (serdeError == SerdeError.logAndContinue) {
-				this.deserializationExceptionHandler = DeserializationExceptionHandler.logAndContinue;
-			}
-			else if (serdeError == SerdeError.logAndFail) {
-				this.deserializationExceptionHandler = DeserializationExceptionHandler.logAndFail;
-			}
-			else if (serdeError == SerdeError.sendToDlq) {
-				this.deserializationExceptionHandler = DeserializationExceptionHandler.sendToDlq;
-			}
+		this.serdeError = serdeError;
+		if (serdeError == SerdeError.logAndContinue) {
+			this.deserializationExceptionHandler = DeserializationExceptionHandler.logAndContinue;
+		}
+		else if (serdeError == SerdeError.logAndFail) {
+			this.deserializationExceptionHandler = DeserializationExceptionHandler.logAndFail;
+		}
+		else if (serdeError == SerdeError.sendToDlq) {
+			this.deserializationExceptionHandler = DeserializationExceptionHandler.sendToDlq;
+		}
 	}
 
 	public DeserializationExceptionHandler getDeserializationExceptionHandler() {

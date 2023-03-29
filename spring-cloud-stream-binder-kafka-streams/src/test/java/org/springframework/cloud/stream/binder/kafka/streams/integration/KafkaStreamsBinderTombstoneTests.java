@@ -65,7 +65,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KafkaStreamsBinderTombstoneTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
 			"counts-1");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule
@@ -75,13 +75,13 @@ public class KafkaStreamsBinderTombstoneTests {
 
 	@BeforeClass
 	public static void setUp() {
-		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group", "false",
+		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group","false",
 				embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
 		DefaultKafkaConsumerFactory<String, String> cf = new DefaultKafkaConsumerFactory<>(
 				consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromEmbeddedTopics(consumer, "counts-1");
+		embeddedKafka.consumeFromEmbeddedTopics(consumer,"counts-1");
 	}
 
 	@AfterClass
@@ -110,10 +110,10 @@ public class KafkaStreamsBinderTombstoneTests {
 				"--spring.cloud.stream.bindings.process-in-0.consumer.concurrency=2",
 				"--spring.cloud.stream.kafka.streams.binder.brokers="
 						+ embeddedKafka.getBrokersAsString())) {
-			receiveAndValidate("words-1", "counts-1");
+			receiveAndValidate("words-1","counts-1");
 			// Assertions on StreamBuilderFactoryBean
 			StreamsBuilderFactoryBean streamsBuilderFactoryBean = context
-					.getBean("&stream-builder-process", StreamsBuilderFactoryBean.class);
+					.getBean("&stream-builder-process",StreamsBuilderFactoryBean.class);
 			KafkaStreams kafkaStreams = streamsBuilderFactoryBean.getKafkaStreams();
 			assertThat(kafkaStreams).isNotNull();
 			// Ensure that concurrency settings are mapped to number of stream task
@@ -126,18 +126,18 @@ public class KafkaStreamsBinderTombstoneTests {
 			sendTombStoneRecordsAndVerifyGracefulHandling();
 
 			CleanupConfig cleanup = TestUtils.getPropertyValue(streamsBuilderFactoryBean,
-					"cleanupConfig", CleanupConfig.class);
+					"cleanupConfig",CleanupConfig.class);
 			assertThat(cleanup.cleanupOnStart()).isTrue();
 			assertThat(cleanup.cleanupOnStop()).isFalse();
 		}
 	}
 
-	private void receiveAndValidate(String in, String out) {
+	private void receiveAndValidate(String in,String out) {
 		Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 		DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(
 				senderProps);
 		try {
-			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 			template.setDefaultTopic(in);
 			template.sendDefault("foobar");
 			ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer,
@@ -154,7 +154,7 @@ public class KafkaStreamsBinderTombstoneTests {
 		DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(
 				senderProps);
 		try {
-			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 			template.setDefaultTopic("words-1");
 			template.sendDefault(null);
 			ConsumerRecords<String, String> received = consumer
@@ -177,18 +177,18 @@ public class KafkaStreamsBinderTombstoneTests {
 
 			return input -> input
 					.flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
-					.map((key, value) -> new KeyValue<>(value, value))
-					.groupByKey(Grouped.with(Serdes.String(), Serdes.String()))
+					.map((key,value) -> new KeyValue<>(value,value))
+					.groupByKey(Grouped.with(Serdes.String(),Serdes.String()))
 					.windowedBy(TimeWindows.of(Duration.ofMillis(5000)))
 					.count(Materialized.as("foo-WordCounts"))
 					.toStream()
-					.map((key, value) -> new KeyValue<>(null, new WordCount(key.key(), value,
-							new Date(key.window().start()), new Date(key.window().end()))));
+					.map((key,value) -> new KeyValue<>(null,new WordCount(key.key(),value,
+							new Date(key.window().start()),new Date(key.window().end()))));
 		}
 
 		@Bean
 		public CleanupConfig cleanupConfig() {
-			return new CleanupConfig(true, false);
+			return new CleanupConfig(true,false);
 		}
 
 	}
@@ -203,7 +203,7 @@ public class KafkaStreamsBinderTombstoneTests {
 
 		private Date end;
 
-		WordCount(String word, long count, Date start, Date end) {
+		WordCount(String word,long count,Date start,Date end) {
 			this.word = word;
 			this.count = count;
 			this.start = start;

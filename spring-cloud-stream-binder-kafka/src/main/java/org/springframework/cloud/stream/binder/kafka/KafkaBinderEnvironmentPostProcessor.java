@@ -65,7 +65,7 @@ public class KafkaBinderEnvironmentPostProcessor implements EnvironmentPostProce
 			kafkaBinderDefaultProperties.put("logging.level.kafka.server.KafkaConfig",
 					"ERROR");
 			kafkaBinderDefaultProperties
-					.put("logging.level.kafka.admin.AdminClient.AdminConfig", "ERROR");
+					.put("logging.level.kafka.admin.AdminClient.AdminConfig","ERROR");
 			kafkaBinderDefaultProperties.put(SPRING_KAFKA_PRODUCER_KEY_SERIALIZER,
 					ByteArraySerializer.class.getName());
 			kafkaBinderDefaultProperties.put(SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER,
@@ -75,7 +75,7 @@ public class KafkaBinderEnvironmentPostProcessor implements EnvironmentPostProce
 			kafkaBinderDefaultProperties.put(SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER,
 					ByteArrayDeserializer.class.getName());
 			environment.getPropertySources().addLast(new MapPropertySource(
-					KAFKA_BINDER_DEFAULT_PROPERTIES, kafkaBinderDefaultProperties));
+					KAFKA_BINDER_DEFAULT_PROPERTIES,kafkaBinderDefaultProperties));
 		}
 	}
 

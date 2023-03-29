@@ -49,18 +49,18 @@ public class KafkaNullConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	protected boolean canConvertFrom(Message<?> message, Class<?> targetClass) {
+	protected boolean canConvertFrom(Message<?> message,Class<?> targetClass) {
 		return message.getPayload() instanceof KafkaNull;
 	}
 
 	@Override
-	protected Object convertFromInternal(Message<?> message, Class<?> targetClass,
+	protected Object convertFromInternal(Message<?> message,Class<?> targetClass,
 			Object conversionHint) {
 		return message.getPayload();
 	}
 
 	@Override
-	protected Object convertToInternal(Object payload, MessageHeaders headers,
+	protected Object convertToInternal(Object payload,MessageHeaders headers,
 			Object conversionHint) {
 		return payload;
 	}

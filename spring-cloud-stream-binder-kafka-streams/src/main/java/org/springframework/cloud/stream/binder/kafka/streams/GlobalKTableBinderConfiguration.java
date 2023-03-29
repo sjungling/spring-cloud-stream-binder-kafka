@@ -40,7 +40,7 @@ import org.springframework.context.annotation.Import;
  * @since 2.1.0
  */
 @Configuration
-@Import({ KafkaAutoConfiguration.class,
+@Import({KafkaAutoConfiguration.class,
 		MultiBinderPropertiesConfiguration.class,
 		KafkaStreamsBinderHealthIndicatorConfiguration.class,
 		KafkaStreamsJaasConfiguration.class})
@@ -49,8 +49,8 @@ public class GlobalKTableBinderConfiguration {
 	@Bean
 	public KafkaTopicProvisioner provisioningProvider(
 			KafkaStreamsBinderConfigurationProperties binderConfigurationProperties,
-			KafkaProperties kafkaProperties, ObjectProvider<AdminClientConfigCustomizer> adminClientConfigCustomizer) {
-		return new KafkaTopicProvisioner(binderConfigurationProperties, kafkaProperties, adminClientConfigCustomizer.getIfUnique());
+			KafkaProperties kafkaProperties,ObjectProvider<AdminClientConfigCustomizer> adminClientConfigCustomizer) {
+		return new KafkaTopicProvisioner(binderConfigurationProperties,kafkaProperties,adminClientConfigCustomizer.getIfUnique());
 	}
 
 	@Bean
@@ -63,7 +63,7 @@ public class GlobalKTableBinderConfiguration {
 			KafkaStreamsRegistry kafkaStreamsRegistry) {
 
 		GlobalKTableBinder globalKTableBinder = new GlobalKTableBinder(binderConfigurationProperties,
-				kafkaTopicProvisioner, kafkaStreamsBindingInformationCatalogue, kafkaStreamsRegistry);
+				kafkaTopicProvisioner,kafkaStreamsBindingInformationCatalogue,kafkaStreamsRegistry);
 		globalKTableBinder.setKafkaStreamsExtendedBindingProperties(
 				kafkaStreamsExtendedBindingProperties);
 		return globalKTableBinder;

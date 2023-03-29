@@ -79,7 +79,7 @@ public class KafkaStreamsBindableProxyFactory extends AbstractBindableProxyFacto
 
 	private BeanFactory beanFactory;
 
-	public KafkaStreamsBindableProxyFactory(ResolvableType[] types, String functionName, Method method) {
+	public KafkaStreamsBindableProxyFactory(ResolvableType[] types,String functionName,Method method) {
 		super(types[0].getType().getClass());
 		this.types = types;
 		this.functionName = functionName;
@@ -100,15 +100,15 @@ public class KafkaStreamsBindableProxyFactory extends AbstractBindableProxyFacto
 		List<String> inputBindings = buildInputBindings();
 		Iterator<String> iterator = inputBindings.iterator();
 		String next = iterator.next();
-		bindInput(argument, next);
+		bindInput(argument,next);
 
 		// Check if its a component style bean.
 		if (method != null) {
 			final Object bean = beanFactory.getBean(functionName);
 			if (BiFunction.class.isAssignableFrom(bean.getClass()) || BiConsumer.class.isAssignableFrom(bean.getClass())) {
-				argument = ResolvableType.forMethodParameter(method, 1);
+				argument = ResolvableType.forMethodParameter(method,1);
 				next = iterator.next();
-				bindInput(argument, next);
+				bindInput(argument,next);
 			}
 		}
 		// Normal functional bean
@@ -117,7 +117,7 @@ public class KafkaStreamsBindableProxyFactory extends AbstractBindableProxyFacto
 						this.types[0].getRawClass().isAssignableFrom(BiConsumer.class))) {
 			argument = this.types[0].getGeneric(resolvableTypeDepthCounter++);
 			next = iterator.next();
-			bindInput(argument, next);
+			bindInput(argument,next);
 		}
 		ResolvableType outboundArgument;
 		if (method != null) {
@@ -131,7 +131,7 @@ public class KafkaStreamsBindableProxyFactory extends AbstractBindableProxyFacto
 			//The function is a curried function. We should introspect the partial function chain hierarchy.
 			argument = outboundArgument.getGeneric(0);
 			String next1 = iterator.next();
-			bindInput(argument, next1);
+			bindInput(argument,next1);
 			outboundArgument = outboundArgument.getGeneric(1);
 		}
 
@@ -160,21 +160,21 @@ public class KafkaStreamsBindableProxyFactory extends AbstractBindableProxyFacto
 				}
 			}
 			else {
-				outputBinding = String.format("%s-%s-0", this.functionName, FunctionConstants.DEFAULT_OUTPUT_SUFFIX);
+				outputBinding = String.format("%s-%s-0",this.functionName,FunctionConstants.DEFAULT_OUTPUT_SUFFIX);
 			}
-			Assert.isTrue(outputBinding != null, "output binding is not inferred.");
+			Assert.isTrue(outputBinding != null,"output binding is not inferred.");
 			// We will only allow KStream targets on the outbound. If the user provides a KTable,
 			// we still use the KStreamBinder to send it through the outbound.
 			// In that case before sending, we do a cast from KTable to KStream.
 			// See KafkaStreamsFunctionsProcessor#setupFunctionInvokerForKafkaStreams for details.
 			KafkaStreamsBindableProxyFactory.this.outputHolders.put(outputBinding,
 					new BoundTargetHolder(getBindingTargetFactory(KStream.class)
-							.createOutput(outputBinding), true));
+							.createOutput(outputBinding),true));
 			String outputBinding1 = outputBinding;
 			RootBeanDefinition rootBeanDefinition1 = new RootBeanDefinition();
 			rootBeanDefinition1.setInstanceSupplier(() -> outputHolders.get(outputBinding1).getBoundTarget());
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-			registry.registerBeanDefinition(outputBinding1, rootBeanDefinition1);
+			registry.registerBeanDefinition(outputBinding1,rootBeanDefinition1);
 		}
 	}
 
@@ -222,7 +222,7 @@ public class KafkaStreamsBindableProxyFactory extends AbstractBindableProxyFacto
 
 		int i = 0;
 		while (i < numberOfInputs) {
-			inputs.add(String.format("%s-%s-%d", this.functionName, FunctionConstants.DEFAULT_INPUT_SUFFIX, i++));
+			inputs.add(String.format("%s-%s-%d",this.functionName,FunctionConstants.DEFAULT_INPUT_SUFFIX,i++));
 		}
 		return inputs;
 	}
@@ -238,29 +238,29 @@ public class KafkaStreamsBindableProxyFactory extends AbstractBindableProxyFacto
 		return numberOfInputs;
 	}
 
-	private void bindInput(ResolvableType arg0, String inputName) {
+	private void bindInput(ResolvableType arg0,String inputName) {
 		if (arg0.getRawClass() != null) {
 			KafkaStreamsBindableProxyFactory.this.inputHolders.put(inputName,
 					new BoundTargetHolder(getBindingTargetFactory(arg0.getRawClass())
-							.createInput(inputName), true));
+							.createInput(inputName),true));
 		}
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 		RootBeanDefinition rootBeanDefinition = new RootBeanDefinition();
 		rootBeanDefinition.setInstanceSupplier(() -> inputHolders.get(inputName).getBoundTarget());
-		registry.registerBeanDefinition(inputName, rootBeanDefinition);
+		registry.registerBeanDefinition(inputName,rootBeanDefinition);
 	}
 
 	@Override
 	public Set<String> getInputs() {
 		Set<String> ins = new LinkedHashSet<>();
-		this.inputHolders.forEach((s, BoundTargetHolder) -> ins.add(s));
+		this.inputHolders.forEach((s,BoundTargetHolder) -> ins.add(s));
 		return ins;
 	}
 
 	@Override
 	public Set<String> getOutputs() {
 		Set<String> outs = new LinkedHashSet<>();
-		this.outputHolders.forEach((s, BoundTargetHolder) -> outs.add(s));
+		this.outputHolders.forEach((s,BoundTargetHolder) -> outs.add(s));
 		return outs;
 	}
 
@@ -269,10 +269,10 @@ public class KafkaStreamsBindableProxyFactory extends AbstractBindableProxyFacto
 		this.beanFactory = beanFactory;
 	}
 
-	public void addOutputBinding(String output, Class<?> clazz) {
+	public void addOutputBinding(String output,Class<?> clazz) {
 		KafkaStreamsBindableProxyFactory.this.outputHolders.put(output,
 				new BoundTargetHolder(getBindingTargetFactory(clazz)
-						.createOutput(output), true));
+						.createOutput(output),true));
 	}
 
 	public String getFunctionName() {

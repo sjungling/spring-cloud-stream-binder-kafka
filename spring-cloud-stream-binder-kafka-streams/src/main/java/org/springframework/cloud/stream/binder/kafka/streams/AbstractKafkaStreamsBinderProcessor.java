@@ -108,7 +108,7 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 	public AbstractKafkaStreamsBinderProcessor(BindingServiceProperties bindingServiceProperties,
 			KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue,
 			KafkaStreamsExtendedBindingProperties kafkaStreamsExtendedBindingProperties,
-			KeyValueSerdeResolver keyValueSerdeResolver, CleanupConfig cleanupConfig) {
+			KeyValueSerdeResolver keyValueSerdeResolver,CleanupConfig cleanupConfig) {
 		this.bindingServiceProperties = bindingServiceProperties;
 		this.kafkaStreamsBindingInformationCatalogue = kafkaStreamsBindingInformationCatalogue;
 		this.kafkaStreamsExtendedBindingProperties = kafkaStreamsExtendedBindingProperties;
@@ -122,7 +122,7 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 		this.applicationContext = (ConfigurableApplicationContext) applicationContext;
 	}
 
-	protected Topology.AutoOffsetReset getAutoOffsetReset(String inboundName, KafkaStreamsConsumerProperties extendedConsumerProperties) {
+	protected Topology.AutoOffsetReset getAutoOffsetReset(String inboundName,KafkaStreamsConsumerProperties extendedConsumerProperties) {
 		final KafkaConsumerProperties.StartOffset startOffset = extendedConsumerProperties
 				.getStartOffset();
 		Topology.AutoOffsetReset autoOffsetReset = null;
@@ -147,23 +147,23 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void handleKTableGlobalKTableInputs(Object[] arguments, int index, String input, Class<?> parameterType, Object targetBean,
-			StreamsBuilderFactoryBean streamsBuilderFactoryBean, StreamsBuilder streamsBuilder,
+	protected void handleKTableGlobalKTableInputs(Object[] arguments,int index,String input,Class<?> parameterType,Object targetBean,
+			StreamsBuilderFactoryBean streamsBuilderFactoryBean,StreamsBuilder streamsBuilder,
 			KafkaStreamsConsumerProperties extendedConsumerProperties,
-			Serde<?> keySerde, Serde<?> valueSerde, Topology.AutoOffsetReset autoOffsetReset, boolean firstBuild) {
+			Serde<?> keySerde,Serde<?> valueSerde,Topology.AutoOffsetReset autoOffsetReset,boolean firstBuild) {
 		if (firstBuild) {
 			addStateStoreBeans(streamsBuilder);
 		}
 		if (parameterType.isAssignableFrom(KTable.class)) {
 			String materializedAs = extendedConsumerProperties.getMaterializedAs();
 			String bindingDestination = this.bindingServiceProperties.getBindingDestination(input);
-			KTable<?, ?> table = getKTable(extendedConsumerProperties, streamsBuilder, keySerde, valueSerde, materializedAs,
-					bindingDestination, autoOffsetReset);
+			KTable<?, ?> table = getKTable(extendedConsumerProperties,streamsBuilder,keySerde,valueSerde,materializedAs,
+					bindingDestination,autoOffsetReset);
 			KTableBoundElementFactory.KTableWrapper kTableWrapper =
 					(KTableBoundElementFactory.KTableWrapper) targetBean;
 			//wrap the proxy created during the initial target type binding with real object (KTable)
 			kTableWrapper.wrap((KTable<Object, Object>) table);
-			this.kafkaStreamsBindingInformationCatalogue.addStreamBuilderFactoryPerBinding(input, streamsBuilderFactoryBean);
+			this.kafkaStreamsBindingInformationCatalogue.addStreamBuilderFactoryPerBinding(input,streamsBuilderFactoryBean);
 			this.kafkaStreamsBindingInformationCatalogue.addConsumerPropertiesPerSbfb(streamsBuilderFactoryBean,
 					bindingServiceProperties.getConsumerProperties(input));
 			arguments[index] = table;
@@ -171,30 +171,30 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 		else if (parameterType.isAssignableFrom(GlobalKTable.class)) {
 			String materializedAs = extendedConsumerProperties.getMaterializedAs();
 			String bindingDestination = this.bindingServiceProperties.getBindingDestination(input);
-			GlobalKTable<?, ?> table = getGlobalKTable(extendedConsumerProperties, streamsBuilder, keySerde, valueSerde, materializedAs,
-					bindingDestination, autoOffsetReset);
+			GlobalKTable<?, ?> table = getGlobalKTable(extendedConsumerProperties,streamsBuilder,keySerde,valueSerde,materializedAs,
+					bindingDestination,autoOffsetReset);
 			GlobalKTableBoundElementFactory.GlobalKTableWrapper globalKTableWrapper =
 					(GlobalKTableBoundElementFactory.GlobalKTableWrapper) targetBean;
 			//wrap the proxy created during the initial target type binding with real object (KTable)
 			globalKTableWrapper.wrap((GlobalKTable<Object, Object>) table);
-			this.kafkaStreamsBindingInformationCatalogue.addStreamBuilderFactoryPerBinding(input, streamsBuilderFactoryBean);
+			this.kafkaStreamsBindingInformationCatalogue.addStreamBuilderFactoryPerBinding(input,streamsBuilderFactoryBean);
 			this.kafkaStreamsBindingInformationCatalogue.addConsumerPropertiesPerSbfb(streamsBuilderFactoryBean,
 					bindingServiceProperties.getConsumerProperties(input));
 			arguments[index] = table;
 		}
 	}
 
-	@SuppressWarnings({ "unchecked" })
+	@SuppressWarnings({"unchecked"})
 	protected StreamsBuilderFactoryBean buildStreamsBuilderAndRetrieveConfig(String beanNamePostPrefix,
-																			ApplicationContext applicationContext, String inboundName,
-																			KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties,
-																			StreamsBuilderFactoryBeanConfigurer customizer,
-																			ConfigurableEnvironment environment, BindingProperties bindingProperties) {
+			ApplicationContext applicationContext,String inboundName,
+			KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties,
+			StreamsBuilderFactoryBeanConfigurer customizer,
+			ConfigurableEnvironment environment,BindingProperties bindingProperties) {
 		ConfigurableListableBeanFactory beanFactory = this.applicationContext
 				.getBeanFactory();
 
 		Map<String, Object> streamConfigGlobalProperties = applicationContext
-				.getBean("streamConfigGlobalProperties", Map.class);
+				.getBean("streamConfigGlobalProperties",Map.class);
 
 		// Use a copy because the global configuration will be shared by multiple processors.
 		Map<String, Object> streamConfiguration = new HashMap<>(streamConfigGlobalProperties);
@@ -211,7 +211,7 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 
 					String applicationId = functionConfig.getApplicationId();
 					if (!StringUtils.isEmpty(applicationId)) {
-						streamConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, applicationId);
+						streamConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG,applicationId);
 					}
 				}
 			}
@@ -221,13 +221,13 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 
 		if (!StringUtils.isEmpty(bindingProperties.getBinder())) {
 			final KafkaStreamsBinderConfigurationProperties multiBinderKafkaStreamsBinderConfigurationProperties =
-					applicationContext.getBean(bindingProperties.getBinder() + "-KafkaStreamsBinderConfigurationProperties", KafkaStreamsBinderConfigurationProperties.class);
+					applicationContext.getBean(bindingProperties.getBinder() + "-KafkaStreamsBinderConfigurationProperties",KafkaStreamsBinderConfigurationProperties.class);
 			String connectionString = multiBinderKafkaStreamsBinderConfigurationProperties.getKafkaConnectionString();
 			if (StringUtils.isEmpty(connectionString)) {
 				connectionString = (String) propertySources.get(bindingProperties.getBinder() + "-kafkaStreamsBinderEnv").getProperty("spring.cloud.stream.kafka.binder.brokers");
 			}
 
-			streamConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, connectionString);
+			streamConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,connectionString);
 
 			String binderProvidedApplicationId = multiBinderKafkaStreamsBinderConfigurationProperties.getApplicationId();
 			if (StringUtils.hasText(binderProvidedApplicationId)) {
@@ -253,7 +253,7 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 						StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG,
 						RecoveringDeserializationExceptionHandler.class);
 				SendToDlqAndContinue sendToDlqAndContinue = applicationContext.getBean(SendToDlqAndContinue.class);
-				streamConfiguration.put(RecoveringDeserializationExceptionHandler.KSTREAM_DESERIALIZATION_RECOVERER, sendToDlqAndContinue);
+				streamConfiguration.put(RecoveringDeserializationExceptionHandler.KSTREAM_DESERIALIZATION_RECOVERER,sendToDlqAndContinue);
 			}
 
 			if (!ObjectUtils.isEmpty(multiBinderKafkaStreamsBinderConfigurationProperties.getConfiguration())) {
@@ -299,7 +299,7 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 					return generatedApplicationID;
 				});
 
-		handleConcurrency(applicationContext, inboundName, streamConfiguration);
+		handleConcurrency(applicationContext,inboundName,streamConfiguration);
 
 		// Override deserialization exception handlers per binding
 		final DeserializationExceptionHandler deserializationExceptionHandler =
@@ -341,12 +341,12 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 						() -> streamsBuilderFactoryBean)
 				.getRawBeanDefinition();
 		((BeanDefinitionRegistry) beanFactory).registerBeanDefinition(
-				"stream-builder-" + beanNamePostPrefix, streamsBuilderBeanDefinition);
+				"stream-builder-" + beanNamePostPrefix,streamsBuilderBeanDefinition);
 
 		extendedConsumerProperties.setApplicationId((String) streamConfiguration.get(StreamsConfig.APPLICATION_ID_CONFIG));
 
 		final StreamsBuilderFactoryBean streamsBuilderFactoryBeanFromContext = applicationContext.getBean(
-				"&stream-builder-" + beanNamePostPrefix, StreamsBuilderFactoryBean.class);
+				"&stream-builder-" + beanNamePostPrefix,StreamsBuilderFactoryBean.class);
 		//At this point, the StreamsBuilderFactoryBean is created. If the users call, getObject()
 		//in the customizer, that should grant access to the StreamsBuilder.
 		if (customizer != null) {
@@ -355,26 +355,26 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 		return streamsBuilderFactoryBeanFromContext;
 	}
 
-	private void handleConcurrency(ApplicationContext applicationContext, String inboundName,
-								Map<String, Object> streamConfiguration) {
+	private void handleConcurrency(ApplicationContext applicationContext,String inboundName,
+			Map<String, Object> streamConfiguration) {
 		// This rebinding is necessary to capture the concurrency explicitly set by the application.
 		// This is added to fix this issue: https://github.com/spring-cloud/spring-cloud-stream-binder-kafka/issues/899
 		org.springframework.boot.context.properties.bind.Binder explicitConcurrencyResolver =
 				new org.springframework.boot.context.properties.bind.Binder(ConfigurationPropertySources.get(applicationContext.getEnvironment()),
 						new PropertySourcesPlaceholdersResolver(applicationContext.getEnvironment()),
-						IntegrationUtils.getConversionService(this.applicationContext.getBeanFactory()), null);
+						IntegrationUtils.getConversionService(this.applicationContext.getBeanFactory()),null);
 
-		boolean[] concurrencyExplicitlyProvided = new boolean[] {false};
+		boolean[] concurrencyExplicitlyProvided = new boolean[]{false};
 		BindHandler handler = new BindHandler() {
 
 			@Override
-			public Object onSuccess(ConfigurationPropertyName name, Bindable<?> target,
-									BindContext context, Object result) {
+			public Object onSuccess(ConfigurationPropertyName name,Bindable<?> target,
+					BindContext context,Object result) {
 				if (!concurrencyExplicitlyProvided[0]) {
 
 					concurrencyExplicitlyProvided[0] = name.getLastElement(ConfigurationPropertyName.Form.UNIFORM)
 							.equals("concurrency") &&
-					ConfigurationPropertyName.of("spring.cloud.stream.bindings." + inboundName + ".consumer").isAncestorOf(name);
+							ConfigurationPropertyName.of("spring.cloud.stream.bindings." + inboundName + ".consumer").isAncestorOf(name);
 				}
 				return result;
 			}
@@ -382,7 +382,7 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 		//Re-bind spring.cloud.stream properties to check if the application explicitly provided concurrency.
 		try {
 			explicitConcurrencyResolver.bind("spring.cloud.stream",
-					Bindable.ofInstance(new BindingServiceProperties()), handler);
+					Bindable.ofInstance(new BindingServiceProperties()),handler);
 		}
 		catch (Exception e) {
 			// Ignore this exception
@@ -401,21 +401,21 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 		}
 	}
 
-	protected Serde<?> getValueSerde(String inboundName, KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties, ResolvableType resolvableType) {
+	protected Serde<?> getValueSerde(String inboundName,KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties,ResolvableType resolvableType) {
 		if (bindingServiceProperties.getConsumerProperties(inboundName).isUseNativeDecoding()) {
 			BindingProperties bindingProperties = this.bindingServiceProperties
 					.getBindingProperties(inboundName);
 			return this.keyValueSerdeResolver.getInboundValueSerde(
-					bindingProperties.getConsumer(), kafkaStreamsConsumerProperties, resolvableType);
+					bindingProperties.getConsumer(),kafkaStreamsConsumerProperties,resolvableType);
 		}
 		else {
 			return Serdes.ByteArray();
 		}
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	protected KStream<?, ?> getKStream(String inboundName, BindingProperties bindingProperties, KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties,
-									StreamsBuilder streamsBuilder, Serde<?> keySerde, Serde<?> valueSerde, Topology.AutoOffsetReset autoOffsetReset, boolean firstBuild) {
+	@SuppressWarnings({"rawtypes","unchecked"})
+	protected KStream<?, ?> getKStream(String inboundName,BindingProperties bindingProperties,KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties,
+			StreamsBuilder streamsBuilder,Serde<?> keySerde,Serde<?> valueSerde,Topology.AutoOffsetReset autoOffsetReset,boolean firstBuild) {
 		if (firstBuild) {
 			addStateStoreBeans(streamsBuilder);
 		}
@@ -434,13 +434,13 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 		KStream<?, ?> stream;
 		final Serde<?> valueSerdeToUse = StringUtils.hasText(kafkaStreamsConsumerProperties.getEventTypes()) ?
 				new Serdes.BytesSerde() : valueSerde;
-		final Consumed<?, ?> consumed = getConsumed(kafkaStreamsConsumerProperties, keySerde, valueSerdeToUse, autoOffsetReset);
+		final Consumed<?, ?> consumed = getConsumed(kafkaStreamsConsumerProperties,keySerde,valueSerdeToUse,autoOffsetReset);
 
 		if (this.kafkaStreamsExtendedBindingProperties
 				.getExtendedConsumerProperties(inboundName).isDestinationIsPattern()) {
 			final Pattern pattern = Pattern.compile(this.bindingServiceProperties.getBindingDestination(inboundName));
 
-			stream = streamsBuilder.stream(pattern, consumed);
+			stream = streamsBuilder.stream(pattern,consumed);
 		}
 		else {
 			String[] bindingTargets = StringUtils.commaDelimitedListToStringArray(
@@ -455,25 +455,25 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 			AtomicReference<String> topicObject = new AtomicReference<>();
 			AtomicReference<Headers> headersObject = new AtomicReference<>();
 			// Processor to retrieve the header value.
-			stream.process(() -> eventTypeProcessor(kafkaStreamsConsumerProperties, matched, topicObject, headersObject));
+			stream.process(() -> eventTypeProcessor(kafkaStreamsConsumerProperties,matched,topicObject,headersObject));
 			// Branching based on event type match.
-			final KStream<?, ?>[] branch = stream.branch((key, value) -> matched.getAndSet(false));
+			final KStream<?, ?>[] branch = stream.branch((key,value) -> matched.getAndSet(false));
 			// Deserialize if we have a branch from above.
 			final KStream<?, Object> deserializedKStream = branch[0].mapValues(value -> valueSerde.deserializer().deserialize(
-					topicObject.get(), headersObject.get(), ((Bytes) value).get()));
-			return getkStream(bindingProperties, deserializedKStream, nativeDecoding);
+					topicObject.get(),headersObject.get(),((Bytes) value).get()));
+			return getkStream(bindingProperties,deserializedKStream,nativeDecoding);
 		}
-		return getkStream(bindingProperties, stream, nativeDecoding);
+		return getkStream(bindingProperties,stream,nativeDecoding);
 	}
 
-	private KStream<?, ?> getkStream(BindingProperties bindingProperties, KStream<?, ?> stream, boolean nativeDecoding) {
+	private KStream<?, ?> getkStream(BindingProperties bindingProperties,KStream<?, ?> stream,boolean nativeDecoding) {
 		if (!nativeDecoding) {
 			stream = stream.mapValues((value) -> {
 				Object returnValue;
 				String contentType = bindingProperties.getContentType();
 				if (value != null && !StringUtils.isEmpty(contentType)) {
 					returnValue = MessageBuilder.withPayload(value)
-							.setHeader(MessageHeaders.CONTENT_TYPE, contentType).build();
+							.setHeader(MessageHeaders.CONTENT_TYPE,contentType).build();
 				}
 				else {
 					returnValue = value;
@@ -502,55 +502,55 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 		}
 	}
 
-	private <K, V> KTable<K, V> materializedAs(StreamsBuilder streamsBuilder, String destination, String storeName,
-			Serde<K> k, Serde<V> v, Topology.AutoOffsetReset autoOffsetReset, KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties) {
+	private <K,V> KTable<K, V> materializedAs(StreamsBuilder streamsBuilder,String destination,String storeName,
+			Serde<K> k,Serde<V> v,Topology.AutoOffsetReset autoOffsetReset,KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties) {
 
-		final Consumed<K, V> consumed = getConsumed(kafkaStreamsConsumerProperties, k, v, autoOffsetReset);
+		final Consumed<K, V> consumed = getConsumed(kafkaStreamsConsumerProperties,k,v,autoOffsetReset);
 		return streamsBuilder.table(this.bindingServiceProperties.getBindingDestination(destination),
-				consumed, getMaterialized(storeName, k, v));
+				consumed,getMaterialized(storeName,k,v));
 	}
 
-	private <K, V> Materialized<K, V, KeyValueStore<Bytes, byte[]>> getMaterialized(
-			String storeName, Serde<K> k, Serde<V> v) {
+	private <K,V> Materialized<K, V, KeyValueStore<Bytes, byte[]>> getMaterialized(
+			String storeName,Serde<K> k,Serde<V> v) {
 		return Materialized.<K, V, KeyValueStore<Bytes, byte[]>>as(storeName)
 				.withKeySerde(k).withValueSerde(v);
 	}
 
-	private <K, V> GlobalKTable<K, V> materializedAsGlobalKTable(
-			StreamsBuilder streamsBuilder, String destination, String storeName,
-			Serde<K> k, Serde<V> v, Topology.AutoOffsetReset autoOffsetReset, KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties) {
-		final Consumed<K, V> consumed = getConsumed(kafkaStreamsConsumerProperties, k, v, autoOffsetReset);
+	private <K,V> GlobalKTable<K, V> materializedAsGlobalKTable(
+			StreamsBuilder streamsBuilder,String destination,String storeName,
+			Serde<K> k,Serde<V> v,Topology.AutoOffsetReset autoOffsetReset,KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties) {
+		final Consumed<K, V> consumed = getConsumed(kafkaStreamsConsumerProperties,k,v,autoOffsetReset);
 		return streamsBuilder.globalTable(
 				this.bindingServiceProperties.getBindingDestination(destination),
 				consumed,
-				getMaterialized(storeName, k, v));
+				getMaterialized(storeName,k,v));
 	}
 
 	private GlobalKTable<?, ?> getGlobalKTable(KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties,
 			StreamsBuilder streamsBuilder,
-			Serde<?> keySerde, Serde<?> valueSerde, String materializedAs,
-			String bindingDestination, Topology.AutoOffsetReset autoOffsetReset) {
-		final Consumed<?, ?> consumed = getConsumed(kafkaStreamsConsumerProperties, keySerde, valueSerde, autoOffsetReset);
+			Serde<?> keySerde,Serde<?> valueSerde,String materializedAs,
+			String bindingDestination,Topology.AutoOffsetReset autoOffsetReset) {
+		final Consumed<?, ?> consumed = getConsumed(kafkaStreamsConsumerProperties,keySerde,valueSerde,autoOffsetReset);
 		return materializedAs != null
-				? materializedAsGlobalKTable(streamsBuilder, bindingDestination,
-				materializedAs, keySerde, valueSerde, autoOffsetReset, kafkaStreamsConsumerProperties)
+				? materializedAsGlobalKTable(streamsBuilder,bindingDestination,
+				materializedAs,keySerde,valueSerde,autoOffsetReset,kafkaStreamsConsumerProperties)
 				: streamsBuilder.globalTable(bindingDestination,
 				consumed);
 	}
 
 	private KTable<?, ?> getKTable(KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties,
-			StreamsBuilder streamsBuilder, Serde<?> keySerde,
-			Serde<?> valueSerde, String materializedAs, String bindingDestination,
+			StreamsBuilder streamsBuilder,Serde<?> keySerde,
+			Serde<?> valueSerde,String materializedAs,String bindingDestination,
 			Topology.AutoOffsetReset autoOffsetReset) {
 
 		final Serde<?> valueSerdeToUse = StringUtils.hasText(kafkaStreamsConsumerProperties.getEventTypes()) ?
 				new Serdes.BytesSerde() : valueSerde;
 
-		final Consumed<?, ?> consumed = getConsumed(kafkaStreamsConsumerProperties, keySerde, valueSerdeToUse, autoOffsetReset);
+		final Consumed<?, ?> consumed = getConsumed(kafkaStreamsConsumerProperties,keySerde,valueSerdeToUse,autoOffsetReset);
 
 		final KTable<?, ?> kTable = materializedAs != null
-				? materializedAs(streamsBuilder, bindingDestination, materializedAs,
-				keySerde, valueSerdeToUse, autoOffsetReset, kafkaStreamsConsumerProperties)
+				? materializedAs(streamsBuilder,bindingDestination,materializedAs,
+				keySerde,valueSerdeToUse,autoOffsetReset,kafkaStreamsConsumerProperties)
 				: streamsBuilder.table(bindingDestination,
 				consumed);
 		if (StringUtils.hasText(kafkaStreamsConsumerProperties.getEventTypes())) {
@@ -561,26 +561,26 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 			final KStream<?, ?> stream = kTable.toStream();
 
 			// Processor to retrieve the header value.
-			stream.process(() -> eventTypeProcessor(kafkaStreamsConsumerProperties, matched, topicObject, headersObject));
+			stream.process(() -> eventTypeProcessor(kafkaStreamsConsumerProperties,matched,topicObject,headersObject));
 			// Branching based on event type match.
-			final KStream<?, ?>[] branch = stream.branch((key, value) -> matched.getAndSet(false));
+			final KStream<?, ?>[] branch = stream.branch((key,value) -> matched.getAndSet(false));
 			// Deserialize if we have a branch from above.
 			final KStream<?, Object> deserializedKStream = branch[0].mapValues(value -> valueSerde.deserializer().deserialize(
-					topicObject.get(), headersObject.get(), ((Bytes) value).get()));
+					topicObject.get(),headersObject.get(),((Bytes) value).get()));
 
 			return deserializedKStream.toTable();
 		}
 		return kTable;
 	}
 
-	private <K, V> Consumed<K, V> getConsumed(KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties,
-			Serde<K> keySerde, Serde<V> valueSerde, Topology.AutoOffsetReset autoOffsetReset) {
+	private <K,V> Consumed<K, V> getConsumed(KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties,
+			Serde<K> keySerde,Serde<V> valueSerde,Topology.AutoOffsetReset autoOffsetReset) {
 		TimestampExtractor timestampExtractor = null;
 		if (!StringUtils.isEmpty(kafkaStreamsConsumerProperties.getTimestampExtractorBeanName())) {
 			timestampExtractor = applicationContext.getBean(kafkaStreamsConsumerProperties.getTimestampExtractorBeanName(),
 					TimestampExtractor.class);
 		}
-		final Consumed<K, V> consumed = Consumed.with(keySerde, valueSerde)
+		final Consumed<K, V> consumed = Consumed.with(keySerde,valueSerde)
 				.withOffsetResetPolicy(autoOffsetReset);
 		if (timestampExtractor != null) {
 			consumed.withTimestampExtractor(timestampExtractor);
@@ -591,8 +591,8 @@ public abstract class AbstractKafkaStreamsBinderProcessor implements Application
 		return consumed;
 	}
 
-	private <K, V> Processor<K, V, Void, Void> eventTypeProcessor(KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties,
-																AtomicBoolean matched, AtomicReference<String> topicObject, AtomicReference<Headers> headersObject) {
+	private <K,V> Processor<K, V, Void, Void> eventTypeProcessor(KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties,
+			AtomicBoolean matched,AtomicReference<String> topicObject,AtomicReference<Headers> headersObject) {
 		return new Processor<K, V, Void, Void>() {
 
 			org.apache.kafka.streams.processor.api.ProcessorContext<?, ?> context;

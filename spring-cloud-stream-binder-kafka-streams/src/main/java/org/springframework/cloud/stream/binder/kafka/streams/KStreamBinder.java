@@ -83,10 +83,10 @@ class KStreamBinder extends
 	private final KafkaStreamsRegistry kafkaStreamsRegistry;
 
 	KStreamBinder(KafkaStreamsBinderConfigurationProperties binderConfigurationProperties,
-				KafkaTopicProvisioner kafkaTopicProvisioner,
-				KafkaStreamsMessageConversionDelegate kafkaStreamsMessageConversionDelegate,
-				KafkaStreamsBindingInformationCatalogue KafkaStreamsBindingInformationCatalogue,
-				KeyValueSerdeResolver keyValueSerdeResolver, KafkaStreamsRegistry kafkaStreamsRegistry) {
+			KafkaTopicProvisioner kafkaTopicProvisioner,
+			KafkaStreamsMessageConversionDelegate kafkaStreamsMessageConversionDelegate,
+			KafkaStreamsBindingInformationCatalogue KafkaStreamsBindingInformationCatalogue,
+			KeyValueSerdeResolver keyValueSerdeResolver,KafkaStreamsRegistry kafkaStreamsRegistry) {
 		this.binderConfigurationProperties = binderConfigurationProperties;
 		this.kafkaTopicProvisioner = kafkaTopicProvisioner;
 		this.kafkaStreamsMessageConversionDelegate = kafkaStreamsMessageConversionDelegate;
@@ -96,14 +96,14 @@ class KStreamBinder extends
 	}
 
 	@Override
-	protected Binding<KStream<Object, Object>> doBindConsumer(String name, String group,
+	protected Binding<KStream<Object, Object>> doBindConsumer(String name,String group,
 			KStream<Object, Object> inputTarget,
 			ExtendedConsumerProperties<KafkaStreamsConsumerProperties> properties) {
 
 		KStream<Object, Object> delegate = ((KStreamBoundElementFactory.KStreamWrapperHandler)
 				((Advised) inputTarget).getAdvisors()[0].getAdvice()).getDelegate();
 
-		this.kafkaStreamsBindingInformationCatalogue.registerConsumerProperties(delegate, properties.getExtension());
+		this.kafkaStreamsBindingInformationCatalogue.registerConsumerProperties(delegate,properties.getExtension());
 
 		if (!StringUtils.hasText(group)) {
 			group = properties.getExtension().getApplicationId();
@@ -115,15 +115,15 @@ class KStreamBinder extends
 		final StreamsBuilderFactoryBean streamsBuilderFactoryBean = this.kafkaStreamsBindingInformationCatalogue
 				.getStreamsBuilderFactoryBeanPerBinding().get(bindingName);
 
-		KafkaStreamsBinderUtils.prepareConsumerBinding(name, group,
-				getApplicationContext(), this.kafkaTopicProvisioner,
-				this.binderConfigurationProperties, properties, retryTemplate, getBeanFactory(),
+		KafkaStreamsBinderUtils.prepareConsumerBinding(name,group,
+				getApplicationContext(),this.kafkaTopicProvisioner,
+				this.binderConfigurationProperties,properties,retryTemplate,getBeanFactory(),
 				this.kafkaStreamsBindingInformationCatalogue.bindingNamePerTarget(inputTarget),
-				this.kafkaStreamsBindingInformationCatalogue, streamsBuilderFactoryBean);
+				this.kafkaStreamsBindingInformationCatalogue,streamsBuilderFactoryBean);
 
 
-		return new DefaultBinding<KStream<Object, Object>>(bindingName, group,
-				inputTarget, streamsBuilderFactoryBean) {
+		return new DefaultBinding<KStream<Object, Object>>(bindingName,group,
+				inputTarget,streamsBuilderFactoryBean) {
 
 			@Override
 			public boolean isInput() {
@@ -150,11 +150,11 @@ class KStreamBinder extends
 					final KafkaStreams kafkaStreams = streamsBuilderFactoryBean.getKafkaStreams();
 					super.stop();
 					KStreamBinder.this.kafkaStreamsRegistry.unregisterKafkaStreams(kafkaStreams);
-					KafkaStreamsBinderUtils.closeDlqProducerFactories(kafkaStreamsBindingInformationCatalogue, streamsBuilderFactoryBean);
+					KafkaStreamsBinderUtils.closeDlqProducerFactories(kafkaStreamsBindingInformationCatalogue,streamsBuilderFactoryBean);
 					//Caching the stopped KafkaStreams for health indicator purposes on the underlying processor.
 					//See this issue for more details: https://github.com/spring-cloud/spring-cloud-stream-binder-kafka/issues/1165
 					KStreamBinder.this.kafkaStreamsBindingInformationCatalogue.addPreviousKafkaStreamsForApplicationId(
-							(String) streamsBuilderFactoryBean.getStreamsConfiguration().get(StreamsConfig.APPLICATION_ID_CONFIG), kafkaStreams);
+							(String) streamsBuilderFactoryBean.getStreamsConfiguration().get(StreamsConfig.APPLICATION_ID_CONFIG),kafkaStreams);
 				}
 			}
 		};
@@ -169,23 +169,23 @@ class KStreamBinder extends
 		ExtendedProducerProperties<KafkaProducerProperties> extendedProducerProperties =
 				(ExtendedProducerProperties) properties;
 
-		this.kafkaTopicProvisioner.provisionProducerDestination(name, extendedProducerProperties);
+		this.kafkaTopicProvisioner.provisionProducerDestination(name,extendedProducerProperties);
 		Serde<?> keySerde = this.keyValueSerdeResolver
-				.getOuboundKeySerde(properties.getExtension(), kafkaStreamsBindingInformationCatalogue.getOutboundKStreamResolvable(outboundBindTarget));
+				.getOuboundKeySerde(properties.getExtension(),kafkaStreamsBindingInformationCatalogue.getOutboundKStreamResolvable(outboundBindTarget));
 		LOG.info("Key Serde used for (outbound) " + name + ": " + keySerde.getClass().getName());
 
 		Serde<?> valueSerde;
 		if (properties.isUseNativeEncoding()) {
 			valueSerde = this.keyValueSerdeResolver.getOutboundValueSerde(properties,
-					properties.getExtension(), kafkaStreamsBindingInformationCatalogue.getOutboundKStreamResolvable(outboundBindTarget));
+					properties.getExtension(),kafkaStreamsBindingInformationCatalogue.getOutboundKStreamResolvable(outboundBindTarget));
 		}
 		else {
 			valueSerde = Serdes.ByteArray();
 		}
 		LOG.info("Value Serde used for (outbound) " + name + ": " + valueSerde.getClass().getName());
 
-		to(properties.isUseNativeEncoding(), name, outboundBindTarget,
-				(Serde<Object>) keySerde, (Serde<Object>) valueSerde, properties.getExtension());
+		to(properties.isUseNativeEncoding(),name,outboundBindTarget,
+				(Serde<Object>) keySerde,(Serde<Object>) valueSerde,properties.getExtension());
 
 		final String bindingName = this.kafkaStreamsBindingInformationCatalogue.bindingNamePerTarget(outboundBindTarget);
 		final StreamsBuilderFactoryBean streamsBuilderFactoryBean = this.kafkaStreamsBindingInformationCatalogue
@@ -198,7 +198,7 @@ class KStreamBinder extends
 		final String applicationId = streamsConfiguration != null ? (String) streamsConfiguration.get("application.id") : bindingName;
 
 		return new DefaultBinding<KStream<Object, Object>>(bindingName,
-				applicationId, outboundBindTarget, streamsBuilderFactoryBean) {
+				applicationId,outboundBindTarget,streamsBuilderFactoryBean) {
 
 			@Override
 			public boolean isInput() {
@@ -225,21 +225,21 @@ class KStreamBinder extends
 					final KafkaStreams kafkaStreams = streamsBuilderFactoryBean.getKafkaStreams();
 					super.stop();
 					KStreamBinder.this.kafkaStreamsRegistry.unregisterKafkaStreams(kafkaStreams);
-					KafkaStreamsBinderUtils.closeDlqProducerFactories(kafkaStreamsBindingInformationCatalogue, streamsBuilderFactoryBean);
+					KafkaStreamsBinderUtils.closeDlqProducerFactories(kafkaStreamsBindingInformationCatalogue,streamsBuilderFactoryBean);
 					//Caching the stopped KafkaStreams for health indicator purposes on the underlying processor
 					//See this issue for more details: https://github.com/spring-cloud/spring-cloud-stream-binder-kafka/issues/1165
 					KStreamBinder.this.kafkaStreamsBindingInformationCatalogue.addPreviousKafkaStreamsForApplicationId(
-							(String) streamsBuilderFactoryBean.getStreamsConfiguration().get(StreamsConfig.APPLICATION_ID_CONFIG), kafkaStreams);
+							(String) streamsBuilderFactoryBean.getStreamsConfiguration().get(StreamsConfig.APPLICATION_ID_CONFIG),kafkaStreams);
 				}
 			}
 		};
 	}
 
 	@SuppressWarnings("unchecked")
-	private void to(boolean isNativeEncoding, String name,
-					KStream<Object, Object> outboundBindTarget, Serde<Object> keySerde,
-					Serde<Object> valueSerde, KafkaStreamsProducerProperties properties) {
-		final Produced<Object, Object> produced = Produced.with(keySerde, valueSerde);
+	private void to(boolean isNativeEncoding,String name,
+			KStream<Object, Object> outboundBindTarget,Serde<Object> keySerde,
+			Serde<Object> valueSerde,KafkaStreamsProducerProperties properties) {
+		final Produced<Object, Object> produced = Produced.with(keySerde,valueSerde);
 		if (StringUtils.hasText(properties.getProducedAs())) {
 			produced.withName(properties.getProducedAs());
 		}
@@ -254,16 +254,16 @@ class KStreamBinder extends
 		if (!isNativeEncoding) {
 			LOG.info("Native encoding is disabled for " + name
 					+ ". Outbound message conversion done by Spring Cloud Stream.");
-			outboundBindTarget.filter((k, v) -> v == null)
-					.to(name, produced);
+			outboundBindTarget.filter((k,v) -> v == null)
+					.to(name,produced);
 			this.kafkaStreamsMessageConversionDelegate
 					.serializeOnOutbound(outboundBindTarget)
-					.to(name, produced);
+					.to(name,produced);
 		}
 		else {
 			LOG.info("Native encoding is enabled for " + name
 					+ ". Outbound serialization done at the broker.");
-			outboundBindTarget.to(name, produced);
+			outboundBindTarget.to(name,produced);
 		}
 	}
 

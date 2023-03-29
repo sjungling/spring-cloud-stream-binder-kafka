@@ -40,7 +40,7 @@ import org.springframework.context.annotation.Import;
  */
 @SuppressWarnings("ALL")
 @Configuration
-@Import({ KafkaAutoConfiguration.class,
+@Import({KafkaAutoConfiguration.class,
 		MultiBinderPropertiesConfiguration.class,
 		KafkaStreamsBinderHealthIndicatorConfiguration.class,
 		KafkaStreamsJaasConfiguration.class})
@@ -49,8 +49,8 @@ public class KTableBinderConfiguration {
 	@Bean
 	public KafkaTopicProvisioner provisioningProvider(
 			KafkaStreamsBinderConfigurationProperties binderConfigurationProperties,
-			KafkaProperties kafkaProperties, ObjectProvider<AdminClientConfigCustomizer> adminClientConfigCustomizer) {
-		return new KafkaTopicProvisioner(binderConfigurationProperties, kafkaProperties, adminClientConfigCustomizer.getIfUnique());
+			KafkaProperties kafkaProperties,ObjectProvider<AdminClientConfigCustomizer> adminClientConfigCustomizer) {
+		return new KafkaTopicProvisioner(binderConfigurationProperties,kafkaProperties,adminClientConfigCustomizer.getIfUnique());
 	}
 
 	@Bean
@@ -62,7 +62,7 @@ public class KTableBinderConfiguration {
 			@Qualifier("streamConfigGlobalProperties") Map<String, Object> streamConfigGlobalProperties,
 			KafkaStreamsRegistry kafkaStreamsRegistry) {
 		KTableBinder kTableBinder = new KTableBinder(binderConfigurationProperties,
-				kafkaTopicProvisioner, kafkaStreamsBindingInformationCatalogue, kafkaStreamsRegistry);
+				kafkaTopicProvisioner,kafkaStreamsBindingInformationCatalogue,kafkaStreamsRegistry);
 		kTableBinder.setKafkaStreamsExtendedBindingProperties(kafkaStreamsExtendedBindingProperties);
 		return kTableBinder;
 	}

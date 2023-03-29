@@ -82,7 +82,7 @@ public class InteractiveQueryService {
 	 * @param <T> generic queryable store
 	 * @return queryable store.
 	 */
-	public <T> T getQueryableStore(String storeName, QueryableStoreType<T> storeType) {
+	public <T> T getQueryableStore(String storeName,QueryableStoreType<T> storeType) {
 
 		final RetryTemplate retryTemplate = getRetryTemplate();
 
@@ -95,7 +95,7 @@ public class InteractiveQueryService {
 				try {
 					store = contextSpecificKafkaStreams.store(
 							StoreQueryParameters.fromNameAndType(
-									storeName, storeType));
+									storeName,storeType));
 				}
 				catch (InvalidStateStoreException e) {
 					// pass through..
@@ -115,7 +115,7 @@ public class InteractiveQueryService {
 				try {
 					store = iterator.next()
 							.store(StoreQueryParameters.fromNameAndType(
-									storeName, storeType));
+									storeName,storeType));
 				}
 				catch (InvalidStateStoreException e) {
 					// pass through..
@@ -149,7 +149,7 @@ public class InteractiveQueryService {
 	 */
 	private boolean filterByThreadName(KafkaStreams streams) {
 		String applicationId = kafkaStreamsRegistry.streamBuilderFactoryBean(
-						streams).getStreamsConfiguration()
+				streams).getStreamsConfiguration()
 				.getProperty(StreamsConfig.APPLICATION_ID_CONFIG);
 		// TODO: is there some better way to find out if a Stream App created the Thread?
 		return Thread.currentThread().getName().contains(applicationId);
@@ -170,9 +170,9 @@ public class InteractiveQueryService {
 		if (configuration.containsKey("application.server")) {
 
 			String applicationServer = configuration.get("application.server");
-			String[] splits = StringUtils.split(applicationServer, ":");
+			String[] splits = StringUtils.split(applicationServer,":");
 
-			return new HostInfo(splits[0], Integer.valueOf(splits[1]));
+			return new HostInfo(splits[0],Integer.valueOf(splits[1]));
 		}
 		return null;
 	}
@@ -192,7 +192,7 @@ public class InteractiveQueryService {
 	 * @param serializer {@link Serializer} for the key
 	 * @return the {@link HostInfo} where the key for the provided store is hosted currently
 	 */
-	public <K> HostInfo getHostInfo(String store, K key, Serializer<K> serializer) {
+	public <K> HostInfo getHostInfo(String store,K key,Serializer<K> serializer) {
 		final RetryTemplate retryTemplate = getRetryTemplate();
 
 
@@ -201,7 +201,7 @@ public class InteractiveQueryService {
 			try {
 				final KeyQueryMetadata keyQueryMetadata = this.kafkaStreamsRegistry.getKafkaStreams()
 						.stream()
-						.map((k) -> Optional.ofNullable(k.queryMetadataForKey(store, key, serializer)))
+						.map((k) -> Optional.ofNullable(k.queryMetadataForKey(store,key,serializer)))
 						.filter(Optional::isPresent).map(Optional::get).findFirst().orElse(null);
 				if (keyQueryMetadata != null) {
 					return keyQueryMetadata.activeHost();
@@ -211,7 +211,7 @@ public class InteractiveQueryService {
 				throwable = e;
 			}
 			throw new IllegalStateException(
-					"Error when retrieving state store.", throwable != null ? throwable : new Throwable("Kafka Streams is not ready."));
+					"Error when retrieving state store.",throwable != null ? throwable : new Throwable("Kafka Streams is not ready."));
 		});
 	}
 
@@ -239,10 +239,10 @@ public class InteractiveQueryService {
 	 * @param serializer {@link Serializer} for the key
 	 * @return the {@link KeyQueryMetadata} if available, null otherwise.
 	 */
-	public <K> KeyQueryMetadata getKeyQueryMetadata(String store, K key, Serializer<K> serializer) {
+	public <K> KeyQueryMetadata getKeyQueryMetadata(String store,K key,Serializer<K> serializer) {
 		return this.kafkaStreamsRegistry.getKafkaStreams()
 				.stream()
-				.map((k) -> Optional.ofNullable(k.queryMetadataForKey(store, key, serializer)))
+				.map((k) -> Optional.ofNullable(k.queryMetadataForKey(store,key,serializer)))
 				.filter(Optional::isPresent).map(Optional::get).findFirst().orElse(null);
 	}
 
@@ -256,11 +256,11 @@ public class InteractiveQueryService {
 	 * @param serializer {@link Serializer} for the key
 	 * @return {@link KafkaStreams} object associated with this combination of store and key
 	 */
-	public <K> KafkaStreams getKafkaStreams(String store, K key, Serializer<K> serializer) {
+	public <K> KafkaStreams getKafkaStreams(String store,K key,Serializer<K> serializer) {
 		final AtomicReference<KafkaStreams> kafkaStreamsAtomicReference = new AtomicReference<>();
 		this.kafkaStreamsRegistry.getKafkaStreams()
 				.forEach(k -> {
-					final KeyQueryMetadata keyQueryMetadata = k.queryMetadataForKey(store, key, serializer);
+					final KeyQueryMetadata keyQueryMetadata = k.queryMetadataForKey(store,key,serializer);
 					if (keyQueryMetadata != null) {
 						kafkaStreamsAtomicReference.set(k);
 					}

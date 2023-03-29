@@ -163,11 +163,11 @@ import static org.mockito.Mockito.mock;
  * @author Henryk Konsek
  * @author Gary Russell
  */
-@EmbeddedKafka(count = 1, controlledShutdown = true, topics = "error.pollableDlq.group-pcWithDlq", brokerProperties = {"transaction.state.log.replication.factor=1",
+@EmbeddedKafka(count = 1,controlledShutdown = true,topics = "error.pollableDlq.group-pcWithDlq",brokerProperties = {"transaction.state.log.replication.factor=1",
 		"transaction.state.log.min.isr=1"})
 public class KafkaBinderTests extends
 
-	PartitionCapableBinderTests<AbstractKafkaTestBinder, ExtendedConsumerProperties<KafkaConsumerProperties>, ExtendedProducerProperties<KafkaProducerProperties>> {
+		PartitionCapableBinderTests<AbstractKafkaTestBinder, ExtendedConsumerProperties<KafkaConsumerProperties>, ExtendedProducerProperties<KafkaProducerProperties>> {
 
 	private static final int DEFAULT_OPERATION_TIMEOUT = 30;
 
@@ -217,14 +217,14 @@ public class KafkaBinderTests extends
 		if (binder == null) {
 			KafkaBinderConfigurationProperties binderConfiguration = createConfigurationProperties();
 			KafkaTopicProvisioner kafkaTopicProvisioner = new KafkaTopicProvisioner(
-					binderConfiguration, new TestKafkaProperties(), null);
+					binderConfiguration,new TestKafkaProperties(),null);
 			try {
 				kafkaTopicProvisioner.afterPropertiesSet();
 			}
 			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-			binder = new KafkaTestBinder(binderConfiguration, kafkaTopicProvisioner);
+			binder = new KafkaTestBinder(binderConfiguration,kafkaTopicProvisioner);
 		}
 		return binder;
 	}
@@ -232,15 +232,15 @@ public class KafkaBinderTests extends
 	private KafkaTestBinder getBinder(
 			KafkaBinderConfigurationProperties kafkaBinderConfigurationProperties) {
 
-		return getBinder(kafkaBinderConfigurationProperties, null, null);
+		return getBinder(kafkaBinderConfigurationProperties,null,null);
 	}
 
 	private KafkaTestBinder getBinder(
 			KafkaBinderConfigurationProperties kafkaBinderConfigurationProperties,
-			DlqPartitionFunction dlqPartitionFunction, DlqDestinationResolver dlqDestinationResolver) {
+			DlqPartitionFunction dlqPartitionFunction,DlqDestinationResolver dlqDestinationResolver) {
 
 		KafkaTopicProvisioner provisioningProvider = new KafkaTopicProvisioner(
-				kafkaBinderConfigurationProperties, new TestKafkaProperties(), null);
+				kafkaBinderConfigurationProperties,new TestKafkaProperties(),null);
 		try {
 			provisioningProvider.afterPropertiesSet();
 		}
@@ -248,7 +248,7 @@ public class KafkaBinderTests extends
 			throw new RuntimeException(e);
 		}
 		return new KafkaTestBinder(kafkaBinderConfigurationProperties,
-				provisioningProvider, dlqPartitionFunction, dlqDestinationResolver);
+				provisioningProvider,dlqPartitionFunction,dlqDestinationResolver);
 	}
 
 	private KafkaBinderConfigurationProperties createConfigurationProperties() {
@@ -269,13 +269,13 @@ public class KafkaBinderTests extends
 		return consumerFactory().createConsumer().partitionsFor(topic).size();
 	}
 
-	private void invokeCreateTopic(String topic, int partitions, int replicationFactor)
+	private void invokeCreateTopic(String topic,int partitions,int replicationFactor)
 			throws Exception {
 
-		NewTopic newTopic = new NewTopic(topic, partitions, (short) replicationFactor);
+		NewTopic newTopic = new NewTopic(topic,partitions,(short) replicationFactor);
 		CreateTopicsResult topics = adminClient
 				.createTopics(Collections.singletonList(newTopic));
-		topics.all().get(DEFAULT_OPERATION_TIMEOUT, TimeUnit.SECONDS);
+		topics.all().get(DEFAULT_OPERATION_TIMEOUT,TimeUnit.SECONDS);
 	}
 
 	private String getKafkaOffsetHeaderKey() {
@@ -308,7 +308,7 @@ public class KafkaBinderTests extends
 				.describeTopics(Collections.singletonList(topic));
 		KafkaFuture<Map<String, TopicDescription>> all = describeTopicsResult.all();
 		Map<String, TopicDescription> stringTopicDescriptionMap = all
-				.get(DEFAULT_OPERATION_TIMEOUT, TimeUnit.SECONDS);
+				.get(DEFAULT_OPERATION_TIMEOUT,TimeUnit.SECONDS);
 		TopicDescription topicDescription = stringTopicDescriptionMap.get(topic);
 		return topicDescription.partitions().size();
 	}
@@ -333,15 +333,15 @@ public class KafkaBinderTests extends
 		KafkaBinderConfigurationProperties configurationProperties = createConfigurationProperties();
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
 				configurationProperties.getKafkaConnectionString());
-		props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, "TEST-CONSUMER-GROUP");
+		props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,false);
+		props.put(ConsumerConfig.GROUP_ID_CONFIG,"TEST-CONSUMER-GROUP");
 		Deserializer<byte[]> valueDecoder = new ByteArrayDeserializer();
 		Deserializer<byte[]> keyDecoder = new ByteArrayDeserializer();
 
-		return new DefaultKafkaConsumerFactory<>(props, keyDecoder, valueDecoder);
+		return new DefaultKafkaConsumerFactory<>(props,keyDecoder,valueDecoder);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes","unchecked"})
 	@Test
 	public void testDefaultHeaderMapper() throws Exception {
 		Binder binder = getBinder();
@@ -353,24 +353,24 @@ public class KafkaBinderTests extends
 
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 		consumerProperties.getExtension()
-				.setTrustedPackages(new String[] { "org.springframework.cloud.stream.binder.kafka" });
+				.setTrustedPackages(new String[]{"org.springframework.cloud.stream.binder.kafka"});
 
 		DirectChannel moduleInputChannel = createBindableChannel("input",
 				createConsumerBindingProperties(consumerProperties));
 
 		Binding<MessageChannel> producerBinding = binder.bindProducer("bar.0",
-				moduleOutputChannel, producerBindingProperties.getProducer());
+				moduleOutputChannel,producerBindingProperties.getProducer());
 
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer("bar.0",
-				"testSendAndReceiveNoOriginalContentType", moduleInputChannel,
+				"testSendAndReceiveNoOriginalContentType",moduleInputChannel,
 				consumerProperties);
 		binderBindUnbindLatency();
 
 		final Pojo pojoHeader = new Pojo("testing");
 		Message<?> message = org.springframework.integration.support.MessageBuilder
 				.withPayload("foo")
-				.setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN)
-				.setHeader("foo", pojoHeader).build();
+				.setHeader(MessageHeaders.CONTENT_TYPE,MimeTypeUtils.TEXT_PLAIN)
+				.setHeader("foo",pojoHeader).build();
 
 		moduleOutputChannel.send(message);
 		CountDownLatch latch = new CountDownLatch(1);
@@ -383,7 +383,7 @@ public class KafkaBinderTests extends
 				latch.countDown();
 			}
 		});
-		Assert.isTrue(latch.await(5, TimeUnit.SECONDS), "Failed to receive message");
+		Assert.isTrue(latch.await(5,TimeUnit.SECONDS),"Failed to receive message");
 
 		Assertions.assertThat(inboundMessageRef.get()).isNotNull();
 		Assertions.assertThat(inboundMessageRef.get().getPayload())
@@ -400,7 +400,7 @@ public class KafkaBinderTests extends
 		consumerBinding.unbind();
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes","unchecked"})
 	@Test
 	public void testCustomHeaderMapper() throws Exception {
 
@@ -408,25 +408,25 @@ public class KafkaBinderTests extends
 		binderConfiguration.setHeaderMapperBeanName("headerMapper");
 
 		KafkaTopicProvisioner kafkaTopicProvisioner = new KafkaTopicProvisioner(
-				binderConfiguration, new TestKafkaProperties(), null);
+				binderConfiguration,new TestKafkaProperties(),null);
 		try {
 			kafkaTopicProvisioner.afterPropertiesSet();
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		KafkaTestBinder binder = new KafkaTestBinder(binderConfiguration, kafkaTopicProvisioner);
+		KafkaTestBinder binder = new KafkaTestBinder(binderConfiguration,kafkaTopicProvisioner);
 		((GenericApplicationContext) binder.getApplicationContext()).registerBean("headerMapper",
-				KafkaHeaderMapper.class, () -> new KafkaHeaderMapper() {
+				KafkaHeaderMapper.class,() -> new KafkaHeaderMapper() {
 					@Override
-					public void fromHeaders(MessageHeaders headers, Headers target) {
-						target.add(new RecordHeader("custom-header", "foobar".getBytes()));
+					public void fromHeaders(MessageHeaders headers,Headers target) {
+						target.add(new RecordHeader("custom-header","foobar".getBytes()));
 					}
 
 					@Override
-					public void toHeaders(Headers source, Map<String, Object> target) {
+					public void toHeaders(Headers source,Map<String, Object> target) {
 						if (source.headers("custom-header").iterator().hasNext()) {
-							target.put("custom-header", source.headers("custom-header").iterator().next().value());
+							target.put("custom-header",source.headers("custom-header").iterator().next().value());
 						}
 
 					}
@@ -443,16 +443,16 @@ public class KafkaBinderTests extends
 				createConsumerBindingProperties(consumerProperties));
 
 		Binding<MessageChannel> producerBinding = binder.bindProducer("bar.0",
-				moduleOutputChannel, producerProperties);
+				moduleOutputChannel,producerProperties);
 
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer("bar.0",
-				"testSendAndReceiveNoOriginalContentType", moduleInputChannel,
+				"testSendAndReceiveNoOriginalContentType",moduleInputChannel,
 				consumerProperties);
 		binderBindUnbindLatency();
 
 		Message<?> message = org.springframework.integration.support.MessageBuilder
 				.withPayload("foo")
-				.setHeader("foo", MimeTypeUtils.TEXT_PLAIN).build();
+				.setHeader("foo",MimeTypeUtils.TEXT_PLAIN).build();
 
 		moduleOutputChannel.send(message);
 		CountDownLatch latch = new CountDownLatch(1);
@@ -465,7 +465,7 @@ public class KafkaBinderTests extends
 				latch.countDown();
 			}
 		});
-		Assert.isTrue(latch.await(5, TimeUnit.SECONDS), "Failed to receive message");
+		Assert.isTrue(latch.await(5,TimeUnit.SECONDS),"Failed to receive message");
 
 		Assertions.assertThat(inboundMessageRef.get()).isNotNull();
 		Assertions.assertThat(inboundMessageRef.get().getPayload())
@@ -478,33 +478,33 @@ public class KafkaBinderTests extends
 		consumerBinding.unbind();
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes","unchecked"})
 	@Test
 	public void testWellKnownHeaderMapperWithBeanNameKafkaHeaderMapper() throws Exception {
 
 		KafkaBinderConfigurationProperties binderConfiguration = createConfigurationProperties();
 
 		KafkaTopicProvisioner kafkaTopicProvisioner = new KafkaTopicProvisioner(
-				binderConfiguration, new TestKafkaProperties(), null);
+				binderConfiguration,new TestKafkaProperties(),null);
 		try {
 			kafkaTopicProvisioner.afterPropertiesSet();
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		KafkaTestBinder binder = new KafkaTestBinder(binderConfiguration, kafkaTopicProvisioner);
+		KafkaTestBinder binder = new KafkaTestBinder(binderConfiguration,kafkaTopicProvisioner);
 		((GenericApplicationContext) binder.getApplicationContext()).registerBean("kafkaBinderHeaderMapper",
-				KafkaHeaderMapper.class, () -> new BinderHeaderMapper() {
+				KafkaHeaderMapper.class,() -> new BinderHeaderMapper() {
 					@Override
-					public void fromHeaders(MessageHeaders headers, Headers target) {
-						target.add(new RecordHeader("custom-header", "foobar".getBytes()));
-						super.fromHeaders(headers, target);
+					public void fromHeaders(MessageHeaders headers,Headers target) {
+						target.add(new RecordHeader("custom-header","foobar".getBytes()));
+						super.fromHeaders(headers,target);
 					}
 
 					@Override
-					public void toHeaders(Headers source, Map<String, Object> target) {
+					public void toHeaders(Headers source,Map<String, Object> target) {
 						if (source.headers("custom-header").iterator().hasNext()) {
-							target.put("custom-header", source.headers("custom-header").iterator().next().value());
+							target.put("custom-header",source.headers("custom-header").iterator().next().value());
 						}
 
 					}
@@ -521,16 +521,16 @@ public class KafkaBinderTests extends
 				createConsumerBindingProperties(consumerProperties));
 
 		Binding<MessageChannel> producerBinding = binder.bindProducer("bar.0",
-				moduleOutputChannel, producerProperties);
+				moduleOutputChannel,producerProperties);
 
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer("bar.0",
-				"testSendAndReceiveNoOriginalContentType", moduleInputChannel,
+				"testSendAndReceiveNoOriginalContentType",moduleInputChannel,
 				consumerProperties);
 		binderBindUnbindLatency();
 
 		Message<?> message = org.springframework.integration.support.MessageBuilder
 				.withPayload("foo")
-				.setHeader("foo", MimeTypeUtils.TEXT_PLAIN).build();
+				.setHeader("foo",MimeTypeUtils.TEXT_PLAIN).build();
 
 		moduleOutputChannel.send(message);
 		CountDownLatch latch = new CountDownLatch(1);
@@ -543,7 +543,7 @@ public class KafkaBinderTests extends
 				latch.countDown();
 			}
 		});
-		Assert.isTrue(latch.await(5, TimeUnit.SECONDS), "Failed to receive message");
+		Assert.isTrue(latch.await(5,TimeUnit.SECONDS),"Failed to receive message");
 
 		Assertions.assertThat(inboundMessageRef.get()).isNotNull();
 		Assertions.assertThat(inboundMessageRef.get().getPayload())
@@ -570,12 +570,12 @@ public class KafkaBinderTests extends
 		DirectChannel moduleInputChannel = createBindableChannel("input",
 				createConsumerBindingProperties(consumerProperties));
 		Binding<MessageChannel> producerBinding = binder.bindProducer("bar.0",
-				moduleOutputChannel, producerBindingProperties.getProducer());
+				moduleOutputChannel,producerBindingProperties.getProducer());
 
 		consumerProperties.getExtension()
-				.setTrustedPackages(new String[] { "org.springframework.util" });
+				.setTrustedPackages(new String[]{"org.springframework.util"});
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer("bar.0",
-				"testSendAndReceiveNoOriginalContentType", moduleInputChannel,
+				"testSendAndReceiveNoOriginalContentType",moduleInputChannel,
 				consumerProperties);
 		binderBindUnbindLatency();
 
@@ -584,7 +584,7 @@ public class KafkaBinderTests extends
 		// https://github.com/spring-projects/spring-kafka/issues/424
 		Message<?> message = org.springframework.integration.support.MessageBuilder
 				.withPayload("foo")
-				.setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN).build();
+				.setHeader(MessageHeaders.CONTENT_TYPE,MimeTypeUtils.TEXT_PLAIN).build();
 		moduleOutputChannel.send(message);
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<Message<byte[]>> inboundMessageRef = new AtomicReference<>();
@@ -596,7 +596,7 @@ public class KafkaBinderTests extends
 				latch.countDown();
 			}
 		});
-		Assert.isTrue(latch.await(5, TimeUnit.SECONDS), "Failed to receive message");
+		Assert.isTrue(latch.await(5,TimeUnit.SECONDS),"Failed to receive message");
 
 		assertThat(inboundMessageRef.get()).isNotNull();
 		assertThat(inboundMessageRef.get().getPayload()).isEqualTo("foo".getBytes());
@@ -621,13 +621,13 @@ public class KafkaBinderTests extends
 
 		MessagingMessageConverter mmc = new MessagingMessageConverter();
 		((GenericApplicationContext) ((KafkaTestBinder) binder).getApplicationContext())
-				.registerBean("tSARmmc", MessagingMessageConverter.class, () -> mmc);
+				.registerBean("tSARmmc",MessagingMessageConverter.class,() -> mmc);
 		consumerProperties.getExtension().setConverterBeanName("tSARmmc");
 
 		Binding<MessageChannel> producerBinding = binder.bindProducer("foo.bar",
-				moduleOutputChannel, outputBindingProperties.getProducer());
+				moduleOutputChannel,outputBindingProperties.getProducer());
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer("foo.bar",
-				"testSendAndReceive", moduleInputChannel, consumerProperties);
+				"testSendAndReceive",moduleInputChannel,consumerProperties);
 		assertThat(KafkaTestUtils.getPropertyValue(consumerBinding,
 				"lifecycle.messageListenerContainer.applicationContext")).isNotNull();
 		Message<?> message = org.springframework.integration.support.MessageBuilder
@@ -649,12 +649,12 @@ public class KafkaBinderTests extends
 				latch.countDown();
 			}
 		});
-		Assert.isTrue(latch.await(5, TimeUnit.SECONDS), "Failed to receive message");
+		Assert.isTrue(latch.await(5,TimeUnit.SECONDS),"Failed to receive message");
 
 		assertThat(inboundMessageRef.get()).isNotNull();
 		assertThat(
-				new String(inboundMessageRef.get().getPayload(), StandardCharsets.UTF_8))
-						.isEqualTo("foo");
+				new String(inboundMessageRef.get().getPayload(),StandardCharsets.UTF_8))
+				.isEqualTo("foo");
 		assertThat(inboundMessageRef.get().getHeaders().get(MessageHeaders.CONTENT_TYPE))
 				.isEqualTo(MimeTypeUtils.APPLICATION_OCTET_STREAM);
 
@@ -665,14 +665,14 @@ public class KafkaBinderTests extends
 		assertThat(topic.isConsumerTopic()).isTrue();
 		assertThat(topic.getConsumerGroup()).isEqualTo("testSendAndReceive");
 
-		assertThat(KafkaTestUtils.getPropertyValue(consumerBinding, "lifecycle.recordListener.messageConverter"))
+		assertThat(KafkaTestUtils.getPropertyValue(consumerBinding,"lifecycle.recordListener.messageConverter"))
 				.isSameAs(mmc);
 		producerBinding.unbind();
 		consumerBinding.unbind();
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked","rawtypes"})
 	public void testSendAndReceiveBatch() throws Exception {
 		Binder binder = getBinder();
 		BindingProperties outputBindingProperties = createProducerBindingProperties(
@@ -681,23 +681,23 @@ public class KafkaBinderTests extends
 				outputBindingProperties);
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 		consumerProperties.setBatchMode(true);
-		consumerProperties.getExtension().getConfiguration().put("fetch.min.bytes", "1000");
-		consumerProperties.getExtension().getConfiguration().put("fetch.max.wait.ms", "5000");
-		consumerProperties.getExtension().getConfiguration().put("max.poll.records", "2");
+		consumerProperties.getExtension().getConfiguration().put("fetch.min.bytes","1000");
+		consumerProperties.getExtension().getConfiguration().put("fetch.max.wait.ms","5000");
+		consumerProperties.getExtension().getConfiguration().put("max.poll.records","2");
 		BatchMessagingMessageConverter bmmc = new BatchMessagingMessageConverter();
 		((GenericApplicationContext) ((KafkaTestBinder) binder).getApplicationContext())
-				.registerBean("tSARBbmmc", BatchMessagingMessageConverter.class, () -> bmmc);
+				.registerBean("tSARBbmmc",BatchMessagingMessageConverter.class,() -> bmmc);
 		consumerProperties.getExtension().setConverterBeanName("tSARBbmmc");
 		DirectChannel moduleInputChannel = createBindableChannel("input",
 				createConsumerBindingProperties(consumerProperties));
 
 		Binding<MessageChannel> producerBinding = binder.bindProducer("c.batching",
-				moduleOutputChannel, outputBindingProperties.getProducer());
+				moduleOutputChannel,outputBindingProperties.getProducer());
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer("c.batching",
-				"testSendAndReceiveBatch", moduleInputChannel, consumerProperties);
+				"testSendAndReceiveBatch",moduleInputChannel,consumerProperties);
 		Message<?> message = org.springframework.integration.support.MessageBuilder
 				.withPayload("foo".getBytes(StandardCharsets.UTF_8))
-				.setHeader(KafkaHeaders.PARTITION_ID, 0)
+				.setHeader(KafkaHeaders.PARTITION_ID,0)
 				.build();
 
 		// Let the consumer actually bind to the producer before sending a msg
@@ -705,20 +705,20 @@ public class KafkaBinderTests extends
 		moduleOutputChannel.send(message);
 		message = MessageBuilder
 				.withPayload("bar".getBytes(StandardCharsets.UTF_8))
-				.setHeader(KafkaHeaders.PARTITION_ID, 0)
+				.setHeader(KafkaHeaders.PARTITION_ID,0)
 				.build();
 		moduleOutputChannel.send(message);
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<Message<List<byte[]>>> inboundMessageRef = new AtomicReference<>();
 		moduleInputChannel.subscribe(message1 -> {
 			try {
-				inboundMessageRef.compareAndSet(null, (Message<List<byte[]>>) message1);
+				inboundMessageRef.compareAndSet(null,(Message<List<byte[]>>) message1);
 			}
 			finally {
 				latch.countDown();
 			}
 		});
-		Assert.isTrue(latch.await(5, TimeUnit.SECONDS), "Failed to receive message");
+		Assert.isTrue(latch.await(5,TimeUnit.SECONDS),"Failed to receive message");
 
 		assertThat(inboundMessageRef.get()).isNotNull();
 		List<byte[]> payload = inboundMessageRef.get().getPayload();
@@ -727,7 +727,7 @@ public class KafkaBinderTests extends
 			assertThat(payload.get(1)).isEqualTo("bar".getBytes());
 		}
 
-		assertThat(KafkaTestUtils.getPropertyValue(consumerBinding, "lifecycle.batchListener.batchMessageConverter"))
+		assertThat(KafkaTestUtils.getPropertyValue(consumerBinding,"lifecycle.batchListener.batchMessageConverter"))
 				.isSameAs(bmmc);
 		producerBinding.unbind();
 		consumerBinding.unbind();
@@ -769,9 +769,9 @@ public class KafkaBinderTests extends
 				createConsumerBindingProperties(consumerProperties));
 
 		Binding<MessageChannel> producerBinding = binder.bindProducer("foo.bar",
-				moduleOutputChannel, outputBindingProperties.getProducer());
+				moduleOutputChannel,outputBindingProperties.getProducer());
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer("foo.bar",
-				"testDlqWithNativeEncoding-1", moduleInputChannel, consumerProperties);
+				"testDlqWithNativeEncoding-1",moduleInputChannel,consumerProperties);
 
 		// Let the consumer actually bind to the producer before sending a msg
 		binderBindUnbindLatency();
@@ -785,7 +785,7 @@ public class KafkaBinderTests extends
 		dlqConsumerProperties.setMaxAttempts(1);
 
 		Binding<MessageChannel> dlqConsumerBinding = binder.bindConsumer(
-				"error.foo.bar." + "testDlqWithNativeEncoding-1", null, dlqChannel,
+				"error.foo.bar." + "testDlqWithNativeEncoding-1",null,dlqChannel,
 				dlqConsumerProperties);
 		binderBindUnbindLatency();
 
@@ -793,16 +793,16 @@ public class KafkaBinderTests extends
 				.withPayload("foo").build();
 
 		moduleOutputChannel.send(message);
-		Message<?> receivedMessage = receive(dlqChannel, 5);
+		Message<?> receivedMessage = receive(dlqChannel,5);
 		assertThat(receivedMessage).isNotNull();
 		assertThat(receivedMessage.getPayload()).isEqualTo("foo".getBytes());
 		Awaitility.await().until(() -> handler.getInvocationCount() == consumerProperties.getMaxAttempts());
 		assertThat(receivedMessage.getHeaders()
 				.get(KafkaMessageChannelBinder.X_ORIGINAL_TOPIC))
-						.isEqualTo("foo.bar".getBytes(StandardCharsets.UTF_8));
+				.isEqualTo("foo.bar".getBytes(StandardCharsets.UTF_8));
 		assertThat(new String((byte[]) receivedMessage.getHeaders()
 				.get(KafkaMessageChannelBinder.X_EXCEPTION_MESSAGE))).startsWith(
-						"Dispatcher failed to deliver Message; nested exception is java.lang.RuntimeException: fail");
+				"Dispatcher failed to deliver Message; nested exception is java.lang.RuntimeException: fail");
 		assertThat(receivedMessage.getHeaders()
 				.get(KafkaMessageChannelBinder.X_EXCEPTION_STACKTRACE)).isNotNull();
 		binderBindUnbindLatency();
@@ -848,9 +848,9 @@ public class KafkaBinderTests extends
 				createConsumerBindingProperties(consumerProperties));
 
 		Binding<MessageChannel> producerBinding = binder.bindProducer("foo.bar",
-				moduleOutputChannel, outputBindingProperties.getProducer());
+				moduleOutputChannel,outputBindingProperties.getProducer());
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer("foo.bar",
-				"testDlqWithNativeEncoding-2", moduleInputChannel, consumerProperties);
+				"testDlqWithNativeEncoding-2",moduleInputChannel,consumerProperties);
 
 		// Let the consumer actually bind to the producer before sending a msg
 		binderBindUnbindLatency();
@@ -864,7 +864,7 @@ public class KafkaBinderTests extends
 		dlqConsumerProperties.setMaxAttempts(1);
 
 		Binding<MessageChannel> dlqConsumerBinding = binder.bindConsumer(
-				"error.foo.bar." + "testDlqWithNativeEncoding-2", null, dlqChannel,
+				"error.foo.bar." + "testDlqWithNativeEncoding-2",null,dlqChannel,
 				dlqConsumerProperties);
 		binderBindUnbindLatency();
 
@@ -895,11 +895,11 @@ public class KafkaBinderTests extends
 		KafkaBinderConfigurationProperties binderConfiguration = createConfigurationProperties();
 
 		Map<String, String> consumerProps = new HashMap<>();
-		consumerProps.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+		consumerProps.put("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
 		binderConfiguration.setConsumerProperties(consumerProps);
 
 		Map<String, String> producerProps = new HashMap<>();
-		producerProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		producerProps.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		binderConfiguration.setProducerProperties(producerProps);
 		Binder binder = getBinder(binderConfiguration);
 
@@ -918,9 +918,9 @@ public class KafkaBinderTests extends
 				createConsumerBindingProperties(consumerProperties));
 
 		Binding<MessageChannel> producerBinding = binder.bindProducer("foo.bar",
-				moduleOutputChannel, outputBindingProperties.getProducer());
+				moduleOutputChannel,outputBindingProperties.getProducer());
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer("foo.bar",
-				"tdwcapsabl", moduleInputChannel, consumerProperties);
+				"tdwcapsabl",moduleInputChannel,consumerProperties);
 
 		// Let the consumer actually bind to the producer before sending a msg
 		binderBindUnbindLatency();
@@ -934,7 +934,7 @@ public class KafkaBinderTests extends
 		dlqConsumerProperties.setMaxAttempts(1);
 
 		Binding<MessageChannel> dlqConsumerBinding = binder.bindConsumer(
-				"error.foo.bar." + "tdwcapsabl", null, dlqChannel,
+				"error.foo.bar." + "tdwcapsabl",null,dlqChannel,
 				dlqConsumerProperties);
 		binderBindUnbindLatency();
 
@@ -957,47 +957,47 @@ public class KafkaBinderTests extends
 
 	@Test
 	public void testDlqAndRetry() throws Exception {
-		testDlqGuts(true, null, null, false, false);
+		testDlqGuts(true,null,null,false,false);
 	}
 
 	@Test
 	public void testDlqAndRetryTransactional() throws Exception {
-		testDlqGuts(true, null, null, true, false);
+		testDlqGuts(true,null,null,true,false);
 	}
 
 	@Test
 	public void testDlq() throws Exception {
-		testDlqGuts(false, null, 3, false, false);
+		testDlqGuts(false,null,3,false,false);
 	}
 
 	@Test
 	public void testDlqWithDlqDestinationResolver() throws Exception {
-		testDlqGuts(false, null, 3, false, true);
+		testDlqGuts(false,null,3,false,true);
 	}
 
 	@Test
 	public void testDlqTransactional() throws Exception {
-		testDlqGuts(false, null, 3, true, false);
+		testDlqGuts(false,null,3,true,false);
 	}
 
 	@Test
 	public void testDlqNone() throws Exception {
-		testDlqGuts(false, HeaderMode.none, 1, false, false);
+		testDlqGuts(false,HeaderMode.none,1,false,false);
 	}
 
 	@Test
 	public void testDlqEmbedded() throws Exception {
-		testDlqGuts(false, HeaderMode.embeddedHeaders, 3, false, false);
+		testDlqGuts(false,HeaderMode.embeddedHeaders,3,false,false);
 	}
 
-	private void testDlqGuts(boolean withRetry, HeaderMode headerMode, Integer dlqPartitions,
-			boolean transactional, boolean useDlqDestResolver) throws Exception {
+	private void testDlqGuts(boolean withRetry,HeaderMode headerMode,Integer dlqPartitions,
+			boolean transactional,boolean useDlqDestResolver) throws Exception {
 
 		int expectedDlqPartition = dlqPartitions == null ? 0 : dlqPartitions - 1;
 		KafkaBinderConfigurationProperties binderConfig = createConfigurationProperties();
 		if (transactional) {
 			binderConfig.getTransaction().setTransactionIdPrefix("tx-");
-			binderConfig.getTransaction().getProducer().getConfiguration().put(ProducerConfig.RETRIES_CONFIG, "1");
+			binderConfig.getTransaction().getProducer().getConfiguration().put(ProducerConfig.RETRIES_CONFIG,"1");
 			binderConfig.setRequiredAcks("all");
 		}
 		DlqPartitionFunction dlqPartitionFunction;
@@ -1005,20 +1005,20 @@ public class KafkaBinderTests extends
 			dlqPartitionFunction = null; // test that ZERO_PARTITION is used
 		}
 		else if (dlqPartitions == null) {
-			dlqPartitionFunction = (group, rec, ex) -> 0;
+			dlqPartitionFunction = (group,rec,ex) -> 0;
 		}
 		else {
-			dlqPartitionFunction = (group, rec, ex) -> dlqPartitions - 1;
+			dlqPartitionFunction = (group,rec,ex) -> dlqPartitions - 1;
 		}
 		DlqDestinationResolver dlqDestinationResolver = null;
 		if (useDlqDestResolver) {
-			dlqDestinationResolver = (cr, e) -> "foo.dlq";
+			dlqDestinationResolver = (cr,e) -> "foo.dlq";
 		}
-		AbstractKafkaTestBinder binder = getBinder(binderConfig, dlqPartitionFunction, dlqDestinationResolver);
+		AbstractKafkaTestBinder binder = getBinder(binderConfig,dlqPartitionFunction,dlqDestinationResolver);
 
 		ExtendedProducerProperties<KafkaProducerProperties> producerProperties = createProducerProperties();
 		producerProperties.getExtension()
-				.setHeaderPatterns(new String[] { MessageHeaders.CONTENT_TYPE });
+				.setHeaderPatterns(new String[]{MessageHeaders.CONTENT_TYPE});
 		producerProperties.setHeaderMode(headerMode);
 		producerProperties.setPartitionCount(2);
 
@@ -1047,20 +1047,20 @@ public class KafkaBinderTests extends
 
 		String producerName = "dlqTest." + uniqueBindingId + ".0";
 		Binding<MessageChannel> producerBinding = binder.bindProducer(producerName,
-				moduleOutputChannel, producerProperties);
-		String consumerDest = producerName + ", " + producerName.replaceAll("0", "1");
+				moduleOutputChannel,producerProperties);
+		String consumerDest = producerName + ", " + producerName.replaceAll("0","1");
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(consumerDest,
-				"testGroup", moduleInputChannel, consumerProperties);
+				"testGroup",moduleInputChannel,consumerProperties);
 
 		AbstractMessageListenerContainer container = TestUtils.getPropertyValue(consumerBinding,
-				"lifecycle.messageListenerContainer", AbstractMessageListenerContainer.class);
+				"lifecycle.messageListenerContainer",AbstractMessageListenerContainer.class);
 		assertThat(container.getContainerProperties().getTopicPartitions().length)
 				.isEqualTo(4); // 2 topics 2 partitions each
 		if (transactional) {
-			assertThat(TestUtils.getPropertyValue(container.getAfterRollbackProcessor(), "kafkaTemplate")).isNotNull();
+			assertThat(TestUtils.getPropertyValue(container.getAfterRollbackProcessor(),"kafkaTemplate")).isNotNull();
 			assertThat(
-					TestUtils.getPropertyValue(container.getAfterRollbackProcessor(), "commitRecovered", Boolean.class))
-							.isTrue();
+					TestUtils.getPropertyValue(container.getAfterRollbackProcessor(),"commitRecovered",Boolean.class))
+					.isTrue();
 		}
 
 		String dlqTopic = useDlqDestResolver ? "foo.dlq" : "error.dlqTest." + uniqueBindingId + ".0.testGroup";
@@ -1068,16 +1068,16 @@ public class KafkaBinderTests extends
 				embeddedKafka.getBrokersAsString()))) {
 			if (useDlqDestResolver) {
 				List<NewTopic> nonProvisionedDlqTopics = new ArrayList<>();
-				NewTopic nTopic = new NewTopic(dlqTopic, 3, (short) 1);
+				NewTopic nTopic = new NewTopic(dlqTopic,3,(short) 1);
 				nonProvisionedDlqTopics.add(nTopic);
 				admin.createTopics(nonProvisionedDlqTopics);
 			}
 			Map<String, TopicDescription> topicDescriptions = admin.describeTopics(Collections.singletonList(dlqTopic))
-				.all()
-				.get(10, TimeUnit.SECONDS);
+					.all()
+					.get(10,TimeUnit.SECONDS);
 			assertThat(topicDescriptions).hasSize(1);
 			assertThat(topicDescriptions.values().iterator().next().partitions())
-				.hasSize(dlqPartitions == null ? 2 : dlqPartitions);
+					.hasSize(dlqPartitions == null ? 2 : dlqPartitions);
 		}
 
 		ExtendedConsumerProperties<KafkaConsumerProperties> dlqConsumerProperties = createConsumerProperties();
@@ -1086,9 +1086,9 @@ public class KafkaBinderTests extends
 		dlqConsumerProperties.getExtension().setTxCommitRecovered(false);
 
 		ApplicationContext context = TestUtils.getPropertyValue(binder.getBinder(),
-				"applicationContext", ApplicationContext.class);
+				"applicationContext",ApplicationContext.class);
 		SubscribableChannel boundErrorChannel = context
-				.getBean(consumerDest + ".testGroup.errors-0", SubscribableChannel.class);
+				.getBean(consumerDest + ".testGroup.errors-0",SubscribableChannel.class);
 		SubscribableChannel globalErrorChannel = context.getBean("errorChannel",
 				SubscribableChannel.class);
 		final AtomicReference<Message<?>> boundErrorChannelMessage = new AtomicReference<>();
@@ -1105,7 +1105,7 @@ public class KafkaBinderTests extends
 		globalErrorChannel.subscribe(globalErrorChannelMessage::set);
 
 		Binding<MessageChannel> dlqConsumerBinding = binder.bindConsumer(
-				dlqTopic, null, dlqChannel,
+				dlqTopic,null,dlqChannel,
 				dlqConsumerProperties);
 		binderBindUnbindLatency();
 		if (transactional) {
@@ -1113,18 +1113,18 @@ public class KafkaBinderTests extends
 					"lifecycle.messageListenerContainer.afterRollbackProcessor.kafkaTemplate")).isNotNull();
 			assertThat(
 					TestUtils.getPropertyValue(dlqConsumerBinding,
-							"lifecycle.messageListenerContainer.afterRollbackProcessor.commitRecovered", Boolean.class))
-							.isFalse();
+							"lifecycle.messageListenerContainer.afterRollbackProcessor.commitRecovered",Boolean.class))
+					.isFalse();
 		}
 
 		String testMessagePayload = "test." + UUID.randomUUID().toString();
 		Message<byte[]> testMessage = MessageBuilder
 				.withPayload(testMessagePayload.getBytes())
-				.setHeader(KafkaHeaders.PARTITION_ID, 1)
+				.setHeader(KafkaHeaders.PARTITION_ID,1)
 				.build();
 		moduleOutputChannel.send(testMessage);
 
-		Message<?> receivedMessage = receive(dlqChannel, 3);
+		Message<?> receivedMessage = receive(dlqChannel,3);
 		assertThat(receivedMessage).isNotNull();
 		assertThat(receivedMessage.getPayload()).isEqualTo(testMessagePayload.getBytes());
 		if (HeaderMode.embeddedHeaders.equals(headerMode)) {
@@ -1133,7 +1133,7 @@ public class KafkaBinderTests extends
 
 			assertThat(receivedMessage.getHeaders()
 					.get(KafkaMessageChannelBinder.X_ORIGINAL_TOPIC))
-							.isEqualTo(producerName);
+					.isEqualTo(producerName);
 
 			assertThat(receivedMessage.getHeaders()
 					.get(KafkaMessageChannelBinder.X_ORIGINAL_PARTITION)).isEqualTo(1);
@@ -1146,12 +1146,12 @@ public class KafkaBinderTests extends
 
 			assertThat(receivedMessage.getHeaders()
 					.get(KafkaMessageChannelBinder.X_ORIGINAL_TIMESTAMP_TYPE))
-							.isEqualTo(TimestampType.CREATE_TIME.toString());
+					.isEqualTo(TimestampType.CREATE_TIME.toString());
 
 			assertThat(((String) receivedMessage.getHeaders()
 					.get(KafkaMessageChannelBinder.X_EXCEPTION_MESSAGE))).startsWith(
-							"Dispatcher failed to deliver Message; nested exception "
-									+ "is java.lang.RuntimeException: fail");
+					"Dispatcher failed to deliver Message; nested exception "
+							+ "is java.lang.RuntimeException: fail");
 			assertThat(receivedMessage.getHeaders()
 					.get(KafkaMessageChannelBinder.X_EXCEPTION_STACKTRACE)).isNotNull();
 			assertThat(receivedMessage.getHeaders()
@@ -1165,37 +1165,37 @@ public class KafkaBinderTests extends
 
 			assertThat(receivedMessage.getHeaders()
 					.get(KafkaMessageChannelBinder.X_ORIGINAL_TOPIC))
-							.isEqualTo(producerName.getBytes(StandardCharsets.UTF_8));
+					.isEqualTo(producerName.getBytes(StandardCharsets.UTF_8));
 
 			assertThat(receivedMessage.getHeaders()
 					.get(KafkaMessageChannelBinder.X_ORIGINAL_PARTITION)).isEqualTo(
-							ByteBuffer.allocate(Integer.BYTES).putInt(1).array());
+					ByteBuffer.allocate(Integer.BYTES).putInt(1).array());
 
 			assertThat(receivedMessage.getHeaders()
 					.get(KafkaMessageChannelBinder.X_ORIGINAL_OFFSET)).isEqualTo(
-							ByteBuffer.allocate(Long.BYTES).putLong(0).array());
+					ByteBuffer.allocate(Long.BYTES).putLong(0).array());
 
 			assertThat(receivedMessage.getHeaders()
 					.get(KafkaMessageChannelBinder.X_ORIGINAL_TIMESTAMP)).isNotNull();
 
 			assertThat(receivedMessage.getHeaders()
 					.get(KafkaMessageChannelBinder.X_ORIGINAL_TIMESTAMP_TYPE))
-							.isEqualTo(TimestampType.CREATE_TIME.toString().getBytes());
+					.isEqualTo(TimestampType.CREATE_TIME.toString().getBytes());
 
 			if (transactional) {
 				assertThat(new String((byte[]) receivedMessage.getHeaders()
 						.get(KafkaMessageChannelBinder.X_EXCEPTION_MESSAGE))).startsWith(
-								"Transaction rollback limit exceeded");
+						"Transaction rollback limit exceeded");
 				assertThat(new String((byte[]) receivedMessage.getHeaders()
 						.get(KafkaMessageChannelBinder.X_EXCEPTION_MESSAGE))).contains(
-								"Dispatcher failed to deliver Message; nested exception "
-										+ "is java.lang.RuntimeException: fail");
+						"Dispatcher failed to deliver Message; nested exception "
+								+ "is java.lang.RuntimeException: fail");
 			}
 			else {
 				assertThat(new String((byte[]) receivedMessage.getHeaders()
 						.get(KafkaMessageChannelBinder.X_EXCEPTION_MESSAGE))).startsWith(
-								"Dispatcher failed to deliver Message; nested exception "
-										+ "is java.lang.RuntimeException: fail");
+						"Dispatcher failed to deliver Message; nested exception "
+								+ "is java.lang.RuntimeException: fail");
 			}
 
 			assertThat(receivedMessage.getHeaders()
@@ -1249,16 +1249,16 @@ public class KafkaBinderTests extends
 		moduleInputChannel.subscribe(handler);
 		long uniqueBindingId = System.currentTimeMillis();
 		Binding<MessageChannel> producerBinding = binder.bindProducer(
-				"retryTest." + uniqueBindingId + ".0", moduleOutputChannel,
+				"retryTest." + uniqueBindingId + ".0",moduleOutputChannel,
 				producerProperties);
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(
-				"retryTest." + uniqueBindingId + ".0", "testGroup", moduleInputChannel,
+				"retryTest." + uniqueBindingId + ".0","testGroup",moduleInputChannel,
 				consumerProperties);
 		ExtendedConsumerProperties<KafkaConsumerProperties> dlqConsumerProperties = createConsumerProperties();
 		dlqConsumerProperties.setMaxAttempts(1);
 		QueueChannel dlqChannel = new QueueChannel();
 		Binding<MessageChannel> dlqConsumerBinding = binder.bindConsumer(
-				"error.retryTest." + uniqueBindingId + ".0.testGroup", null, dlqChannel,
+				"error.retryTest." + uniqueBindingId + ".0.testGroup",null,dlqChannel,
 				dlqConsumerProperties);
 
 		String testMessagePayload = "test." + UUID.randomUUID().toString();
@@ -1266,7 +1266,7 @@ public class KafkaBinderTests extends
 				.withPayload(testMessagePayload.getBytes()).build();
 		moduleOutputChannel.send(testMessage);
 
-		Message<?> dlqMessage = receive(dlqChannel, 3);
+		Message<?> dlqMessage = receive(dlqChannel,3);
 		assertThat(dlqMessage).isNotNull();
 		assertThat(dlqMessage.getPayload()).isEqualTo(testMessagePayload.getBytes());
 
@@ -1276,8 +1276,8 @@ public class KafkaBinderTests extends
 				.next().getValue();
 		assertThat(handledMessage).isNotNull();
 		assertThat(
-				new String((byte[]) handledMessage.getPayload(), StandardCharsets.UTF_8))
-						.isEqualTo(testMessagePayload);
+				new String((byte[]) handledMessage.getPayload(),StandardCharsets.UTF_8))
+				.isEqualTo(testMessagePayload);
 		assertThat(handler.getInvocationCount())
 				.isEqualTo(consumerProperties.getMaxAttempts());
 		binderBindUnbindLatency();
@@ -1287,7 +1287,7 @@ public class KafkaBinderTests extends
 		// on the second attempt the message is not redelivered because the DLQ is set
 		QueueChannel successfulInputChannel = new QueueChannel();
 		consumerBinding = binder.bindConsumer("retryTest." + uniqueBindingId + ".0",
-				"testGroup", successfulInputChannel, consumerProperties);
+				"testGroup",successfulInputChannel,consumerProperties);
 		String testMessage2Payload = "test." + UUID.randomUUID().toString();
 		Message<byte[]> testMessage2 = MessageBuilder
 				.withPayload(testMessage2Payload.getBytes()).build();
@@ -1325,10 +1325,10 @@ public class KafkaBinderTests extends
 		moduleInputChannel.subscribe(handler);
 		long uniqueBindingId = System.currentTimeMillis();
 		Binding<MessageChannel> producerBinding = binder.bindProducer(
-				"retryTest." + uniqueBindingId + ".0", moduleOutputChannel,
+				"retryTest." + uniqueBindingId + ".0",moduleOutputChannel,
 				producerProperties);
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(
-				"retryTest." + uniqueBindingId + ".0", "testGroup", moduleInputChannel,
+				"retryTest." + uniqueBindingId + ".0","testGroup",moduleInputChannel,
 				consumerProperties);
 
 		String testMessagePayload = "test." + UUID.randomUUID();
@@ -1359,18 +1359,18 @@ public class KafkaBinderTests extends
 				producerBindingProperties);
 
 		CountDownLatch latch = new CountDownLatch(1);
-		CommonErrorHandler commonErrorHandler = new DefaultErrorHandler(new FixedBackOff(0L, 0L)) {
+		CommonErrorHandler commonErrorHandler = new DefaultErrorHandler(new FixedBackOff(0L,0L)) {
 			@Override
-			public void handleRemaining(Exception thrownException, List<ConsumerRecord<?, ?>> records,
-										Consumer<?, ?> consumer, MessageListenerContainer container) {
-				super.handleRemaining(thrownException, records, consumer, container);
+			public void handleRemaining(Exception thrownException,List<ConsumerRecord<?, ?>> records,
+					Consumer<?, ?> consumer,MessageListenerContainer container) {
+				super.handleRemaining(thrownException,records,consumer,container);
 				latch.countDown();
 			}
 		};
 
 		ConfigurableApplicationContext context = TestUtils.getPropertyValue(binder,
-				"binder.applicationContext", ConfigurableApplicationContext.class);
-		context.getBeanFactory().registerSingleton("fooCommonErrorHandler", commonErrorHandler);
+				"binder.applicationContext",ConfigurableApplicationContext.class);
+		context.getBeanFactory().registerSingleton("fooCommonErrorHandler",commonErrorHandler);
 
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 		consumerProperties.setMaxAttempts(2);
@@ -1385,10 +1385,10 @@ public class KafkaBinderTests extends
 		moduleInputChannel.subscribe(handler);
 		long uniqueBindingId = System.currentTimeMillis();
 		Binding<MessageChannel> producerBinding = binder.bindProducer(
-				"retryTest." + uniqueBindingId + ".0", moduleOutputChannel,
+				"retryTest." + uniqueBindingId + ".0",moduleOutputChannel,
 				producerProperties);
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(
-				"retryTest." + uniqueBindingId + ".0", "testGroup", moduleInputChannel,
+				"retryTest." + uniqueBindingId + ".0","testGroup",moduleInputChannel,
 				consumerProperties);
 
 		String testMessagePayload = "test." + UUID.randomUUID();
@@ -1401,7 +1401,7 @@ public class KafkaBinderTests extends
 		//Assertions for the CommonErrorHandler configured on the consumer binding (commonErrorHandlerBeanName).
 		assertThat(KafkaTestUtils.getPropertyValue(consumerBinding,
 				"lifecycle.messageListenerContainer.commonErrorHandler")).isSameAs(commonErrorHandler);
-		latch.await(10, TimeUnit.SECONDS);
+		latch.await(10,TimeUnit.SECONDS);
 
 		binderBindUnbindLatency();
 		consumerBinding.unbind();
@@ -1437,16 +1437,16 @@ public class KafkaBinderTests extends
 		moduleInputChannel.subscribe(handler);
 		long uniqueBindingId = System.currentTimeMillis();
 		Binding<MessageChannel> producerBinding = binder.bindProducer(
-				"retryTest." + uniqueBindingId + ".0", moduleOutputChannel,
+				"retryTest." + uniqueBindingId + ".0",moduleOutputChannel,
 				producerProperties);
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(
-				"retryTest." + uniqueBindingId + ".0", "testGroup", moduleInputChannel,
+				"retryTest." + uniqueBindingId + ".0","testGroup",moduleInputChannel,
 				consumerProperties);
 		ExtendedConsumerProperties<KafkaConsumerProperties> dlqConsumerProperties = createConsumerProperties();
 		dlqConsumerProperties.setMaxAttempts(1);
 		QueueChannel dlqChannel = new QueueChannel();
 		Binding<MessageChannel> dlqConsumerBinding = binder.bindConsumer(
-				"error.retryTest." + uniqueBindingId + ".0.testGroup", null, dlqChannel,
+				"error.retryTest." + uniqueBindingId + ".0.testGroup",null,dlqChannel,
 				dlqConsumerProperties);
 
 		String testMessagePayload = "test." + UUID.randomUUID().toString();
@@ -1454,7 +1454,7 @@ public class KafkaBinderTests extends
 				.withPayload(testMessagePayload.getBytes()).build();
 		moduleOutputChannel.send(testMessage);
 
-		Message<?> dlqMessage = receive(dlqChannel, 3);
+		Message<?> dlqMessage = receive(dlqChannel,3);
 		assertThat(dlqMessage).isNotNull();
 		assertThat(dlqMessage.getPayload()).isEqualTo(testMessagePayload.getBytes());
 
@@ -1464,7 +1464,7 @@ public class KafkaBinderTests extends
 				.next().getValue();
 		assertThat(handledMessage).isNotNull();
 		assertThat(
-				new String((byte[]) handledMessage.getPayload(), StandardCharsets.UTF_8))
+				new String((byte[]) handledMessage.getPayload(),StandardCharsets.UTF_8))
 				.isEqualTo(testMessagePayload);
 		assertThat(handler.getInvocationCount())
 				.isEqualTo(consumerProperties.getMaxAttempts());
@@ -1475,7 +1475,7 @@ public class KafkaBinderTests extends
 		// on the second attempt the message is not redelivered because the DLQ is set and the record in error is already committed.
 		QueueChannel successfulInputChannel = new QueueChannel();
 		consumerBinding = binder.bindConsumer("retryTest." + uniqueBindingId + ".0",
-				"testGroup", successfulInputChannel, consumerProperties);
+				"testGroup",successfulInputChannel,consumerProperties);
 		String testMessage2Payload = "test1." + UUID.randomUUID().toString();
 		Message<byte[]> testMessage2 = MessageBuilder
 				.withPayload(testMessage2Payload.getBytes()).build();
@@ -1518,23 +1518,23 @@ public class KafkaBinderTests extends
 
 		long uniqueBindingId = System.currentTimeMillis();
 		Binding<MessageChannel> producerBinding = binder.bindProducer(
-				"retryTest." + uniqueBindingId + ".0", moduleOutputChannel,
+				"retryTest." + uniqueBindingId + ".0",moduleOutputChannel,
 				producerProperties);
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(
-				"retryTest." + uniqueBindingId + ".0", "testGroup", moduleInputChannel,
+				"retryTest." + uniqueBindingId + ".0","testGroup",moduleInputChannel,
 				consumerProperties);
 		ExtendedConsumerProperties<KafkaConsumerProperties> dlqConsumerProperties = createConsumerProperties();
 		dlqConsumerProperties.setMaxAttempts(1);
 		QueueChannel dlqChannel = new QueueChannel();
-		Binding<MessageChannel> dlqConsumerBinding = binder.bindConsumer(dlqName, null,
-				dlqChannel, dlqConsumerProperties);
+		Binding<MessageChannel> dlqConsumerBinding = binder.bindConsumer(dlqName,null,
+				dlqChannel,dlqConsumerProperties);
 
 		String testMessagePayload = "test." + UUID.randomUUID().toString();
 		Message<byte[]> testMessage = MessageBuilder
 				.withPayload(testMessagePayload.getBytes()).build();
 		moduleOutputChannel.send(testMessage);
 
-		Message<?> dlqMessage = receive(dlqChannel, 3);
+		Message<?> dlqMessage = receive(dlqChannel,3);
 		assertThat(dlqMessage).isNotNull();
 		assertThat(dlqMessage.getPayload()).isEqualTo(testMessagePayload.getBytes());
 
@@ -1544,8 +1544,8 @@ public class KafkaBinderTests extends
 				.next().getValue();
 		assertThat(handledMessage).isNotNull();
 		assertThat(
-				new String((byte[]) handledMessage.getPayload(), StandardCharsets.UTF_8))
-						.isEqualTo(testMessagePayload);
+				new String((byte[]) handledMessage.getPayload(),StandardCharsets.UTF_8))
+				.isEqualTo(testMessagePayload);
 		assertThat(handler.getInvocationCount())
 				.isEqualTo(consumerProperties.getMaxAttempts());
 		binderBindUnbindLatency();
@@ -1555,7 +1555,7 @@ public class KafkaBinderTests extends
 		// on the second attempt the message is not redelivered because the DLQ is set
 		QueueChannel successfulInputChannel = new QueueChannel();
 		consumerBinding = binder.bindConsumer("retryTest." + uniqueBindingId + ".0",
-				"testGroup", successfulInputChannel, consumerProperties);
+				"testGroup",successfulInputChannel,consumerProperties);
 		String testMessage2Payload = "test." + UUID.randomUUID().toString();
 		Message<byte[]> testMessage2 = MessageBuilder
 				.withPayload(testMessage2Payload.getBytes()).build();
@@ -1587,13 +1587,13 @@ public class KafkaBinderTests extends
 	// type
 	// - yet being converted by the json converter
 	public void testCompression() throws Exception {
-		final KafkaProducerProperties.CompressionType[] codecs = new KafkaProducerProperties.CompressionType[] {
+		final KafkaProducerProperties.CompressionType[] codecs = new KafkaProducerProperties.CompressionType[]{
 				KafkaProducerProperties.CompressionType.none,
 				KafkaProducerProperties.CompressionType.gzip,
 				KafkaProducerProperties.CompressionType.snappy,
 				KafkaProducerProperties.CompressionType.zstd};
 		byte[] testPayload = new byte[2048];
-		Arrays.fill(testPayload, (byte) 65);
+		Arrays.fill(testPayload,(byte) 65);
 		Binder binder = getBinder();
 		for (KafkaProducerProperties.CompressionType codec : codecs) {
 			ExtendedProducerProperties<KafkaProducerProperties> producerProperties = createProducerProperties();
@@ -1609,9 +1609,9 @@ public class KafkaBinderTests extends
 					createConsumerBindingProperties(consumerProperties));
 
 			Binding<MessageChannel> producerBinding = binder.bindProducer(
-					"testCompression", moduleOutputChannel, producerProperties);
+					"testCompression",moduleOutputChannel,producerProperties);
 			Binding<MessageChannel> consumerBinding = binder.bindConsumer(
-					"testCompression", "test", moduleInputChannel, consumerProperties);
+					"testCompression","test",moduleInputChannel,consumerProperties);
 			Message<?> message = org.springframework.integration.support.MessageBuilder
 					.withPayload(testPayload).build();
 			// Let the consumer actually bind to the producer before sending a msg
@@ -1628,7 +1628,7 @@ public class KafkaBinderTests extends
 					latch.countDown();
 				}
 			});
-			Assert.isTrue(latch.await(5, TimeUnit.SECONDS), "Failed to receive message");
+			Assert.isTrue(latch.await(5,TimeUnit.SECONDS),"Failed to receive message");
 
 			assertThat(inboundMessageRef.get()).isNotNull();
 			assertThat(inboundMessageRef.get().getPayload()).containsExactly(testPayload);
@@ -1660,12 +1660,12 @@ public class KafkaBinderTests extends
 					createConsumerBindingProperties(consumerProperties));
 
 			String testTopicName = UUID.randomUUID().toString();
-			producerBinding = binder.bindProducer(testTopicName, output,
+			producerBinding = binder.bindProducer(testTopicName,output,
 					producerBindingProperties.getProducer());
 			String testPayload1 = "foo-" + UUID.randomUUID().toString();
 			output.send(new GenericMessage<>(testPayload1.getBytes()));
 
-			consumerBinding = binder.bindConsumer(testTopicName, "startOffsets", input1,
+			consumerBinding = binder.bindConsumer(testTopicName,"startOffsets",input1,
 					consumerProperties);
 			CountDownLatch latch = new CountDownLatch(1);
 			AtomicReference<Message<byte[]>> inboundMessageRef1 = new AtomicReference<>();
@@ -1678,7 +1678,7 @@ public class KafkaBinderTests extends
 				}
 			};
 			input1.subscribe(messageHandler);
-			Assert.isTrue(latch.await(5, TimeUnit.SECONDS), "Failed to receive message");
+			Assert.isTrue(latch.await(5,TimeUnit.SECONDS),"Failed to receive message");
 			assertThat(inboundMessageRef1.get()).isNotNull();
 			String testPayload2 = "foo-" + UUID.randomUUID().toString();
 			input1.unsubscribe(messageHandler);
@@ -1694,7 +1694,7 @@ public class KafkaBinderTests extends
 					latch1.countDown();
 				}
 			});
-			Assert.isTrue(latch1.await(5, TimeUnit.SECONDS), "Failed to receive message");
+			Assert.isTrue(latch1.await(5,TimeUnit.SECONDS),"Failed to receive message");
 
 			assertThat(inboundMessageRef2.get()).isNotNull();
 			assertThat(new String(inboundMessageRef2.get().getPayload(),
@@ -1730,16 +1730,16 @@ public class KafkaBinderTests extends
 		producer1Props.getExtension().setUseTopicHeader(true);
 
 		Binding<MessageChannel> producerBinding1 = binder.bindProducer("foo.x",
-				moduleOutputChannel1, producer1Props);
+				moduleOutputChannel1,producer1Props);
 		Binding<MessageChannel> producerBinding2 = binder.bindProducer("foo.y",
-				moduleOutputChannel2, createProducerProperties());
+				moduleOutputChannel2,createProducerProperties());
 
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 		consumerProperties.getExtension().setAutoRebalanceEnabled(false);
-		Binding<MessageChannel> consumerBinding1 = binder.bindConsumer("foo.x", "test1",
-				moduleInputChannel, consumerProperties);
-		Binding<MessageChannel> consumerBinding2 = binder.bindConsumer("foo.y", "test2",
-				moduleInputChannel, consumerProperties);
+		Binding<MessageChannel> consumerBinding1 = binder.bindConsumer("foo.x","test1",
+				moduleInputChannel,consumerProperties);
+		Binding<MessageChannel> consumerBinding2 = binder.bindConsumer("foo.y","test2",
+				moduleInputChannel,consumerProperties);
 
 		String testPayload1 = "foo1";
 		Message<?> message1 = org.springframework.integration.support.MessageBuilder
@@ -1750,7 +1750,7 @@ public class KafkaBinderTests extends
 		String testPayload3 = "foo3";
 		Message<?> message3 = org.springframework.integration.support.MessageBuilder
 				.withPayload(testPayload3.getBytes())
-				.setHeader(KafkaHeaders.TOPIC, "foo.y")
+				.setHeader(KafkaHeaders.TOPIC,"foo.y")
 				.build();
 
 		// Let the consumer actually bind to the producer before sending a msg
@@ -1768,7 +1768,7 @@ public class KafkaBinderTests extends
 		assertThat(messages[1]).isNotNull();
 		assertThat(messages[1]).isNotNull();
 		assertThat(messages).extracting("payload").containsExactlyInAnyOrder(
-				testPayload1.getBytes(), testPayload2.getBytes(), testPayload3.getBytes());
+				testPayload1.getBytes(),testPayload2.getBytes(),testPayload3.getBytes());
 		Arrays.asList(messages).forEach(message -> {
 			if (new String((byte[]) message.getPayload()).equals("foo1")) {
 				assertThat(message.getHeaders().get(KafkaHeaders.RECEIVED_TOPIC)).isEqualTo("foo.x");
@@ -1796,14 +1796,14 @@ public class KafkaBinderTests extends
 
 		Binding<MessageChannel> producerBinding = binder.bindProducer(
 				"testManualAckSucceedsWhenAutoCommitOffsetIsTurnedOff",
-				moduleOutputChannel, createProducerProperties());
+				moduleOutputChannel,createProducerProperties());
 
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 		consumerProperties.getExtension().setAckMode(ContainerProperties.AckMode.MANUAL);
 
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(
-				"testManualAckSucceedsWhenAutoCommitOffsetIsTurnedOff", "test",
-				moduleInputChannel, consumerProperties);
+				"testManualAckSucceedsWhenAutoCommitOffsetIsTurnedOff","test",
+				moduleInputChannel,consumerProperties);
 
 		String testPayload1 = "foo" + UUID.randomUUID().toString();
 		Message<?> message1 = org.springframework.integration.support.MessageBuilder
@@ -1818,7 +1818,7 @@ public class KafkaBinderTests extends
 		assertThat(receivedMessage.getHeaders().get(KafkaHeaders.ACKNOWLEDGMENT))
 				.isNotNull();
 		Acknowledgment acknowledgment = receivedMessage.getHeaders()
-				.get(KafkaHeaders.ACKNOWLEDGMENT, Acknowledgment.class);
+				.get(KafkaHeaders.ACKNOWLEDGMENT,Acknowledgment.class);
 		try {
 			acknowledgment.acknowledge();
 		}
@@ -1843,16 +1843,16 @@ public class KafkaBinderTests extends
 
 		Binding<MessageChannel> producerBinding = binder.bindProducer(
 				"testManualAckIsNotPossibleWhenAutoCommitOffsetIsEnabledOnTheBinder",
-				moduleOutputChannel, createProducerProperties());
+				moduleOutputChannel,createProducerProperties());
 
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(
 				"testManualAckIsNotPossibleWhenAutoCommitOffsetIsEnabledOnTheBinder",
-				"test", moduleInputChannel, consumerProperties);
+				"test",moduleInputChannel,consumerProperties);
 
 		AbstractMessageListenerContainer<?, ?> container = TestUtils.getPropertyValue(
-				consumerBinding, "lifecycle.messageListenerContainer",
+				consumerBinding,"lifecycle.messageListenerContainer",
 				AbstractMessageListenerContainer.class);
 		assertThat(container.getContainerProperties().getAckMode())
 				.isEqualTo(ContainerProperties.AckMode.BATCH);
@@ -1885,11 +1885,11 @@ public class KafkaBinderTests extends
 				createProducerBindingProperties(producerProperties));
 
 		String testDestination = "testDestination"
-				+ UUID.randomUUID().toString().replace("-", "");
+				+ UUID.randomUUID().toString().replace("-","");
 
-		producerProperties.setRequiredGroups("test1", "test2");
+		producerProperties.setRequiredGroups("test1","test2");
 		Binding<MessageChannel> producerBinding = binder.bindProducer(testDestination,
-				output, producerProperties);
+				output,producerProperties);
 
 		String testPayload = "foo-" + UUID.randomUUID().toString();
 		output.send(new GenericMessage<>(testPayload.getBytes()));
@@ -1899,13 +1899,13 @@ public class KafkaBinderTests extends
 		consumerProperties.getExtension().setAutoRebalanceEnabled(false);
 		consumerProperties.getExtension().setAckMode(ContainerProperties.AckMode.RECORD);
 		Binding<MessageChannel> consumerBinding1 = binder.bindConsumer(testDestination,
-				"test1", inbound1, consumerProperties);
+				"test1",inbound1,consumerProperties);
 		QueueChannel inbound2 = new QueueChannel();
 		Binding<MessageChannel> consumerBinding2 = binder.bindConsumer(testDestination,
-				"test2", inbound2, consumerProperties);
+				"test2",inbound2,consumerProperties);
 
 		AbstractMessageListenerContainer<?, ?> container = TestUtils.getPropertyValue(
-				consumerBinding2, "lifecycle.messageListenerContainer",
+				consumerBinding2,"lifecycle.messageListenerContainer",
 				AbstractMessageListenerContainer.class);
 		assertThat(container.getContainerProperties().getAckMode())
 				.isEqualTo(ContainerProperties.AckMode.RECORD);
@@ -1938,18 +1938,18 @@ public class KafkaBinderTests extends
 		consumerProperties.getExtension().setAutoRebalanceEnabled(false);
 		QueueChannel input0 = new QueueChannel();
 		input0.setBeanName("test.input0S");
-		Binding<MessageChannel> input0Binding = binder.bindConsumer("part.0", "test",
-				input0, consumerProperties);
+		Binding<MessageChannel> input0Binding = binder.bindConsumer("part.0","test",
+				input0,consumerProperties);
 		consumerProperties.setInstanceIndex(1);
 		QueueChannel input1 = new QueueChannel();
 		input1.setBeanName("test.input1S");
-		Binding<MessageChannel> input1Binding = binder.bindConsumer("part.0", "test",
-				input1, consumerProperties);
+		Binding<MessageChannel> input1Binding = binder.bindConsumer("part.0","test",
+				input1,consumerProperties);
 		consumerProperties.setInstanceIndex(2);
 		QueueChannel input2 = new QueueChannel();
 		input2.setBeanName("test.input2S");
-		Binding<MessageChannel> input2Binding = binder.bindConsumer("part.0", "test",
-				input2, consumerProperties);
+		Binding<MessageChannel> input2Binding = binder.bindConsumer("part.0","test",
+				input2,consumerProperties);
 
 		ExtendedProducerProperties<KafkaProducerProperties> producerProperties = createProducerProperties();
 		producerProperties.setPartitionKeyExpression(
@@ -1957,17 +1957,17 @@ public class KafkaBinderTests extends
 		producerProperties.setPartitionSelectorExpression(
 				spelExpressionParser.parseExpression("hashCode()"));
 		producerProperties.setPartitionCount(3);
-		invokeCreateTopic("output", 6, 1);
+		invokeCreateTopic("output",6,1);
 
 		DirectChannel output = createBindableChannel("output",
 				createProducerBindingProperties(producerProperties));
 		output.setBeanName("test.output");
-		Binding<MessageChannel> outputBinding = binder.bindProducer("part.0", output,
+		Binding<MessageChannel> outputBinding = binder.bindProducer("part.0",output,
 				producerProperties);
 		try {
 			Object endpoint = extractEndpoint(outputBinding);
 			assertThat(getEndpointRouting(endpoint))
-					.contains(getExpectedRoutingBaseDestination("part.0", "test")
+					.contains(getExpectedRoutingBaseDestination("part.0","test")
 							+ "-' + headers['partition']");
 		}
 		catch (UnsupportedOperationException ignored) {
@@ -1977,15 +1977,15 @@ public class KafkaBinderTests extends
 		interceptors.forEach(interceptor -> {
 			if (interceptor instanceof PartitioningInterceptor) {
 				count.set(TestUtils.getPropertyValue(interceptor,
-						"partitionHandler.partitionCount", Integer.class));
+						"partitionHandler.partitionCount",Integer.class));
 			}
 		});
 		assertThat(count.get()).isEqualTo(6);
 		Message<Integer> message2 = org.springframework.integration.support.MessageBuilder
 				.withPayload(2)
-				.setHeader(IntegrationMessageHeaderAccessor.CORRELATION_ID, "foo")
-				.setHeader(IntegrationMessageHeaderAccessor.SEQUENCE_NUMBER, 42)
-				.setHeader(IntegrationMessageHeaderAccessor.SEQUENCE_SIZE, 43).build();
+				.setHeader(IntegrationMessageHeaderAccessor.CORRELATION_ID,"foo")
+				.setHeader(IntegrationMessageHeaderAccessor.SEQUENCE_NUMBER,42)
+				.setHeader(IntegrationMessageHeaderAccessor.SEQUENCE_SIZE,43).build();
 		output.send(message2);
 		output.send(new GenericMessage<>(1));
 		output.send(new GenericMessage<>(0));
@@ -2012,25 +2012,25 @@ public class KafkaBinderTests extends
 		ObjectMapper om = new ObjectMapper();
 
 		if (usesExplicitRouting()) {
-			assertThat(om.readValue((byte[]) receive0.getPayload(), Integer.class))
+			assertThat(om.readValue((byte[]) receive0.getPayload(),Integer.class))
 					.isEqualTo(0);
-			assertThat(om.readValue((byte[]) receive1.getPayload(), Integer.class))
+			assertThat(om.readValue((byte[]) receive1.getPayload(),Integer.class))
 					.isEqualTo(1);
-			assertThat(om.readValue((byte[]) receive2.getPayload(), Integer.class))
+			assertThat(om.readValue((byte[]) receive2.getPayload(),Integer.class))
 					.isEqualTo(2);
 			assertThat(receive2).has(correlationHeadersForPayload2);
 		}
 		else {
-			List<Message<?>> receivedMessages = Arrays.asList(receive0, receive1,
+			List<Message<?>> receivedMessages = Arrays.asList(receive0,receive1,
 					receive2);
 			assertThat(receivedMessages).extracting("payload").containsExactlyInAnyOrder(
-					new byte[] { 48 }, new byte[] { 49 }, new byte[] { 50 });
+					new byte[]{48},new byte[]{49},new byte[]{50});
 			Condition<Message<?>> payloadIs2 = new Condition<Message<?>>() {
 
 				@Override
 				public boolean matches(Message<?> value) {
 					try {
-						return om.readValue((byte[]) value.getPayload(), Integer.class)
+						return om.readValue((byte[]) value.getPayload(),Integer.class)
 								.equals(2);
 					}
 					catch (IOException e) {
@@ -2051,7 +2051,7 @@ public class KafkaBinderTests extends
 
 	@Test
 //	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked","rawtypes"})
 	public void testPartitionedModuleJava() throws Exception {
 		Binder binder = getBinder();
 
@@ -2065,42 +2065,42 @@ public class KafkaBinderTests extends
 		consumerProperties.getExtension().setAutoRebalanceEnabled(false);
 		QueueChannel input0 = new QueueChannel();
 		input0.setBeanName("test.input0J");
-		Binding<MessageChannel> input0Binding = binder.bindConsumer("partJ.0", "test",
-				input0, consumerProperties);
+		Binding<MessageChannel> input0Binding = binder.bindConsumer("partJ.0","test",
+				input0,consumerProperties);
 		consumerProperties.setInstanceIndex(1);
 		QueueChannel input1 = new QueueChannel();
 		input1.setBeanName("test.input1J");
-		Binding<MessageChannel> input1Binding = binder.bindConsumer("partJ.0", "test",
-				input1, consumerProperties);
+		Binding<MessageChannel> input1Binding = binder.bindConsumer("partJ.0","test",
+				input1,consumerProperties);
 		consumerProperties.setInstanceIndex(2);
 		QueueChannel input2 = new QueueChannel();
 		input2.setBeanName("test.input2J");
-		Binding<MessageChannel> input2Binding = binder.bindConsumer("partJ.0", "test",
-				input2, consumerProperties);
+		Binding<MessageChannel> input2Binding = binder.bindConsumer("partJ.0","test",
+				input2,consumerProperties);
 		consumerProperties.setInstanceIndex(3);
 		QueueChannel input3 = new QueueChannel();
 		input3.setBeanName("test.input3J");
-		Binding<MessageChannel> input3Binding = binder.bindConsumer("partJ.0", "test",
-				input3, consumerProperties);
+		Binding<MessageChannel> input3Binding = binder.bindConsumer("partJ.0","test",
+				input3,consumerProperties);
 
 		ExtendedProducerProperties<KafkaProducerProperties> producerProperties = createProducerProperties();
 
 		this.applicationContext.registerBean("pkExtractor",
-				PartitionTestSupport.class, () -> new PartitionTestSupport());
+				PartitionTestSupport.class,() -> new PartitionTestSupport());
 		this.applicationContext.registerBean("pkSelector",
-				PartitionTestSupport.class, () -> new PartitionTestSupport());
+				PartitionTestSupport.class,() -> new PartitionTestSupport());
 		producerProperties.setPartitionKeyExtractorName("pkExtractor");
 		producerProperties.setPartitionSelectorName("pkSelector");
 		producerProperties.setPartitionCount(3); // overridden to 8 on the actual topic
 		DirectChannel output = createBindableChannel("output",
 				createProducerBindingProperties(producerProperties));
 		output.setBeanName("test.output");
-		Binding<MessageChannel> outputBinding = binder.bindProducer("partJ.0", output,
+		Binding<MessageChannel> outputBinding = binder.bindProducer("partJ.0",output,
 				producerProperties);
 		if (usesExplicitRouting()) {
 			Object endpoint = extractEndpoint(outputBinding);
 			assertThat(getEndpointRouting(endpoint))
-					.contains(getExpectedRoutingBaseDestination("partJ.0", "test")
+					.contains(getExpectedRoutingBaseDestination("partJ.0","test")
 							+ "-' + headers['partition']");
 		}
 
@@ -2119,13 +2119,13 @@ public class KafkaBinderTests extends
 		assertThat(receive3).isNotNull();
 		ObjectMapper om = new ObjectMapper();
 
-		assertThat(om.readValue((byte[]) receive0.getPayload(), Integer.class))
+		assertThat(om.readValue((byte[]) receive0.getPayload(),Integer.class))
 				.isEqualTo(0);
-		assertThat(om.readValue((byte[]) receive1.getPayload(), Integer.class))
+		assertThat(om.readValue((byte[]) receive1.getPayload(),Integer.class))
 				.isEqualTo(1);
-		assertThat(om.readValue((byte[]) receive2.getPayload(), Integer.class))
+		assertThat(om.readValue((byte[]) receive2.getPayload(),Integer.class))
 				.isEqualTo(2);
-		assertThat(om.readValue((byte[]) receive3.getPayload(), Integer.class))
+		assertThat(om.readValue((byte[]) receive3.getPayload(),Integer.class))
 				.isEqualTo(3);
 
 		input0Binding.unbind();
@@ -2142,18 +2142,18 @@ public class KafkaBinderTests extends
 		Binder binder = getBinder();
 		BindingProperties producerBindingProperties = createProducerBindingProperties(
 				createProducerProperties());
-		DirectChannel output = createBindableChannel("output", producerBindingProperties);
+		DirectChannel output = createBindableChannel("output",producerBindingProperties);
 		Binding<MessageChannel> producerBinding = binder.bindProducer("defaultGroup.0",
-				output, producerBindingProperties.getProducer());
+				output,producerBindingProperties.getProducer());
 
 		QueueChannel input1 = new QueueChannel();
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
-		Binding<MessageChannel> binding1 = binder.bindConsumer("defaultGroup.0", null,
-				input1, consumerProperties);
+		Binding<MessageChannel> binding1 = binder.bindConsumer("defaultGroup.0",null,
+				input1,consumerProperties);
 
 		QueueChannel input2 = new QueueChannel();
-		Binding<MessageChannel> binding2 = binder.bindConsumer("defaultGroup.0", null,
-				input2, consumerProperties);
+		Binding<MessageChannel> binding2 = binder.bindConsumer("defaultGroup.0",null,
+				input2,consumerProperties);
 		// Since we don't provide any topic info, let Kafka bind the consumer successfully
 		Thread.sleep(1000);
 		String testPayload1 = "foo-" + UUID.randomUUID().toString();
@@ -2161,12 +2161,12 @@ public class KafkaBinderTests extends
 
 		Message<byte[]> receivedMessage1 = (Message<byte[]>) receive(input1);
 		assertThat(receivedMessage1).isNotNull();
-		assertThat(new String(receivedMessage1.getPayload(), StandardCharsets.UTF_8))
+		assertThat(new String(receivedMessage1.getPayload(),StandardCharsets.UTF_8))
 				.isEqualTo(testPayload1);
 
 		Message<byte[]> receivedMessage2 = (Message<byte[]>) receive(input2);
 		assertThat(receivedMessage2).isNotNull();
-		assertThat(new String(receivedMessage2.getPayload(), StandardCharsets.UTF_8))
+		assertThat(new String(receivedMessage2.getPayload(),StandardCharsets.UTF_8))
 				.isEqualTo(testPayload1);
 
 		binding2.unbind();
@@ -2174,7 +2174,7 @@ public class KafkaBinderTests extends
 		String testPayload2 = "foo-" + UUID.randomUUID().toString();
 		output.send(new GenericMessage<>(testPayload2.getBytes()));
 
-		binding2 = binder.bindConsumer("defaultGroup.0", null, input2,
+		binding2 = binder.bindConsumer("defaultGroup.0",null,input2,
 				consumerProperties);
 		// Since we don't provide any topic info, let Kafka bind the consumer successfully
 		Thread.sleep(1000);
@@ -2183,16 +2183,16 @@ public class KafkaBinderTests extends
 
 		receivedMessage1 = (Message<byte[]>) receive(input1);
 		assertThat(receivedMessage1).isNotNull();
-		assertThat(new String(receivedMessage1.getPayload(), StandardCharsets.UTF_8))
+		assertThat(new String(receivedMessage1.getPayload(),StandardCharsets.UTF_8))
 				.isEqualTo(testPayload2);
 		receivedMessage1 = (Message<byte[]>) receive(input1);
 		assertThat(receivedMessage1).isNotNull();
-		assertThat(new String(receivedMessage1.getPayload(), StandardCharsets.UTF_8))
+		assertThat(new String(receivedMessage1.getPayload(),StandardCharsets.UTF_8))
 				.isNotNull();
 
 		receivedMessage2 = (Message<byte[]>) receive(input2);
 		assertThat(receivedMessage2).isNotNull();
-		assertThat(new String(receivedMessage2.getPayload(), StandardCharsets.UTF_8))
+		assertThat(new String(receivedMessage2.getPayload(),StandardCharsets.UTF_8))
 				.isEqualTo(testPayload3);
 
 		Map<String, TopicInformation> topicsInUse = ((KafkaTestBinder) binder)
@@ -2214,9 +2214,9 @@ public class KafkaBinderTests extends
 		ExtendedProducerProperties<KafkaProducerProperties> properties = createProducerProperties();
 		properties.setHeaderMode(HeaderMode.none);
 		this.applicationContext.registerBean("pkExtractor",
-				RawKafkaPartitionTestSupport.class, () -> new RawKafkaPartitionTestSupport());
+				RawKafkaPartitionTestSupport.class,() -> new RawKafkaPartitionTestSupport());
 		this.applicationContext.registerBean("pkSelector",
-				RawKafkaPartitionTestSupport.class, () -> new RawKafkaPartitionTestSupport());
+				RawKafkaPartitionTestSupport.class,() -> new RawKafkaPartitionTestSupport());
 		properties.setPartitionKeyExtractorName("pkExtractor");
 		properties.setPartitionSelectorName("pkSelector");
 		properties.setPartitionCount(6);
@@ -2224,7 +2224,7 @@ public class KafkaBinderTests extends
 		DirectChannel output = createBindableChannel("output",
 				createProducerBindingProperties(properties));
 		output.setBeanName("test.output");
-		Binding<MessageChannel> outputBinding = binder.bindProducer("partJ.raw.0", output,
+		Binding<MessageChannel> outputBinding = binder.bindProducer("partJ.raw.0",output,
 				properties);
 
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
@@ -2236,22 +2236,22 @@ public class KafkaBinderTests extends
 		consumerProperties.getExtension().setAutoRebalanceEnabled(false);
 		QueueChannel input0 = new QueueChannel();
 		input0.setBeanName("test.input0J");
-		Binding<MessageChannel> input0Binding = binder.bindConsumer("partJ.raw.0", "test",
-				input0, consumerProperties);
+		Binding<MessageChannel> input0Binding = binder.bindConsumer("partJ.raw.0","test",
+				input0,consumerProperties);
 		consumerProperties.setInstanceIndex(1);
 		QueueChannel input1 = new QueueChannel();
 		input1.setBeanName("test.input1J");
-		Binding<MessageChannel> input1Binding = binder.bindConsumer("partJ.raw.0", "test",
-				input1, consumerProperties);
+		Binding<MessageChannel> input1Binding = binder.bindConsumer("partJ.raw.0","test",
+				input1,consumerProperties);
 		consumerProperties.setInstanceIndex(2);
 		QueueChannel input2 = new QueueChannel();
 		input2.setBeanName("test.input2J");
-		Binding<MessageChannel> input2Binding = binder.bindConsumer("partJ.raw.0", "test",
-				input2, consumerProperties);
+		Binding<MessageChannel> input2Binding = binder.bindConsumer("partJ.raw.0","test",
+				input2,consumerProperties);
 
-		output.send(new GenericMessage<>(new byte[] { (byte) 0 }));
-		output.send(new GenericMessage<>(new byte[] { (byte) 1 }));
-		output.send(new GenericMessage<>(new byte[] { (byte) 2 }));
+		output.send(new GenericMessage<>(new byte[]{(byte) 0}));
+		output.send(new GenericMessage<>(new byte[]{(byte) 1}));
+		output.send(new GenericMessage<>(new byte[]{(byte) 2}));
 
 		Message<?> receive0 = receive(input0);
 		assertThat(receive0).isNotNull();
@@ -2261,8 +2261,8 @@ public class KafkaBinderTests extends
 		assertThat(receive2).isNotNull();
 
 		assertThat(Arrays.asList(((byte[]) receive0.getPayload())[0],
-				((byte[]) receive1.getPayload())[0], ((byte[]) receive2.getPayload())[0]))
-						.containsExactlyInAnyOrder((byte) 0, (byte) 1, (byte) 2);
+				((byte[]) receive1.getPayload())[0],((byte[]) receive2.getPayload())[0]))
+				.containsExactlyInAnyOrder((byte) 0,(byte) 1,(byte) 2);
 
 		input0Binding.unbind();
 		input1Binding.unbind();
@@ -2285,12 +2285,12 @@ public class KafkaBinderTests extends
 		DirectChannel output = createBindableChannel("output",
 				createProducerBindingProperties(properties));
 		output.setBeanName("test.output");
-		Binding<MessageChannel> outputBinding = binder.bindProducer("part.raw.0", output,
+		Binding<MessageChannel> outputBinding = binder.bindProducer("part.raw.0",output,
 				properties);
 		try {
 			Object endpoint = extractEndpoint(outputBinding);
 			assertThat(getEndpointRouting(endpoint))
-					.contains(getExpectedRoutingBaseDestination("part.raw.0", "test")
+					.contains(getExpectedRoutingBaseDestination("part.raw.0","test")
 							+ "-' + headers['partition']");
 		}
 		catch (UnsupportedOperationException ignored) {
@@ -2305,28 +2305,28 @@ public class KafkaBinderTests extends
 		consumerProperties.getExtension().setAutoRebalanceEnabled(false);
 		QueueChannel input0 = new QueueChannel();
 		input0.setBeanName("test.input0S");
-		Binding<MessageChannel> input0Binding = binder.bindConsumer("part.raw.0", "test",
-				input0, consumerProperties);
+		Binding<MessageChannel> input0Binding = binder.bindConsumer("part.raw.0","test",
+				input0,consumerProperties);
 		consumerProperties.setInstanceIndex(1);
 		QueueChannel input1 = new QueueChannel();
 		input1.setBeanName("test.input1S");
-		Binding<MessageChannel> input1Binding = binder.bindConsumer("part.raw.0", "test",
-				input1, consumerProperties);
+		Binding<MessageChannel> input1Binding = binder.bindConsumer("part.raw.0","test",
+				input1,consumerProperties);
 		consumerProperties.setInstanceIndex(2);
 		QueueChannel input2 = new QueueChannel();
 		input2.setBeanName("test.input2S");
-		Binding<MessageChannel> input2Binding = binder.bindConsumer("part.raw.0", "test",
-				input2, consumerProperties);
+		Binding<MessageChannel> input2Binding = binder.bindConsumer("part.raw.0","test",
+				input2,consumerProperties);
 
 		Message<byte[]> message2 = org.springframework.integration.support.MessageBuilder
-				.withPayload(new byte[] { 2 })
+				.withPayload(new byte[]{2})
 				.setHeader(IntegrationMessageHeaderAccessor.CORRELATION_ID,
 						"kafkaBinderTestCommonsDelegate")
-				.setHeader(IntegrationMessageHeaderAccessor.SEQUENCE_NUMBER, 42)
-				.setHeader(IntegrationMessageHeaderAccessor.SEQUENCE_SIZE, 43).build();
+				.setHeader(IntegrationMessageHeaderAccessor.SEQUENCE_NUMBER,42)
+				.setHeader(IntegrationMessageHeaderAccessor.SEQUENCE_SIZE,43).build();
 		output.send(message2);
-		output.send(new GenericMessage<>(new byte[] { 1 }));
-		output.send(new GenericMessage<>(new byte[] { 0 }));
+		output.send(new GenericMessage<>(new byte[]{1}));
+		output.send(new GenericMessage<>(new byte[]{0}));
 		Message<?> receive0 = receive(input0);
 		assertThat(receive0).isNotNull();
 		Message<?> receive1 = receive(input1);
@@ -2334,8 +2334,8 @@ public class KafkaBinderTests extends
 		Message<?> receive2 = receive(input2);
 		assertThat(receive2).isNotNull();
 		assertThat(Arrays.asList(((byte[]) receive0.getPayload())[0],
-				((byte[]) receive1.getPayload())[0], ((byte[]) receive2.getPayload())[0]))
-						.containsExactlyInAnyOrder((byte) 0, (byte) 1, (byte) 2);
+				((byte[]) receive1.getPayload())[0],((byte[]) receive2.getPayload())[0]))
+				.containsExactlyInAnyOrder((byte) 0,(byte) 1,(byte) 2);
 		input0Binding.unbind();
 		input1Binding.unbind();
 		input2Binding.unbind();
@@ -2343,7 +2343,7 @@ public class KafkaBinderTests extends
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked","rawtypes"})
 	public void testPartitionedNative() throws Exception {
 		Binder binder = getBinder();
 		ExtendedProducerProperties<KafkaProducerProperties> properties = createProducerProperties();
@@ -2353,16 +2353,16 @@ public class KafkaBinderTests extends
 				createProducerBindingProperties(properties));
 		output.setBeanName("test.output");
 		Binding<MessageChannel> outputBinding = binder.bindProducer("partNative.raw.0",
-				output, properties);
+				output,properties);
 
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 		QueueChannel input0 = new QueueChannel();
 		input0.setBeanName("test.inputNative");
 		Binding<MessageChannel> inputBinding = binder.bindConsumer("partNative.raw.0",
-				"test", input0, consumerProperties);
+				"test",input0,consumerProperties);
 
 		output.send(new GenericMessage<>("foo".getBytes(),
-				Collections.singletonMap(KafkaHeaders.PARTITION_ID, 5)));
+				Collections.singletonMap(KafkaHeaders.PARTITION_ID,5)));
 
 		Message<?> received = receive(input0);
 		assertThat(received).isNotNull();
@@ -2376,7 +2376,7 @@ public class KafkaBinderTests extends
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked","rawtypes"})
 	public void testSendAndReceiveWithRawMode() throws Exception {
 		Binder binder = getBinder();
 
@@ -2390,10 +2390,10 @@ public class KafkaBinderTests extends
 		DirectChannel moduleInputChannel = createBindableChannel("input",
 				createConsumerBindingProperties(consumerProperties));
 		Binding<MessageChannel> producerBinding = binder.bindProducer("raw.0",
-				moduleOutputChannel, producerProperties);
+				moduleOutputChannel,producerProperties);
 
-		Binding<MessageChannel> consumerBinding = binder.bindConsumer("raw.0", "test",
-				moduleInputChannel, consumerProperties);
+		Binding<MessageChannel> consumerBinding = binder.bindConsumer("raw.0","test",
+				moduleInputChannel,consumerProperties);
 		Message<?> message = org.springframework.integration.support.MessageBuilder
 				.withPayload("testSendAndReceiveWithRawMode".getBytes()).build();
 		// Let the consumer actually bind to the producer before sending a msg
@@ -2410,17 +2410,17 @@ public class KafkaBinderTests extends
 				latch.countDown();
 			}
 		});
-		Assert.isTrue(latch.await(5, TimeUnit.SECONDS), "Failed to receive message");
+		Assert.isTrue(latch.await(5,TimeUnit.SECONDS),"Failed to receive message");
 
 		assertThat(inboundMessageRef.get()).isNotNull();
 		assertThat(
-				new String(inboundMessageRef.get().getPayload(), StandardCharsets.UTF_8))
-						.isEqualTo("testSendAndReceiveWithRawMode");
+				new String(inboundMessageRef.get().getPayload(),StandardCharsets.UTF_8))
+				.isEqualTo("testSendAndReceiveWithRawMode");
 		producerBinding.unbind();
 		consumerBinding.unbind();
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes","unchecked"})
 	@Test
 	public void testAllowNonTransactionalProducerSetting() throws Exception {
 		AbstractKafkaTestBinder binder = getBinder();
@@ -2430,10 +2430,10 @@ public class KafkaBinderTests extends
 				new KafkaProducerProperties());
 		producerProps.getExtension().setAllowNonTransactional(true);
 		Binding<MessageChannel> producerBinding = binder.bindProducer("allwNonTrans.0",
-				moduleOutputChannel, producerProps);
+				moduleOutputChannel,producerProps);
 
 		KafkaProducerMessageHandler endpoint = TestUtils.getPropertyValue(producerBinding,
-				"lifecycle", KafkaProducerMessageHandler.class);
+				"lifecycle",KafkaProducerMessageHandler.class);
 
 		final KafkaTemplate kafkaTemplate = (KafkaTemplate) new DirectFieldAccessor(endpoint).getPropertyValue("kafkaTemplate");
 
@@ -2442,7 +2442,7 @@ public class KafkaBinderTests extends
 		producerBinding.unbind();
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes","unchecked"})
 	@Test
 	public void testProducerErrorChannel() throws Exception {
 		AbstractKafkaTestBinder binder = getBinder();
@@ -2453,9 +2453,9 @@ public class KafkaBinderTests extends
 		producerProps.setHeaderMode(HeaderMode.none);
 		producerProps.setErrorChannelEnabled(true);
 		Binding<MessageChannel> producerBinding = binder.bindProducer("ec.0",
-				moduleOutputChannel, producerProps);
+				moduleOutputChannel,producerProps);
 		final Message<?> message = MessageBuilder.withPayload("bad")
-				.setHeader(MessageHeaders.CONTENT_TYPE, "application/json").build();
+				.setHeader(MessageHeaders.CONTENT_TYPE,"application/json").build();
 		SubscribableChannel ec = binder.getApplicationContext().getBean("ec.0.errors",
 				SubscribableChannel.class);
 		final AtomicReference<Message<?>> errorMessage = new AtomicReference<>();
@@ -2469,7 +2469,7 @@ public class KafkaBinderTests extends
 				SubscribableChannel.class);
 		globalEc.subscribe(message12 -> latch.countDown());
 		KafkaProducerMessageHandler endpoint = TestUtils.getPropertyValue(producerBinding,
-				"lifecycle", KafkaProducerMessageHandler.class);
+				"lifecycle",KafkaProducerMessageHandler.class);
 		final RuntimeException fooException = new RuntimeException("foo");
 		final AtomicReference<Object> sent = new AtomicReference<>();
 		new DirectFieldAccessor(endpoint).setPropertyValue("kafkaTemplate",
@@ -2495,7 +2495,7 @@ public class KafkaBinderTests extends
 				});
 
 		moduleOutputChannel.send(message);
-		assertThat(latch.await(10, TimeUnit.SECONDS)).isTrue();
+		assertThat(latch.await(10,TimeUnit.SECONDS)).isTrue();
 		assertThat(errorMessage.get()).isInstanceOf(ErrorMessage.class);
 		assertThat(errorMessage.get().getPayload())
 				.isInstanceOf(KafkaSendFailureException.class);
@@ -2519,8 +2519,8 @@ public class KafkaBinderTests extends
 		DirectChannel moduleInputChannel = createBindableChannel("input",
 				createConsumerBindingProperties(consumerProperties));
 
-		Binding<?> binding = binder.bindConsumer(testTopicName, "test",
-				moduleInputChannel, consumerProperties);
+		Binding<?> binding = binder.bindConsumer(testTopicName,"test",
+				moduleInputChannel,consumerProperties);
 		binding.unbind();
 	}
 
@@ -2528,7 +2528,7 @@ public class KafkaBinderTests extends
 	@SuppressWarnings("unchecked")
 	public void testCustomPartitionCountOverridesDefaultIfLarger() throws Exception {
 		byte[] testPayload = new byte[2048];
-		Arrays.fill(testPayload, (byte) 65);
+		Arrays.fill(testPayload,(byte) 65);
 		KafkaBinderConfigurationProperties binderConfiguration = createConfigurationProperties();
 		binderConfiguration.setMinPartitionCount(10);
 		Binder binder = getBinder(binderConfiguration);
@@ -2543,9 +2543,9 @@ public class KafkaBinderTests extends
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 		long uniqueBindingId = System.currentTimeMillis();
 		Binding<MessageChannel> producerBinding = binder.bindProducer(
-				"foo" + uniqueBindingId + ".0", moduleOutputChannel, producerProperties);
+				"foo" + uniqueBindingId + ".0",moduleOutputChannel,producerProperties);
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(
-				"foo" + uniqueBindingId + ".0", null, moduleInputChannel,
+				"foo" + uniqueBindingId + ".0",null,moduleInputChannel,
 				consumerProperties);
 		Message<?> message = org.springframework.integration.support.MessageBuilder
 				.withPayload(testPayload).build();
@@ -2566,7 +2566,7 @@ public class KafkaBinderTests extends
 	public void testCustomPartitionCountDoesNotOverridePartitioningIfSmaller()
 			throws Exception {
 		byte[] testPayload = new byte[2048];
-		Arrays.fill(testPayload, (byte) 65);
+		Arrays.fill(testPayload,(byte) 65);
 		KafkaBinderConfigurationProperties binderConfiguration = createConfigurationProperties();
 		binderConfiguration.setMinPartitionCount(6);
 		Binder binder = getBinder(binderConfiguration);
@@ -2580,9 +2580,9 @@ public class KafkaBinderTests extends
 		DirectChannel moduleOutputChannel = createBindableChannel("output",
 				createProducerBindingProperties(producerProperties));
 		Binding<MessageChannel> producerBinding = binder.bindProducer(
-				"foo" + uniqueBindingId + ".0", moduleOutputChannel, producerProperties);
+				"foo" + uniqueBindingId + ".0",moduleOutputChannel,producerProperties);
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(
-				"foo" + uniqueBindingId + ".0", null, moduleInputChannel,
+				"foo" + uniqueBindingId + ".0",null,moduleInputChannel,
 				consumerProperties);
 		Thread.sleep(1000);
 		Message<?> message = org.springframework.integration.support.MessageBuilder
@@ -2614,20 +2614,20 @@ public class KafkaBinderTests extends
 		DirectChannel moduleOutputChannel = createBindableChannel("output",
 				createProducerBindingProperties(producerProperties));
 		Binding<MessageChannel> producerBinding = binder.bindProducer(
-				"foo" + uniqueBindingId + ".0", moduleOutputChannel, producerProperties);
+				"foo" + uniqueBindingId + ".0",moduleOutputChannel,producerProperties);
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(
-				"foo" + uniqueBindingId + ".0", null, moduleInputChannel,
+				"foo" + uniqueBindingId + ".0",null,moduleInputChannel,
 				consumerProperties);
 		Thread.sleep(1000);
 		Message<?> message = MessageBuilder.withPayload("somePayload")
-				.setHeader("key", "myDynamicKey").build();
+				.setHeader("key","myDynamicKey").build();
 		// Let the consumer actually bind to the producer before sending a msg
 		binderBindUnbindLatency();
 		moduleOutputChannel.send(message);
 		Message<?> inbound = receive(moduleInputChannel);
 		assertThat(inbound).isNotNull();
 		String receivedKey = new String(inbound.getHeaders()
-				.get(KafkaHeaders.RECEIVED_MESSAGE_KEY, byte[].class));
+				.get(KafkaHeaders.RECEIVED_MESSAGE_KEY,byte[].class));
 		assertThat(receivedKey).isEqualTo("myDynamicKey");
 		producerBinding.unbind();
 		consumerBinding.unbind();
@@ -2637,7 +2637,7 @@ public class KafkaBinderTests extends
 	@SuppressWarnings("unchecked")
 	public void testCustomPartitionCountOverridesPartitioningIfLarger() throws Exception {
 		byte[] testPayload = new byte[2048];
-		Arrays.fill(testPayload, (byte) 65);
+		Arrays.fill(testPayload,(byte) 65);
 		KafkaBinderConfigurationProperties binderConfiguration = createConfigurationProperties();
 		binderConfiguration.setMinPartitionCount(4);
 		Binder binder = getBinder(binderConfiguration);
@@ -2652,9 +2652,9 @@ public class KafkaBinderTests extends
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 		long uniqueBindingId = System.currentTimeMillis();
 		Binding<MessageChannel> producerBinding = binder.bindProducer(
-				"foo" + uniqueBindingId + ".0", moduleOutputChannel, producerProperties);
+				"foo" + uniqueBindingId + ".0",moduleOutputChannel,producerProperties);
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(
-				"foo" + uniqueBindingId + ".0", null, moduleInputChannel,
+				"foo" + uniqueBindingId + ".0",null,moduleInputChannel,
 				consumerProperties);
 		Message<?> message = org.springframework.integration.support.MessageBuilder
 				.withPayload(testPayload).build();
@@ -2676,7 +2676,7 @@ public class KafkaBinderTests extends
 
 		BindingProperties producerBindingProperties = createProducerBindingProperties(
 				createProducerProperties());
-		DirectChannel output = createBindableChannel("output", producerBindingProperties);
+		DirectChannel output = createBindableChannel("output",producerBindingProperties);
 
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 		consumerProperties.getExtension().setAutoRebalanceEnabled(false);
@@ -2686,12 +2686,12 @@ public class KafkaBinderTests extends
 
 		String testTopicName = UUID.randomUUID().toString();
 		Binding<MessageChannel> producerBinding = binder.bindProducer(testTopicName,
-				output, createProducerProperties());
+				output,createProducerProperties());
 		String testPayload1 = "foo-" + UUID.randomUUID().toString();
 		output.send(new GenericMessage<>(testPayload1.getBytes()));
 
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(testTopicName,
-				"startOffsets", input1, consumerProperties);
+				"startOffsets",input1,consumerProperties);
 
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<Message<byte[]>> inboundMessageRef1 = new AtomicReference<>();
@@ -2704,11 +2704,11 @@ public class KafkaBinderTests extends
 			}
 		};
 		input1.subscribe(messageHandler);
-		Assert.isTrue(latch.await(5, TimeUnit.SECONDS), "Failed to receive message");
+		Assert.isTrue(latch.await(5,TimeUnit.SECONDS),"Failed to receive message");
 		assertThat(inboundMessageRef1.get()).isNotNull();
 		assertThat(
-				new String(inboundMessageRef1.get().getPayload(), StandardCharsets.UTF_8))
-						.isEqualTo(testPayload1);
+				new String(inboundMessageRef1.get().getPayload(),StandardCharsets.UTF_8))
+				.isEqualTo(testPayload1);
 
 		String testPayload2 = "foo-" + UUID.randomUUID().toString();
 		input1.unsubscribe(messageHandler);
@@ -2724,12 +2724,12 @@ public class KafkaBinderTests extends
 				latch1.countDown();
 			}
 		});
-		Assert.isTrue(latch1.await(5, TimeUnit.SECONDS), "Failed to receive message");
+		Assert.isTrue(latch1.await(5,TimeUnit.SECONDS),"Failed to receive message");
 
 		assertThat(inboundMessageRef2.get()).isNotNull();
 		assertThat(
-				new String(inboundMessageRef2.get().getPayload(), StandardCharsets.UTF_8))
-						.isEqualTo(testPayload2);
+				new String(inboundMessageRef2.get().getPayload(),StandardCharsets.UTF_8))
+				.isEqualTo(testPayload2);
 
 		producerBinding.unbind();
 		consumerBinding.unbind();
@@ -2754,10 +2754,10 @@ public class KafkaBinderTests extends
 					createConsumerBindingProperties(createConsumerProperties()));
 
 			String testTopicName = UUID.randomUUID().toString();
-			producerBinding = binder.bindProducer(testTopicName, output,
+			producerBinding = binder.bindProducer(testTopicName,output,
 					producerBindingProperties.getProducer());
 			ExtendedConsumerProperties<KafkaConsumerProperties> firstConsumerProperties = createConsumerProperties();
-			consumerBinding = binder.bindConsumer(testTopicName, "startOffsets", input1,
+			consumerBinding = binder.bindConsumer(testTopicName,"startOffsets",input1,
 					firstConsumerProperties);
 			CountDownLatch latch = new CountDownLatch(1);
 			AtomicReference<Message<byte[]>> inboundMessageRef1 = new AtomicReference<>();
@@ -2772,7 +2772,7 @@ public class KafkaBinderTests extends
 			input1.subscribe(messageHandler);
 			String testPayload1 = "foo1-" + UUID.randomUUID().toString();
 			output.send(new GenericMessage<>(testPayload1));
-			Assert.isTrue(latch.await(15, TimeUnit.SECONDS), "Failed to receive message");
+			Assert.isTrue(latch.await(15,TimeUnit.SECONDS),"Failed to receive message");
 
 			assertThat(inboundMessageRef1.get()).isNotNull();
 			assertThat(inboundMessageRef1.get().getPayload()).isNotNull();
@@ -2790,7 +2790,7 @@ public class KafkaBinderTests extends
 			input1.subscribe(messageHandler1);
 			String testPayload2 = "foo2-" + UUID.randomUUID().toString();
 			output.send(new GenericMessage<>(testPayload2.getBytes()));
-			Assert.isTrue(latch1.await(15, TimeUnit.SECONDS),
+			Assert.isTrue(latch1.await(15,TimeUnit.SECONDS),
 					"Failed to receive message");
 			assertThat(inboundMessageRef2.get()).isNotNull();
 			assertThat(inboundMessageRef2.get().getPayload()).isNotNull();
@@ -2798,7 +2798,7 @@ public class KafkaBinderTests extends
 
 			Thread.sleep(2000);
 			ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
-			consumerBinding = binder.bindConsumer(testTopicName, "startOffsets", input1,
+			consumerBinding = binder.bindConsumer(testTopicName,"startOffsets",input1,
 					consumerProperties);
 			input1.unsubscribe(messageHandler1);
 			CountDownLatch latch2 = new CountDownLatch(1);
@@ -2814,7 +2814,7 @@ public class KafkaBinderTests extends
 			input1.subscribe(messageHandler2);
 			String testPayload3 = "foo3-" + UUID.randomUUID().toString();
 			output.send(new GenericMessage<>(testPayload3.getBytes()));
-			Assert.isTrue(latch2.await(15, TimeUnit.SECONDS),
+			Assert.isTrue(latch2.await(15,TimeUnit.SECONDS),
 					"Failed to receive message");
 			assertThat(inboundMessageRef3.get()).isNotNull();
 			assertThat(new String(inboundMessageRef3.get().getPayload(),
@@ -2839,14 +2839,14 @@ public class KafkaBinderTests extends
 		ExtendedProducerProperties<KafkaProducerProperties> properties = createProducerProperties();
 		properties.getExtension().setSync(true);
 		Binding<MessageChannel> producerBinding = binder.bindProducer(testTopicName,
-				output, properties);
+				output,properties);
 		DirectFieldAccessor accessor = new DirectFieldAccessor(
 				extractEndpoint(producerBinding));
 		KafkaProducerMessageHandler wrappedInstance = (KafkaProducerMessageHandler) accessor
 				.getWrappedInstance();
 		assertThat(new DirectFieldAccessor(wrappedInstance).getPropertyValue("sync")
 				.equals(Boolean.TRUE))
-						.withFailMessage("Kafka Sync Producer should have been enabled.");
+				.withFailMessage("Kafka Sync Producer should have been enabled.");
 		producerBinding.unbind();
 	}
 
@@ -2862,7 +2862,7 @@ public class KafkaBinderTests extends
 		Expression sendTimeoutExpression = parser.parseExpression("5000");
 		properties.getExtension().setSendTimeoutExpression(sendTimeoutExpression);
 		Binding<MessageChannel> producerBinding = binder.bindProducer(testTopicName,
-				output, properties);
+				output,properties);
 		DirectFieldAccessor accessor = new DirectFieldAccessor(
 				extractEndpoint(producerBinding));
 		KafkaProducerMessageHandler wrappedInstance = (KafkaProducerMessageHandler) accessor
@@ -2881,7 +2881,7 @@ public class KafkaBinderTests extends
 		Binder binder = getBinder(configurationProperties);
 		BindingProperties producerBindingProperties = createProducerBindingProperties(
 				createProducerProperties());
-		DirectChannel output = createBindableChannel("output", producerBindingProperties);
+		DirectChannel output = createBindableChannel("output",producerBindingProperties);
 
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 
@@ -2891,13 +2891,13 @@ public class KafkaBinderTests extends
 		String testTopicName = "createdByBroker-" + System.currentTimeMillis();
 
 		Binding<MessageChannel> producerBinding = binder.bindProducer(testTopicName,
-				output, producerBindingProperties.getProducer());
+				output,producerBindingProperties.getProducer());
 
 		String testPayload = "foo1-" + UUID.randomUUID().toString();
 		output.send(new GenericMessage<>(testPayload));
 
 		Binding<MessageChannel> consumerBinding = binder.bindConsumer(testTopicName,
-				"test", input, consumerProperties);
+				"test",input,consumerProperties);
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<Message<byte[]>> inboundMessageRef = new AtomicReference<>();
 		input.subscribe(message1 -> {
@@ -2908,12 +2908,12 @@ public class KafkaBinderTests extends
 				latch.countDown();
 			}
 		});
-		Assert.isTrue(latch.await(5, TimeUnit.SECONDS), "Failed to receive message");
+		Assert.isTrue(latch.await(5,TimeUnit.SECONDS),"Failed to receive message");
 
 		assertThat(inboundMessageRef.get()).isNotNull();
 		assertThat(
-				new String(inboundMessageRef.get().getPayload(), StandardCharsets.UTF_8))
-						.isEqualTo(testPayload);
+				new String(inboundMessageRef.get().getPayload(),StandardCharsets.UTF_8))
+				.isEqualTo(testPayload);
 
 		producerBinding.unbind();
 		consumerBinding.unbind();
@@ -2926,7 +2926,7 @@ public class KafkaBinderTests extends
 		KafkaBinderConfigurationProperties configurationProperties = createConfigurationProperties();
 
 		String testTopicName = "existing" + System.currentTimeMillis();
-		invokeCreateTopic(testTopicName, 5, 1);
+		invokeCreateTopic(testTopicName,5,1);
 		configurationProperties.setAutoCreateTopics(false);
 		Binder binder = getBinder(configurationProperties);
 
@@ -2934,8 +2934,8 @@ public class KafkaBinderTests extends
 
 		DirectChannel input = createBindableChannel("input",
 				createConsumerBindingProperties(consumerProperties));
-		Binding<MessageChannel> binding = binder.bindConsumer(testTopicName, "test",
-				input, consumerProperties);
+		Binding<MessageChannel> binding = binder.bindConsumer(testTopicName,"test",
+				input,consumerProperties);
 		binding.unbind();
 	}
 
@@ -2952,7 +2952,7 @@ public class KafkaBinderTests extends
 		DirectChannel input = createBindableChannel("input",
 				createConsumerBindingProperties(consumerProperties));
 
-		Binding<?> binding = binder.bindConsumer(testTopicName, "test", input,
+		Binding<?> binding = binder.bindConsumer(testTopicName,"test",input,
 				consumerProperties);
 		binding.unbind();
 		assertThat(invokePartitionSize(testTopicName)).isEqualTo(6);
@@ -2965,7 +2965,7 @@ public class KafkaBinderTests extends
 		KafkaBinderConfigurationProperties configurationProperties = createConfigurationProperties();
 
 		String testTopicName = "existing" + System.currentTimeMillis();
-		invokeCreateTopic(testTopicName, 1, 1);
+		invokeCreateTopic(testTopicName,1,1);
 		configurationProperties.setAutoAddPartitions(false);
 		Binder binder = getBinder(configurationProperties);
 		GenericApplicationContext context = new GenericApplicationContext();
@@ -2979,7 +2979,7 @@ public class KafkaBinderTests extends
 		// this consumer must consume from partition 2
 		consumerProperties.setInstanceCount(3);
 		consumerProperties.setInstanceIndex(2);
-		Binding binding = binder.bindConsumer(testTopicName, "test", input,
+		Binding binding = binder.bindConsumer(testTopicName,"test",input,
 				consumerProperties);
 		binding.unbind();
 		assertThat(invokePartitionSize(testTopicName)).isEqualTo(1);
@@ -2992,7 +2992,7 @@ public class KafkaBinderTests extends
 		KafkaBinderConfigurationProperties configurationProperties = createConfigurationProperties();
 
 		String testTopicName = "existing" + System.currentTimeMillis();
-		invokeCreateTopic(testTopicName, 1, 1);
+		invokeCreateTopic(testTopicName,1,1);
 		configurationProperties.setAutoAddPartitions(false);
 		Binder binder = getBinder(configurationProperties);
 		GenericApplicationContext context = new GenericApplicationContext();
@@ -3006,7 +3006,7 @@ public class KafkaBinderTests extends
 		consumerProperties.setInstanceIndex(2);
 		consumerProperties.getExtension().setAutoRebalanceEnabled(false);
 		Assertions.assertThatThrownBy(() -> {
-			Binding binding = binder.bindConsumer(testTopicName, "test", output,
+			Binding binding = binder.bindConsumer(testTopicName,"test",output,
 					consumerProperties);
 			if (binding != null) {
 				binding.unbind();
@@ -3023,7 +3023,7 @@ public class KafkaBinderTests extends
 			KafkaBinderConfigurationProperties configurationProperties = createConfigurationProperties();
 
 			String testTopicName = "existing" + System.currentTimeMillis();
-			invokeCreateTopic(testTopicName, 6, 1);
+			invokeCreateTopic(testTopicName,6,1);
 			configurationProperties.setAutoAddPartitions(false);
 			Binder binder = getBinder(configurationProperties);
 			ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
@@ -3036,7 +3036,7 @@ public class KafkaBinderTests extends
 			consumerProperties.setInstanceIndex(2);
 			consumerProperties.getExtension().setAutoRebalanceEnabled(false);
 
-			binding = binder.bindConsumer(testTopicName, "test-x", input,
+			binding = binder.bindConsumer(testTopicName,"test-x",input,
 					consumerProperties);
 
 			ContainerProperties containerProps = TestUtils.getPropertyValue(
@@ -3046,8 +3046,8 @@ public class KafkaBinderTests extends
 			TopicPartitionOffset[] listenedPartitions = containerProps.getTopicPartitions();
 			assertThat(listenedPartitions).hasSize(2);
 			assertThat(listenedPartitions).contains(
-					new TopicPartitionOffset(testTopicName, 2),
-					new TopicPartitionOffset(testTopicName, 5));
+					new TopicPartitionOffset(testTopicName,2),
+					new TopicPartitionOffset(testTopicName,5));
 			int partitions = invokePartitionSize(testTopicName);
 			assertThat(partitions).isEqualTo(6);
 		}
@@ -3065,7 +3065,7 @@ public class KafkaBinderTests extends
 
 		KafkaBinderConfigurationProperties configurationProperties = createConfigurationProperties();
 
-		invokeCreateTopic(testTopicName, 6, 1);
+		invokeCreateTopic(testTopicName,6,1);
 		configurationProperties.setAutoAddPartitions(true);
 		Binder binder = getBinder(configurationProperties);
 		GenericApplicationContext context = new GenericApplicationContext();
@@ -3075,7 +3075,7 @@ public class KafkaBinderTests extends
 		DirectChannel input = createBindableChannel("input",
 				createConsumerBindingProperties(consumerProperties));
 
-		Binding<?> binding = binder.bindConsumer(testTopicName, "test", input,
+		Binding<?> binding = binder.bindConsumer(testTopicName,"test",input,
 				consumerProperties);
 		binding.unbind();
 
@@ -3089,7 +3089,7 @@ public class KafkaBinderTests extends
 		try {
 			KafkaBinderConfigurationProperties configurationProperties = createConfigurationProperties();
 			String testTopicName = "existing" + System.currentTimeMillis();
-			invokeCreateTopic(testTopicName, 5, 1);
+			invokeCreateTopic(testTopicName,5,1);
 			configurationProperties.setAutoCreateTopics(false);
 			Binder binder = getBinder(configurationProperties);
 
@@ -3097,13 +3097,13 @@ public class KafkaBinderTests extends
 			DirectChannel input = createBindableChannel("input",
 					createConsumerBindingProperties(consumerProperties));
 
-			binding = binder.bindConsumer(testTopicName, "test", input,
+			binding = binder.bindConsumer(testTopicName,"test",input,
 					consumerProperties);
 			DirectFieldAccessor consumerAccessor = new DirectFieldAccessor(
 					getKafkaConsumer(binding));
 			assertThat(consumerAccessor
 					.getPropertyValue("keyDeserializer") instanceof ByteArrayDeserializer)
-							.isTrue();
+					.isTrue();
 			assertThat(consumerAccessor.getPropertyValue(
 					"valueDeserializer") instanceof ByteArrayDeserializer).isTrue();
 		}
@@ -3135,16 +3135,16 @@ public class KafkaBinderTests extends
 			DirectChannel input = createBindableChannel("input",
 					createConsumerBindingProperties(consumerProperties));
 
-			binding = binder.bindConsumer(testTopicName, "test", input,
+			binding = binder.bindConsumer(testTopicName,"test",input,
 					consumerProperties);
 			DirectFieldAccessor consumerAccessor = new DirectFieldAccessor(
 					getKafkaConsumer(binding));
 			assertThat(consumerAccessor
 					.getPropertyValue("keyDeserializer") instanceof StringDeserializer)
-							.isTrue();
+					.isTrue();
 			assertThat(consumerAccessor
 					.getPropertyValue("valueDeserializer") instanceof LongDeserializer)
-							.isTrue();
+					.isTrue();
 		}
 		finally {
 			if (binding != null) {
@@ -3154,7 +3154,7 @@ public class KafkaBinderTests extends
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked","rawtypes"})
 	public void testNativeSerializationWithCustomSerializerDeserializer()
 			throws Exception {
 		Binding<?> producerBinding = null;
@@ -3172,7 +3172,7 @@ public class KafkaBinderTests extends
 			producerProperties.setUseNativeEncoding(true);
 			producerProperties.getExtension().getConfiguration().put("value.serializer",
 					"org.apache.kafka.common.serialization.IntegerSerializer");
-			producerBinding = binder.bindProducer(testTopicName, moduleOutputChannel,
+			producerBinding = binder.bindProducer(testTopicName,moduleOutputChannel,
 					producerProperties);
 			ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 			consumerProperties.getExtension().setAutoRebalanceEnabled(false);
@@ -3180,12 +3180,12 @@ public class KafkaBinderTests extends
 					"org.apache.kafka.common.serialization.IntegerDeserializer");
 			consumerProperties.getExtension()
 					.setStandardHeaders(KafkaConsumerProperties.StandardHeaders.both);
-			consumerBinding = binder.bindConsumer(testTopicName, "test",
-					moduleInputChannel, consumerProperties);
+			consumerBinding = binder.bindConsumer(testTopicName,"test",
+					moduleInputChannel,consumerProperties);
 			// Let the consumer actually bind to the producer before sending a msg
 			binderBindUnbindLatency();
 			moduleOutputChannel.send(message);
-			Message<?> inbound = receive(moduleInputChannel, 500);
+			Message<?> inbound = receive(moduleInputChannel,500);
 			assertThat(inbound).isNotNull();
 			assertThat(inbound.getPayload()).isEqualTo(10);
 			assertThat(inbound.getHeaders()).doesNotContainKey("contentType");
@@ -3217,7 +3217,7 @@ public class KafkaBinderTests extends
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked","rawtypes"})
 	public void testNativeSerializationWithCustomSerializerDeserializerBytesPayload()
 			throws Exception {
 		Binding<?> producerBinding = null;
@@ -3225,25 +3225,25 @@ public class KafkaBinderTests extends
 		try {
 			byte[] testPayload = new byte[1];
 			Message<?> message = MessageBuilder.withPayload(testPayload)
-					.setHeader(MessageHeaders.CONTENT_TYPE, "something/funky").build();
+					.setHeader(MessageHeaders.CONTENT_TYPE,"something/funky").build();
 			SubscribableChannel moduleOutputChannel = new DirectChannel();
 			String testTopicName = "existing" + System.currentTimeMillis();
 			KafkaBinderConfigurationProperties configurationProperties = createConfigurationProperties();
 			configurationProperties.setAutoAddPartitions(true);
 			Binder binder = getBinder(configurationProperties);
 			ConfigurableApplicationContext context = TestUtils.getPropertyValue(binder,
-					"binder.applicationContext", ConfigurableApplicationContext.class);
+					"binder.applicationContext",ConfigurableApplicationContext.class);
 			MessagingMessageConverter converter = new MessagingMessageConverter();
 			converter.setGenerateMessageId(true);
 			converter.setGenerateTimestamp(true);
-			context.getBeanFactory().registerSingleton("testConverter", converter);
+			context.getBeanFactory().registerSingleton("testConverter",converter);
 			QueueChannel moduleInputChannel = new QueueChannel();
 			ExtendedProducerProperties<KafkaProducerProperties> producerProperties = createProducerProperties();
 			producerProperties.setUseNativeEncoding(true);
 			producerProperties.getExtension().getConfiguration().put(
 					ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
 					ByteArraySerializer.class.getName());
-			producerBinding = binder.bindProducer(testTopicName, moduleOutputChannel,
+			producerBinding = binder.bindProducer(testTopicName,moduleOutputChannel,
 					producerProperties);
 			ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 			consumerProperties.getExtension().setAutoRebalanceEnabled(false);
@@ -3251,12 +3251,12 @@ public class KafkaBinderTests extends
 					ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
 					ByteArrayDeserializer.class.getName());
 			consumerProperties.getExtension().setConverterBeanName("testConverter");
-			consumerBinding = binder.bindConsumer(testTopicName, "test",
-					moduleInputChannel, consumerProperties);
+			consumerBinding = binder.bindConsumer(testTopicName,"test",
+					moduleInputChannel,consumerProperties);
 			// Let the consumer actually bind to the producer before sending a msg
 			binderBindUnbindLatency();
 			moduleOutputChannel.send(message);
-			Message<?> inbound = receive(moduleInputChannel, 500);
+			Message<?> inbound = receive(moduleInputChannel,500);
 			assertThat(inbound).isNotNull();
 			assertThat(inbound.getPayload()).isEqualTo(new byte[1]);
 			assertThat(inbound.getHeaders()).containsKey("contentType");
@@ -3283,7 +3283,7 @@ public class KafkaBinderTests extends
 		try {
 			String testPayload = "test";
 			Message<?> message = MessageBuilder.withPayload(testPayload)
-					.setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN)
+					.setHeader(MessageHeaders.CONTENT_TYPE,MimeTypeUtils.TEXT_PLAIN)
 					.build();
 
 			ExtendedProducerProperties<KafkaProducerProperties> producerProperties = createProducerProperties();
@@ -3301,11 +3301,11 @@ public class KafkaBinderTests extends
 			KafkaBinderConfigurationProperties configurationProperties = createConfigurationProperties();
 			configurationProperties.setAutoAddPartitions(true);
 			Binder binder = getBinder(configurationProperties);
-			producerBinding = binder.bindProducer(testTopicName, moduleOutputChannel,
+			producerBinding = binder.bindProducer(testTopicName,moduleOutputChannel,
 					producerProperties);
 
-			consumerBinding = binder.bindConsumer(testTopicName, "test",
-					moduleInputChannel, consumerProperties);
+			consumerBinding = binder.bindConsumer(testTopicName,"test",
+					moduleInputChannel,consumerProperties);
 			// Let the consumer actually bind to the producer before sending a msg
 			binderBindUnbindLatency();
 			moduleOutputChannel.send(message);
@@ -3319,7 +3319,7 @@ public class KafkaBinderTests extends
 					latch.countDown();
 				}
 			});
-			Assert.isTrue(latch.await(5, TimeUnit.SECONDS), "Failed to receive message");
+			Assert.isTrue(latch.await(5,TimeUnit.SECONDS),"Failed to receive message");
 
 			assertThat(inboundMessageRef.get()).isNotNull();
 			assertThat(inboundMessageRef.get().getPayload()).isEqualTo("test".getBytes());
@@ -3341,7 +3341,7 @@ public class KafkaBinderTests extends
 	 * variants.
 	 */
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked","rawtypes"})
 	public void testSendAndReceiveWithMixedMode() throws Exception {
 		KafkaBinderConfigurationProperties binderConfiguration = createConfigurationProperties();
 		binderConfiguration.setHeaders("foo");
@@ -3350,19 +3350,19 @@ public class KafkaBinderTests extends
 		ExtendedProducerProperties<KafkaProducerProperties> producerProperties1 = createProducerProperties();
 		producerProperties1.setHeaderMode(HeaderMode.embeddedHeaders);
 		Binding<MessageChannel> producerBinding1 = binder.bindProducer("mixed.0",
-				moduleOutputChannel1, producerProperties1);
+				moduleOutputChannel1,producerProperties1);
 
 		DirectChannel moduleOutputChannel2 = new DirectChannel();
 		ExtendedProducerProperties<KafkaProducerProperties> producerProperties2 = createProducerProperties();
 		producerProperties2.setHeaderMode(HeaderMode.headers);
 		Binding<MessageChannel> producerBinding2 = binder.bindProducer("mixed.0",
-				moduleOutputChannel2, producerProperties2);
+				moduleOutputChannel2,producerProperties2);
 
 		DirectChannel moduleOutputChannel3 = new DirectChannel();
 		ExtendedProducerProperties<KafkaProducerProperties> producerProperties3 = createProducerProperties();
 		producerProperties3.setHeaderMode(HeaderMode.none);
 		Binding<MessageChannel> producerBinding3 = binder.bindProducer("mixed.0",
-				moduleOutputChannel3, producerProperties3);
+				moduleOutputChannel3,producerProperties3);
 
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
 		consumerProperties.setHeaderMode(HeaderMode.embeddedHeaders);
@@ -3372,42 +3372,42 @@ public class KafkaBinderTests extends
 		BridgeHandler bridge = new BridgeHandler();
 		bridge.setOutputChannel(bridged);
 		moduleInputChannel.subscribe(bridge);
-		Binding<MessageChannel> consumerBinding = binder.bindConsumer("mixed.0", "test",
-				moduleInputChannel, consumerProperties);
+		Binding<MessageChannel> consumerBinding = binder.bindConsumer("mixed.0","test",
+				moduleInputChannel,consumerProperties);
 		Message<?> message = org.springframework.integration.support.MessageBuilder
 				.withPayload("testSendAndReceiveWithMixedMode".getBytes())
-				.setHeader("foo", "bar").build();
+				.setHeader("foo","bar").build();
 		// Let the consumer actually bind to the producer before sending a msg
 		binderBindUnbindLatency();
 		moduleOutputChannel1.send(message);
 		moduleOutputChannel2.send(message);
 		moduleOutputChannel3.send(message);
-		Message<?> inbound = receive(bridged, 10_000);
+		Message<?> inbound = receive(bridged,10_000);
 		assertThat(inbound).isNotNull();
-		assertThat(new String((byte[]) inbound.getPayload(), StandardCharsets.UTF_8))
+		assertThat(new String((byte[]) inbound.getPayload(),StandardCharsets.UTF_8))
 				.isEqualTo("testSendAndReceiveWithMixedMode");
 		assertThat(inbound.getHeaders().get("foo")).isEqualTo("bar");
 		assertThat(inbound.getHeaders().get(BinderHeaders.NATIVE_HEADERS_PRESENT))
 				.isNull();
 		inbound = receive(bridged);
 		assertThat(inbound).isNotNull();
-		assertThat(new String((byte[]) inbound.getPayload(), StandardCharsets.UTF_8))
+		assertThat(new String((byte[]) inbound.getPayload(),StandardCharsets.UTF_8))
 				.isEqualTo("testSendAndReceiveWithMixedMode");
 		assertThat(inbound.getHeaders().get("foo")).isEqualTo("bar");
 		assertThat(inbound.getHeaders().get(BinderHeaders.NATIVE_HEADERS_PRESENT))
 				.isEqualTo(Boolean.TRUE);
 		inbound = receive(bridged);
 		assertThat(inbound).isNotNull();
-		assertThat(new String((byte[]) inbound.getPayload(), StandardCharsets.UTF_8))
+		assertThat(new String((byte[]) inbound.getPayload(),StandardCharsets.UTF_8))
 				.isEqualTo("testSendAndReceiveWithMixedMode");
 		assertThat(inbound.getHeaders().get("foo")).isNull();
 		assertThat(inbound.getHeaders().get(BinderHeaders.NATIVE_HEADERS_PRESENT))
 				.isNull();
 
 		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(
-				"testSendAndReceiveWithMixedMode", "false",
+				"testSendAndReceiveWithMixedMode","false",
 				embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
 		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
 				ByteArrayDeserializer.class);
 		consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
@@ -3438,7 +3438,7 @@ public class KafkaBinderTests extends
 		consumerBinding.unbind();
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes","unchecked"})
 	@Test
 	public void testPolledConsumer() throws Exception {
 		KafkaTestBinder binder = getBinder();
@@ -3448,13 +3448,13 @@ public class KafkaBinderTests extends
 		consumerProps.setMultiplex(true);
 		consumerProps.getExtension().setPollTimeout(1);
 		Binding<PollableSource<MessageHandler>> binding = binder.bindPollableConsumer(
-				"pollable,anotherOne", "group-polledConsumer", inboundBindTarget,
+				"pollable,anotherOne","group-polledConsumer",inboundBindTarget,
 				consumerProps);
 		Map<String, Object> producerProps = KafkaTestUtils
 				.producerProps(embeddedKafka);
 		KafkaTemplate template = new KafkaTemplate(
 				new DefaultKafkaProducerFactory<>(producerProps));
-		template.send("pollable", "testPollable");
+		template.send("pollable","testPollable");
 		boolean polled = inboundBindTarget.poll(m -> {
 			assertThat(m.getPayload()).isEqualTo("testPollable");
 		});
@@ -3467,7 +3467,7 @@ public class KafkaBinderTests extends
 		}
 		assertThat(polled).isTrue();
 
-		template.send("anotherOne", "testPollable2");
+		template.send("anotherOne","testPollable2");
 		polled = inboundBindTarget.poll(m -> {
 			assertThat(m.getPayload()).isEqualTo("testPollable2");
 		});
@@ -3481,18 +3481,18 @@ public class KafkaBinderTests extends
 		assertThat(polled).isTrue();
 		// Bind a second pollable consumer GH-521
 		consumerProps.getExtension().getConfiguration()
-				.put(ConsumerConfig.CLIENT_ID_CONFIG, "pollable2");
+				.put(ConsumerConfig.CLIENT_ID_CONFIG,"pollable2");
 		PollableSource<MessageHandler> second = new DefaultPollableMessageSource(
 				this.messageConverter);
 		Binding<PollableSource<MessageHandler>> binding2 = binder.bindPollableConsumer(
-				"pollable2", "group-polledConsumer2", second, consumerProps);
+				"pollable2","group-polledConsumer2",second,consumerProps);
 		second.poll(m -> {
 		});
 		binding.unbind();
 		binding2.unbind();
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes","unchecked"})
 	@Test
 	public void testPolledConsumerRequeue() throws Exception {
 		KafkaTestBinder binder = getBinder();
@@ -3500,12 +3500,12 @@ public class KafkaBinderTests extends
 				this.messageConverter);
 		ExtendedConsumerProperties<KafkaConsumerProperties> properties = createConsumerProperties();
 		Binding<PollableSource<MessageHandler>> binding = binder.bindPollableConsumer(
-				"pollableRequeue", "group", inboundBindTarget, properties);
+				"pollableRequeue","group",inboundBindTarget,properties);
 		Map<String, Object> producerProps = KafkaTestUtils
 				.producerProps(embeddedKafka);
 		KafkaTemplate template = new KafkaTemplate(
 				new DefaultKafkaProducerFactory<>(producerProps));
-		template.send("pollableRequeue", "testPollable");
+		template.send("pollableRequeue","testPollable");
 		try {
 			boolean polled = false;
 			int n = 0;
@@ -3526,7 +3526,7 @@ public class KafkaBinderTests extends
 		binding.unbind();
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes","unchecked"})
 	@Test
 	public void testPolledConsumerWithDlq() throws Exception {
 		KafkaTestBinder binder = getBinder();
@@ -3540,10 +3540,10 @@ public class KafkaBinderTests extends
 		Map<String, Object> producerProps = KafkaTestUtils
 				.producerProps(embeddedKafka);
 		Binding<PollableSource<MessageHandler>> binding = binder.bindPollableConsumer(
-				"pollableDlq", "group-pcWithDlq", inboundBindTarget, properties);
+				"pollableDlq","group-pcWithDlq",inboundBindTarget,properties);
 		KafkaTemplate template = new KafkaTemplate(
 				new DefaultKafkaProducerFactory<>(producerProps));
-		template.send("pollableDlq", "testPollableDLQ");
+		template.send("pollableDlq","testPollableDLQ");
 		try {
 			int n = 0;
 			while (n++ < 100) {
@@ -3556,9 +3556,9 @@ public class KafkaBinderTests extends
 		catch (MessageHandlingException e) {
 			assertThat(e.getCause().getMessage()).isEqualTo("test DLQ");
 		}
-		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("dlq", "false",
+		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("dlq","false",
 				embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
 		ConsumerFactory cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		Consumer consumer = cf.createConsumer();
 		embeddedKafka.consumeFromAnEmbeddedTopic(consumer,
@@ -3571,14 +3571,14 @@ public class KafkaBinderTests extends
 		consumer.close();
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes","unchecked"})
 	@Test
 	public void testTopicPatterns() throws Exception {
 		try (AdminClient admin = AdminClient.create(
 				Collections.singletonMap(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
 						embeddedKafka.getBrokersAsString()))) {
 			admin.createTopics(Collections
-					.singletonList(new NewTopic("topicPatterns.1", 1, (short) 1))).all()
+					.singletonList(new NewTopic("topicPatterns.1",1,(short) 1))).all()
 					.get();
 			Binder binder = getBinder();
 			ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
@@ -3588,17 +3588,17 @@ public class KafkaBinderTests extends
 			final CountDownLatch latch = new CountDownLatch(1);
 			final AtomicReference<String> topic = new AtomicReference<>();
 			moduleInputChannel.subscribe(m -> {
-				topic.set(m.getHeaders().get(KafkaHeaders.RECEIVED_TOPIC, String.class));
+				topic.set(m.getHeaders().get(KafkaHeaders.RECEIVED_TOPIC,String.class));
 				latch.countDown();
 			});
 			Binding<MessageChannel> consumerBinding = binder.bindConsumer(
-					"topicPatterns\\..*", "testTopicPatterns", moduleInputChannel,
+					"topicPatterns\\..*","testTopicPatterns",moduleInputChannel,
 					consumerProperties);
 			DefaultKafkaProducerFactory pf = new DefaultKafkaProducerFactory(
 					KafkaTestUtils.producerProps(embeddedKafka));
 			KafkaTemplate template = new KafkaTemplate(pf);
-			template.send("topicPatterns.1", "foo");
-			assertThat(latch.await(10, TimeUnit.SECONDS)).isTrue();
+			template.send("topicPatterns.1","foo");
+			assertThat(latch.await(10,TimeUnit.SECONDS)).isTrue();
 			assertThat(topic.get()).isEqualTo("topicPatterns.1");
 			consumerBinding.unbind();
 			pf.destroy();
@@ -3612,11 +3612,11 @@ public class KafkaBinderTests extends
 				Collections.singletonMap(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
 						embeddedKafka.getBrokersAsString()))) {
 			admin.createTopics(Collections
-					.singletonList(new NewTopic("fooUniqueTopic", 1, (short) 1))).all()
+					.singletonList(new NewTopic("fooUniqueTopic",1,(short) 1))).all()
 					.get();
 			try {
 				admin.createTopics(Collections
-						.singletonList(new NewTopic("fooUniqueTopic", 1, (short) 1)))
+						.singletonList(new NewTopic("fooUniqueTopic",1,(short) 1)))
 						.all().get();
 				fail("Expecting TopicExistsException");
 			}
@@ -3624,7 +3624,7 @@ public class KafkaBinderTests extends
 				assertThat(ex.getCause() instanceof TopicExistsException).isTrue();
 				latch.countDown();
 			}
-			latch.await(1, TimeUnit.SECONDS);
+			latch.await(1,TimeUnit.SECONDS);
 		}
 	}
 
@@ -3653,16 +3653,16 @@ public class KafkaBinderTests extends
 			KafkaBinderConfigurationProperties configurationProperties = createConfigurationProperties();
 			configurationProperties.setAutoAddPartitions(true);
 			Binder binder = getBinder(configurationProperties);
-			producerBinding = binder.bindProducer(testTopicName, moduleOutputChannel,
+			producerBinding = binder.bindProducer(testTopicName,moduleOutputChannel,
 					producerProperties);
 
-			consumerBinding = binder.bindConsumer(testTopicName, "testReset",
-					moduleInputChannel, consumerProperties);
+			consumerBinding = binder.bindConsumer(testTopicName,"testReset",
+					moduleInputChannel,consumerProperties);
 			// Let the consumer actually bind to the producer before sending a msg
 			binderBindUnbindLatency();
-			IntStream.range(0, 10).forEach(i -> moduleOutputChannel.send(MessageBuilder.withPayload(testPayload)
-					.setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN)
-					.setHeader(KafkaHeaders.PARTITION_ID, i)
+			IntStream.range(0,10).forEach(i -> moduleOutputChannel.send(MessageBuilder.withPayload(testPayload)
+					.setHeader(MessageHeaders.CONTENT_TYPE,MimeTypeUtils.TEXT_PLAIN)
+					.setHeader(KafkaHeaders.PARTITION_ID,i)
 					.build()));
 			CountDownLatch latch1 = new CountDownLatch(10);
 			CountDownLatch latch2 = new CountDownLatch(20);
@@ -3678,13 +3678,13 @@ public class KafkaBinderTests extends
 					latch2.countDown();
 				}
 			});
-			assertThat(latch1.await(10, TimeUnit.SECONDS)).as("Failed to receive messages").isTrue();
+			assertThat(latch1.await(10,TimeUnit.SECONDS)).as("Failed to receive messages").isTrue();
 			consumerBinding.unbind();
-			consumerBinding = binder.bindConsumer(testTopicName, "testReset",
-					moduleInputChannel, consumerProperties);
-			assertThat(latch2.await(10, TimeUnit.SECONDS)).as("Failed to receive message").isTrue();
-			binder.bindConsumer(testTopicName + "-x", "testReset",
-					moduleInputChannel, consumerProperties).unbind(); // cause another rebalance
+			consumerBinding = binder.bindConsumer(testTopicName,"testReset",
+					moduleInputChannel,consumerProperties);
+			assertThat(latch2.await(10,TimeUnit.SECONDS)).as("Failed to receive message").isTrue();
+			binder.bindConsumer(testTopicName + "-x","testReset",
+					moduleInputChannel,consumerProperties).unbind(); // cause another rebalance
 			assertThat(received.get()).as("Unexpected reset").isEqualTo(20);
 
 			assertThat(inboundMessageRef.get()).isNotNull();
@@ -3719,16 +3719,16 @@ public class KafkaBinderTests extends
 			String testTopicName = "existing" + System.currentTimeMillis();
 			KafkaTestBinder binder = getBinder();
 			((GenericApplicationContext) binder.getApplicationContext()).registerBean("metaChannel",
-					MessageChannel.class, () -> metaChannel);
-			producerBinding = binder.bindProducer(testTopicName, moduleOutputChannel,
+					MessageChannel.class,() -> metaChannel);
+			producerBinding = binder.bindProducer(testTopicName,moduleOutputChannel,
 					producerProperties);
 			moduleOutputChannel
-					.send(new GenericMessage<>("foo", Collections.singletonMap(KafkaHeaders.PARTITION_ID, 0)));
+					.send(new GenericMessage<>("foo",Collections.singletonMap(KafkaHeaders.PARTITION_ID,0)));
 			Message<?> sendResult = metaChannel.receive(10_000);
 			assertThat(sendResult).isNotNull();
-			RecordMetadata meta = sendResult.getHeaders().get(KafkaHeaders.RECORD_METADATA, RecordMetadata.class);
+			RecordMetadata meta = sendResult.getHeaders().get(KafkaHeaders.RECORD_METADATA,RecordMetadata.class);
 			assertThat(meta).isNotNull()
-				.hasFieldOrPropertyWithValue("offset", 0L);
+					.hasFieldOrPropertyWithValue("offset",0L);
 			assertThat(meta.topic()).isEqualTo(testTopicName);
 			assertThat(meta.partition()).isEqualTo(0);
 		}
@@ -3754,21 +3754,21 @@ public class KafkaBinderTests extends
 
 			String testTopicName = "existing" + System.currentTimeMillis();
 			KafkaTestBinder binder = getBinder();
-			producerBinding = binder.bindProducer(testTopicName, moduleOutputChannel,
+			producerBinding = binder.bindProducer(testTopicName,moduleOutputChannel,
 					producerProperties);
 			moduleOutputChannel.addInterceptor(new ChannelInterceptor() {
 
 				@Override
-				public Message<?> preSend(Message<?> message, MessageChannel channel) {
+				public Message<?> preSend(Message<?> message,MessageChannel channel) {
 					assertThat(message.getHeaders()
 							.get(KafkaExpressionEvaluatingInterceptor.MESSAGE_KEY_HEADER))
-									.isEqualTo("foo".getBytes());
+							.isEqualTo("foo".getBytes());
 					return message;
 				}
 
 			});
 			moduleOutputChannel.send(
-					new GenericMessage<>(new Pojo("foo"), Collections.singletonMap(KafkaHeaders.PARTITION_ID, 0)));
+					new GenericMessage<>(new Pojo("foo"),Collections.singletonMap(KafkaHeaders.PARTITION_ID,0)));
 		}
 		finally {
 			if (producerBinding != null) {
@@ -3779,20 +3779,20 @@ public class KafkaBinderTests extends
 
 	@Test
 	public void testInternalHeadersNotPropagated() throws Exception {
-		testInternalHeadersNotPropagatedGuts("propagate.1", null, null);
+		testInternalHeadersNotPropagatedGuts("propagate.1",null,null);
 	}
 
 	@Test
 	public void testInternalHeadersNotPropagatedCustomHeader() throws Exception {
-		testInternalHeadersNotPropagatedGuts("propagate.2", new String[] { "foo", "*" }, null);
+		testInternalHeadersNotPropagatedGuts("propagate.2",new String[]{"foo","*"},null);
 	}
 
 	@Test
 	public void testInternalHeadersNotPropagatedCustomMapper() throws Exception {
-		testInternalHeadersNotPropagatedGuts("propagate.3", null, new BinderHeaderMapper("*"));
+		testInternalHeadersNotPropagatedGuts("propagate.3",null,new BinderHeaderMapper("*"));
 	}
 
-	public void testInternalHeadersNotPropagatedGuts(String name, String[] headerPatterns,
+	public void testInternalHeadersNotPropagatedGuts(String name,String[] headerPatterns,
 			KafkaHeaderMapper mapper) throws Exception {
 
 		KafkaTestBinder binder;
@@ -3804,49 +3804,49 @@ public class KafkaBinderTests extends
 			binderConfiguration.setHeaderMapperBeanName("headerMapper");
 
 			KafkaTopicProvisioner kafkaTopicProvisioner = new KafkaTopicProvisioner(
-					binderConfiguration, new TestKafkaProperties(), null);
+					binderConfiguration,new TestKafkaProperties(),null);
 			try {
 				kafkaTopicProvisioner.afterPropertiesSet();
 			}
 			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-			binder = new KafkaTestBinder(binderConfiguration, kafkaTopicProvisioner);
+			binder = new KafkaTestBinder(binderConfiguration,kafkaTopicProvisioner);
 			((GenericApplicationContext) binder.getApplicationContext()).registerBean("headerMapper",
-					KafkaHeaderMapper.class, () -> mapper);
+					KafkaHeaderMapper.class,() -> mapper);
 		}
 		ExtendedProducerProperties<KafkaProducerProperties> producerProperties = createProducerProperties();
 		producerProperties.getExtension().setHeaderPatterns(headerPatterns);
 
-		DirectChannel output = createBindableChannel("output", createProducerBindingProperties(producerProperties));
+		DirectChannel output = createBindableChannel("output",createProducerBindingProperties(producerProperties));
 		output.setBeanName(name + ".out");
-		Binding<MessageChannel> producerBinding = binder.bindProducer(name + ".1", output, producerProperties);
+		Binding<MessageChannel> producerBinding = binder.bindProducer(name + ".1",output,producerProperties);
 
 		QueueChannel input = new QueueChannel();
 		input.setBeanName(name + ".in");
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
-		Binding<MessageChannel> consumerBinding = binder.bindConsumer(name + ".0", name, input, consumerProperties);
+		Binding<MessageChannel> consumerBinding = binder.bindConsumer(name + ".0",name,input,consumerProperties);
 		Map<String, Object> producerProps = KafkaTestUtils.producerProps(embeddedKafka);
 		KafkaTemplate template = new KafkaTemplate(new DefaultKafkaProducerFactory<>(producerProps));
 		template.send(MessageBuilder.withPayload("internalHeaderPropagation")
-				.setHeader(KafkaHeaders.TOPIC, name + ".0")
-				.setHeader("someHeader", "someValue")
+				.setHeader(KafkaHeaders.TOPIC,name + ".0")
+				.setHeader("someHeader","someValue")
 				.build());
 
 		Message<?> consumed = input.receive(10_000);
 		if (headerPatterns != null) {
-			consumed = MessageBuilder.fromMessage(consumed).setHeader(headerPatterns[0], "bar").build();
+			consumed = MessageBuilder.fromMessage(consumed).setHeader(headerPatterns[0],"bar").build();
 		}
 		output.send(consumed);
 
-		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(name, "false",
+		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(name,"false",
 				embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
-		consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,ByteArrayDeserializer.class);
+		consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,ByteArrayDeserializer.class);
 		DefaultKafkaConsumerFactory cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		Consumer consumer = cf.createConsumer();
-		consumer.assign(Collections.singletonList(new TopicPartition(name + ".1", 0)));
+		consumer.assign(Collections.singletonList(new TopicPartition(name + ".1",0)));
 		ConsumerRecords<?, ?> records = consumer.poll(Duration.ofSeconds(10));
 		assertThat(records.count()).isEqualTo(1);
 		ConsumerRecord<?, ?> received = records.iterator().next();
@@ -3873,19 +3873,19 @@ public class KafkaBinderTests extends
 	public void testNoBrokerOverride() throws Exception {
 		Binder binder = getBinder();
 		ExtendedProducerProperties<KafkaProducerProperties> producerProperties = createProducerProperties();
-		producerProperties.getExtension().getConfiguration().put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "foo");
+		producerProperties.getExtension().getConfiguration().put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,"foo");
 		BindingProperties outputBindingProperties = createProducerBindingProperties(producerProperties);
-		DirectChannel moduleOutputChannel = createBindableChannel("output", outputBindingProperties);
+		DirectChannel moduleOutputChannel = createBindableChannel("output",outputBindingProperties);
 		ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties = createConsumerProperties();
-		consumerProperties.getExtension().getConfiguration().put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "foo");
+		consumerProperties.getExtension().getConfiguration().put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,"foo");
 		BindingProperties consumerBindingProperties = createConsumerBindingProperties(consumerProperties);
-		DirectChannel moduleInputChannel = createBindableChannel("input", consumerBindingProperties);
+		DirectChannel moduleInputChannel = createBindableChannel("input",consumerBindingProperties);
 
 		assertThatExceptionOfType(BinderException.class).isThrownBy(() -> binder.bindProducer("foo.bar",
-					moduleOutputChannel, outputBindingProperties.getProducer()))
+				moduleOutputChannel,outputBindingProperties.getProducer()))
 				.withCauseExactlyInstanceOf(IllegalStateException.class);
 		assertThatExceptionOfType(BinderException.class).isThrownBy(() -> binder.bindConsumer("foo.bar",
-					"testSendAndReceive", moduleInputChannel, consumerProperties))
+				"testSendAndReceive",moduleInputChannel,consumerProperties))
 				.withCauseExactlyInstanceOf(IllegalStateException.class);
 	}
 
@@ -3910,11 +3910,11 @@ public class KafkaBinderTests extends
 		public void handleMessage(Message<?> message) throws MessagingException {
 			invocationCount++;
 			Long offset = message.getHeaders()
-					.get(KafkaBinderTests.this.getKafkaOffsetHeaderKey(), Long.class);
+					.get(KafkaBinderTests.this.getKafkaOffsetHeaderKey(),Long.class);
 			// using the offset as key allows to ensure that we don't store duplicate
 			// messages on retry
 			if (!receivedMessages.containsKey(offset)) {
-				receivedMessages.put(offset, message);
+				receivedMessages.put(offset,message);
 				latch.countDown();
 			}
 			throw new RuntimeException("fail");

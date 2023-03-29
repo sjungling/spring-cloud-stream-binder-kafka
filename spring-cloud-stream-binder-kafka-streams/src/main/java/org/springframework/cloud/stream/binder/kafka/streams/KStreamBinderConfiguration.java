@@ -38,7 +38,7 @@ import org.springframework.context.annotation.Import;
  * @author Soby Chacko
  */
 @Configuration
-@Import({ KafkaAutoConfiguration.class,
+@Import({KafkaAutoConfiguration.class,
 		MultiBinderPropertiesConfiguration.class,
 		KafkaStreamsBinderHealthIndicatorConfiguration.class,
 		KafkaStreamsJaasConfiguration.class})
@@ -47,9 +47,9 @@ public class KStreamBinderConfiguration {
 	@Bean
 	public KafkaTopicProvisioner provisioningProvider(
 			KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties,
-			KafkaProperties kafkaProperties, ObjectProvider<AdminClientConfigCustomizer> adminClientConfigCustomizer) {
+			KafkaProperties kafkaProperties,ObjectProvider<AdminClientConfigCustomizer> adminClientConfigCustomizer) {
 		return new KafkaTopicProvisioner(kafkaStreamsBinderConfigurationProperties,
-				kafkaProperties, adminClientConfigCustomizer.getIfUnique());
+				kafkaProperties,adminClientConfigCustomizer.getIfUnique());
 	}
 
 	@Bean
@@ -59,10 +59,10 @@ public class KStreamBinderConfiguration {
 			KafkaStreamsMessageConversionDelegate KafkaStreamsMessageConversionDelegate,
 			KafkaStreamsBindingInformationCatalogue KafkaStreamsBindingInformationCatalogue,
 			KeyValueSerdeResolver keyValueSerdeResolver,
-			KafkaStreamsExtendedBindingProperties kafkaStreamsExtendedBindingProperties, KafkaStreamsRegistry kafkaStreamsRegistry) {
+			KafkaStreamsExtendedBindingProperties kafkaStreamsExtendedBindingProperties,KafkaStreamsRegistry kafkaStreamsRegistry) {
 		KStreamBinder kStreamBinder = new KStreamBinder(binderConfigurationProperties,
-				kafkaTopicProvisioner, KafkaStreamsMessageConversionDelegate,
-				KafkaStreamsBindingInformationCatalogue, keyValueSerdeResolver, kafkaStreamsRegistry);
+				kafkaTopicProvisioner,KafkaStreamsMessageConversionDelegate,
+				KafkaStreamsBindingInformationCatalogue,keyValueSerdeResolver,kafkaStreamsRegistry);
 		kStreamBinder.setKafkaStreamsExtendedBindingProperties(
 				kafkaStreamsExtendedBindingProperties);
 		return kStreamBinder;

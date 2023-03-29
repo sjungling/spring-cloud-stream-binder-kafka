@@ -88,11 +88,11 @@ public class KafkaBinderConfigurationProperties {
 	 */
 	private Map<String, String> producerProperties = new HashMap<>();
 
-	private String[] brokers = new String[] { "localhost" };
+	private String[] brokers = new String[]{"localhost"};
 
 	private String defaultBrokerPort = "9092";
 
-	private String[] headers = new String[] {};
+	private String[] headers = new String[]{};
 
 	private boolean autoCreateTopics = true;
 
@@ -137,7 +137,7 @@ public class KafkaBinderConfigurationProperties {
 	private String certificateStoreDirectory;
 
 	public KafkaBinderConfigurationProperties(KafkaProperties kafkaProperties) {
-		Assert.notNull(kafkaProperties, "'kafkaProperties' cannot be null");
+		Assert.notNull(kafkaProperties,"'kafkaProperties' cannot be null");
 		this.kafkaProperties = kafkaProperties;
 	}
 
@@ -157,7 +157,7 @@ public class KafkaBinderConfigurationProperties {
 		// and this: https://cwiki.apache.org/confluence/display/KAFKA/KIP-398%3A+Support+reading+trust+store+from+classpath
 		moveCertsToFileSystemIfNecessary();
 
-		return toConnectionString(this.brokers, this.defaultBrokerPort);
+		return toConnectionString(this.brokers,this.defaultBrokerPort);
 	}
 
 	private void moveCertsToFileSystemIfNecessary() {
@@ -173,34 +173,34 @@ public class KafkaBinderConfigurationProperties {
 	private void moveBrokerCertsIfApplicable() throws IOException {
 		final String trustStoreLocation = this.configuration.get("ssl.truststore.location");
 		if (trustStoreLocation != null && trustStoreLocation.startsWith("classpath:")) {
-			final String fileSystemLocation = moveCertToFileSystem(trustStoreLocation, this.certificateStoreDirectory);
+			final String fileSystemLocation = moveCertToFileSystem(trustStoreLocation,this.certificateStoreDirectory);
 			// Overriding the value with absolute filesystem path.
-			this.configuration.put("ssl.truststore.location", fileSystemLocation);
+			this.configuration.put("ssl.truststore.location",fileSystemLocation);
 		}
 		final String keyStoreLocation = this.configuration.get("ssl.keystore.location");
 		if (keyStoreLocation != null && keyStoreLocation.startsWith("classpath:")) {
-			final String fileSystemLocation = moveCertToFileSystem(keyStoreLocation, this.certificateStoreDirectory);
+			final String fileSystemLocation = moveCertToFileSystem(keyStoreLocation,this.certificateStoreDirectory);
 			// Overriding the value with absolute filesystem path.
-			this.configuration.put("ssl.keystore.location", fileSystemLocation);
+			this.configuration.put("ssl.keystore.location",fileSystemLocation);
 		}
 	}
 
 	private void moveSchemaRegistryCertsIfApplicable() throws IOException {
 		String trustStoreLocation = this.configuration.get("schema.registry.ssl.truststore.location");
 		if (trustStoreLocation != null && trustStoreLocation.startsWith("classpath:")) {
-			final String fileSystemLocation = moveCertToFileSystem(trustStoreLocation, this.certificateStoreDirectory);
+			final String fileSystemLocation = moveCertToFileSystem(trustStoreLocation,this.certificateStoreDirectory);
 			// Overriding the value with absolute filesystem path.
-			this.configuration.put("schema.registry.ssl.truststore.location", fileSystemLocation);
+			this.configuration.put("schema.registry.ssl.truststore.location",fileSystemLocation);
 		}
 		final String keyStoreLocation = this.configuration.get("schema.registry.ssl.keystore.location");
 		if (keyStoreLocation != null && keyStoreLocation.startsWith("classpath:")) {
-			final String fileSystemLocation = moveCertToFileSystem(keyStoreLocation, this.certificateStoreDirectory);
+			final String fileSystemLocation = moveCertToFileSystem(keyStoreLocation,this.certificateStoreDirectory);
 			// Overriding the value with absolute filesystem path.
-			this.configuration.put("schema.registry.ssl.keystore.location", fileSystemLocation);
+			this.configuration.put("schema.registry.ssl.keystore.location",fileSystemLocation);
 		}
 	}
 
-	private String moveCertToFileSystem(String classpathLocation, String fileSystemLocation) throws IOException {
+	private String moveCertToFileSystem(String classpathLocation,String fileSystemLocation) throws IOException {
 		File targetFile;
 		final String tempDir = System.getProperty("java.io.tmpdir");
 		Resource resource = new DefaultResourceLoader().getResource(classpathLocation);
@@ -209,19 +209,19 @@ public class KafkaBinderConfigurationProperties {
 			if (!Files.exists(path) || !Files.isDirectory(path) || !Files.isWritable(path)) {
 				logger.warn("The filesystem location to move the cert files (" + fileSystemLocation + ") " +
 						"is not found or a directory that is writable. The system temp folder (java.io.tmpdir) will be used instead.");
-				targetFile = new File(Paths.get(tempDir, resource.getFilename()).toString());
+				targetFile = new File(Paths.get(tempDir,resource.getFilename()).toString());
 			}
 			else {
 				// the given location is verified to be a writable directory.
-				targetFile = new File(Paths.get(fileSystemLocation, resource.getFilename()).toString());
+				targetFile = new File(Paths.get(fileSystemLocation,resource.getFilename()).toString());
 			}
 		}
 		else {
-			targetFile = new File(Paths.get(tempDir, resource.getFilename()).toString());
+			targetFile = new File(Paths.get(tempDir,resource.getFilename()).toString());
 		}
 
 		try (InputStream inputStream = resource.getInputStream()) {
-			Files.copy(inputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(inputStream,targetFile.toPath(),StandardCopyOption.REPLACE_EXISTING);
 		}
 		return targetFile.getAbsolutePath();
 	}
@@ -257,7 +257,7 @@ public class KafkaBinderConfigurationProperties {
 	 * @param defaultPort port
 	 * @return formatted connection string
 	 */
-	private String toConnectionString(String[] hosts, String defaultPort) {
+	private String toConnectionString(String[] hosts,String defaultPort) {
 		String[] fullyFormattedHosts = new String[hosts.length];
 		for (int i = 0; i < hosts.length; i++) {
 			if (hosts[i].contains(":") || StringUtils.isEmpty(defaultPort)) {
@@ -339,7 +339,7 @@ public class KafkaBinderConfigurationProperties {
 	}
 
 	public void setConsumerProperties(Map<String, String> consumerProperties) {
-		Assert.notNull(consumerProperties, "'consumerProperties' cannot be null");
+		Assert.notNull(consumerProperties,"'consumerProperties' cannot be null");
 		this.consumerProperties = consumerProperties;
 	}
 
@@ -348,7 +348,7 @@ public class KafkaBinderConfigurationProperties {
 	}
 
 	public void setProducerProperties(Map<String, String> producerProperties) {
-		Assert.notNull(producerProperties, "'producerProperties' cannot be null");
+		Assert.notNull(producerProperties,"'producerProperties' cannot be null");
 		this.producerProperties = producerProperties;
 	}
 
@@ -417,15 +417,15 @@ public class KafkaBinderConfigurationProperties {
 	}
 
 	private String constructIgnoredConfigMessage(String config) {
-		return String.format("Ignoring provided value(s) for '%s'. ", config);
+		return String.format("Ignoring provided value(s) for '%s'. ",config);
 	}
 
 	private Map<String, Object> getConfigurationWithBootstrapServer(
-			Map<String, Object> configuration, String bootstrapServersConfig) {
+			Map<String, Object> configuration,String bootstrapServersConfig) {
 		final String kafkaConnectionString = getKafkaConnectionString();
 		if (ObjectUtils.isEmpty(configuration.get(bootstrapServersConfig)) ||
 				!kafkaConnectionString.equals("localhost:9092")) {
-			configuration.put(bootstrapServersConfig, kafkaConnectionString);
+			configuration.put(bootstrapServersConfig,kafkaConnectionString);
 		}
 		return Collections.unmodifiableMap(configuration);
 	}
@@ -528,7 +528,7 @@ public class KafkaBinderConfigurationProperties {
 					.setPartitionSelectorExpression(partitionSelectorExpression);
 		}
 
-		public @Min(value = 1, message = "Partition count should be greater than zero.") int getPartitionCount() {
+		public @Min(value = 1,message = "Partition count should be greater than zero.") int getPartitionCount() {
 			return this.producerProperties.getPartitionCount();
 		}
 

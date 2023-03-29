@@ -36,12 +36,12 @@ public interface DlqPartitionFunction {
 	/**
 	 * Returns the same partition as the original recor.
 	 */
-	DlqPartitionFunction ORIGINAL_PARTITION = (group, rec, ex) -> rec.partition();
+	DlqPartitionFunction ORIGINAL_PARTITION = (group,rec,ex) -> rec.partition();
 
 	/**
 	 * Returns 0.
 	 */
-	DlqPartitionFunction PARTITION_ZERO = (group, rec, ex) -> 0;
+	DlqPartitionFunction PARTITION_ZERO = (group,rec,ex) -> 0;
 
 	/**
 	 * Apply the function.
@@ -51,7 +51,7 @@ public interface DlqPartitionFunction {
 	 * @return the DLQ partition, or null.
 	 */
 	@Nullable
-	Integer apply(String group, ConsumerRecord<?, ?> record, Throwable throwable);
+	Integer apply(String group,ConsumerRecord<?, ?> record,Throwable throwable);
 
 	/**
 	 * Determine the fallback function to use based on the dlq partition count if no
@@ -60,7 +60,7 @@ public interface DlqPartitionFunction {
 	 * @param logger the logger.
 	 * @return the fallback.
 	 */
-	static DlqPartitionFunction determineFallbackFunction(@Nullable Integer dlqPartitions, Log logger) {
+	static DlqPartitionFunction determineFallbackFunction(@Nullable Integer dlqPartitions,Log logger) {
 		if (dlqPartitions == null) {
 			return ORIGINAL_PARTITION;
 		}

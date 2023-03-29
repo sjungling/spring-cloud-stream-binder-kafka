@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 /**
  * @author Soby Chacko
  */
-@EmbeddedKafka(count = 1, controlledShutdown = true, partitions = 10, topics = "outputTopic")
+@EmbeddedKafka(count = 1,controlledShutdown = true,partitions = 10,topics = "outputTopic")
 public class KafkaBinderMeterRegistryTest {
 
 	private static EmbeddedKafkaBroker embeddedKafka;
@@ -56,13 +56,13 @@ public class KafkaBinderMeterRegistryTest {
 	public static void setup() {
 		embeddedKafka = EmbeddedKafkaCondition.getBroker();
 
-		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group", "false",
+		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group","false",
 				embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,"org.apache.kafka.common.serialization.StringDeserializer");
 		DefaultKafkaConsumerFactory<String, String> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromEmbeddedTopics(consumer, "outputTopic");
+		embeddedKafka.consumeFromEmbeddedTopics(consumer,"outputTopic");
 	}
 
 	@AfterAll
@@ -84,14 +84,14 @@ public class KafkaBinderMeterRegistryTest {
 		Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 		DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 
-		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 		template.setDefaultTopic("inputTopic");
 		template.sendDefault("foo");
 
 		// Forcing the retrieval of the data on the outbound so that the producer factory has
 		// a chance to add the micrometer listener properly. Only on the first send, binder's
 		// internal KafkaTemplate adds the Micrometer listener (using the producer factory).
-		KafkaTestUtils.getSingleRecord(consumer, "outputTopic");
+		KafkaTestUtils.getSingleRecord(consumer,"outputTopic");
 
 		final MeterRegistry meterRegistry = applicationContext.getBean(MeterRegistry.class);
 		assertMeterRegistry(meterRegistry);
@@ -119,14 +119,14 @@ public class KafkaBinderMeterRegistryTest {
 		Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 		DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 
-		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 		template.setDefaultTopic("inputTopic");
 		template.sendDefault("foo");
 
 		// Forcing the retrieval of the data on the outbound so that the producer factory has
 		// a chance to add the micrometer listener properly. Only on the first send, binder's
 		// internal KafkaTemplate adds the Micrometer listener (using the producer factory).
-		KafkaTestUtils.getSingleRecord(consumer, "outputTopic");
+		KafkaTestUtils.getSingleRecord(consumer,"outputTopic");
 
 		final MeterRegistry meterRegistry = applicationContext.getBean(MeterRegistry.class);
 		assertMeterRegistry(meterRegistry);
@@ -138,8 +138,8 @@ public class KafkaBinderMeterRegistryTest {
 
 		// assert kafka binder metrics
 		assertThat(meterRegistry.get("spring.cloud.stream.binder.kafka.offset")
-				.tag("group", "inputGroup")
-				.tag("topic", "inputTopic").gauge().value()).isNotNull();
+				.tag("group","inputGroup")
+				.tag("topic","inputTopic").gauge().value()).isNotNull();
 
 		// assert consumer metrics
 		assertThatCode(() -> meterRegistry.get("kafka.consumer.fetch.manager.fetch.total").meter()).doesNotThrowAnyException();

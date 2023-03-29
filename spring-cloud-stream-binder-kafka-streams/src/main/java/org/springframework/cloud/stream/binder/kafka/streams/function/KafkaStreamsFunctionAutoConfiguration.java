@@ -34,12 +34,12 @@ public class KafkaStreamsFunctionAutoConfiguration {
 	@Bean
 	@Conditional(FunctionDetectorCondition.class)
 	public KafkaStreamsFunctionProcessorInvoker kafkaStreamsFunctionProcessorInvoker(
-																					KafkaStreamsFunctionBeanPostProcessor kafkaStreamsFunctionBeanPostProcessor,
-																					KafkaStreamsFunctionProcessor kafkaStreamsFunctionProcessor,
-																					KafkaStreamsBindableProxyFactory[] kafkaStreamsBindableProxyFactories,
-																					StreamFunctionProperties streamFunctionProperties) {
+			KafkaStreamsFunctionBeanPostProcessor kafkaStreamsFunctionBeanPostProcessor,
+			KafkaStreamsFunctionProcessor kafkaStreamsFunctionProcessor,
+			KafkaStreamsBindableProxyFactory[] kafkaStreamsBindableProxyFactories,
+			StreamFunctionProperties streamFunctionProperties) {
 		return new KafkaStreamsFunctionProcessorInvoker(kafkaStreamsFunctionBeanPostProcessor.getResolvableTypes(),
-				kafkaStreamsFunctionProcessor, kafkaStreamsBindableProxyFactories, kafkaStreamsFunctionBeanPostProcessor.getMethods(),
+				kafkaStreamsFunctionProcessor,kafkaStreamsBindableProxyFactories,kafkaStreamsFunctionBeanPostProcessor.getMethods(),
 				streamFunctionProperties);
 	}
 

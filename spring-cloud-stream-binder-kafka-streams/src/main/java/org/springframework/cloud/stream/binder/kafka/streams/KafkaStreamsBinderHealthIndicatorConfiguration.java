@@ -39,10 +39,10 @@ public class KafkaStreamsBinderHealthIndicatorConfiguration {
 	public KafkaStreamsBinderHealthIndicator kafkaStreamsBinderHealthIndicator(
 			ObjectProvider<KafkaStreamsRegistry> kafkaStreamsRegistry,
 			@Qualifier("binderConfigurationProperties")KafkaStreamsBinderConfigurationProperties kafkaStreamsBinderConfigurationProperties,
-			KafkaProperties kafkaProperties, KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue) {
+			KafkaProperties kafkaProperties,KafkaStreamsBindingInformationCatalogue kafkaStreamsBindingInformationCatalogue) {
 		if (kafkaStreamsRegistry.getIfUnique() != null) {
-			return new KafkaStreamsBinderHealthIndicator(kafkaStreamsRegistry.getIfUnique(), kafkaStreamsBinderConfigurationProperties,
-					kafkaProperties, kafkaStreamsBindingInformationCatalogue);
+			return new KafkaStreamsBinderHealthIndicator(kafkaStreamsRegistry.getIfUnique(),kafkaStreamsBinderConfigurationProperties,
+					kafkaProperties,kafkaStreamsBindingInformationCatalogue);
 		}
 		return null;
 	}

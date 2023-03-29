@@ -57,7 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Gary Russell
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, properties = {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,properties = {
 		"spring.cloud.stream.function.definition=process;processCustom",
 		"spring.cloud.stream.function.bindings.process-in-0=standard-in",
 		"spring.cloud.stream.function.bindings.process-out-0=standard-out",
@@ -73,14 +73,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 		"spring.cloud.stream.kafka.bindings.standard-out.producer.configuration.foo="
 				+ "bindingSpecificPropertyShouldWinOverDefault",
 		"spring.cloud.stream.kafka.default.consumer.ackEachRecord=true",
-		"spring.cloud.stream.kafka.bindings.custom-in.consumer.ackEachRecord=false" })
+		"spring.cloud.stream.kafka.bindings.custom-in.consumer.ackEachRecord=false"})
 @DirtiesContext
 public class KafkaBinderExtendedPropertiesTest {
 
 	private static final String KAFKA_BROKERS_PROPERTY = "spring.cloud.stream.kafka.binder.brokers";
 
 	@ClassRule
-	public static EmbeddedKafkaRule kafkaEmbedded = new EmbeddedKafkaRule(1, true);
+	public static EmbeddedKafkaRule kafkaEmbedded = new EmbeddedKafkaRule(1,true);
 
 	@BeforeClass
 	public static void setup() {
@@ -102,7 +102,7 @@ public class KafkaBinderExtendedPropertiesTest {
 		BinderFactory binderFactory = context.getBeanFactory()
 				.getBean(BinderFactory.class);
 		Binder<MessageChannel, ? extends ConsumerProperties, ? extends ProducerProperties> kafkaBinder = binderFactory
-				.getBinder("kafka", MessageChannel.class);
+				.getBinder("kafka",MessageChannel.class);
 
 		KafkaProducerProperties kafkaProducerProperties = (KafkaProducerProperties) ((ExtendedPropertiesBinder) kafkaBinder)
 				.getExtendedProducerProperties("standard-out");
@@ -139,7 +139,7 @@ public class KafkaBinderExtendedPropertiesTest {
 				.isEqualTo("BarSerializer.class");
 		assertThat(
 				customKafkaProducerProperties.getConfiguration().get("value.serializer"))
-						.isEqualTo("BarSerializer.class");
+				.isEqualTo("BarSerializer.class");
 
 		// through default properties.
 		assertThat(customKafkaProducerProperties.getConfiguration().get("foo"))
@@ -155,13 +155,13 @@ public class KafkaBinderExtendedPropertiesTest {
 				.isEqualTo("BarSerializer.class");
 		assertThat(
 				customKafkaConsumerProperties.getConfiguration().get("value.serializer"))
-						.isEqualTo("BarSerializer.class");
+				.isEqualTo("BarSerializer.class");
 
 		assertThat(kafkaConsumerProperties.isAckEachRecord()).isEqualTo(true);
 		assertThat(customKafkaConsumerProperties.isAckEachRecord()).isEqualTo(false);
 
 		RebalanceListener rebalanceListener = context.getBean(RebalanceListener.class);
-		assertThat(rebalanceListener.latch.await(10, TimeUnit.SECONDS)).isTrue();
+		assertThat(rebalanceListener.latch.await(10,TimeUnit.SECONDS)).isTrue();
 		assertThat(rebalanceListener.bindings.keySet()).contains("standard-in",
 				"custom-in");
 		assertThat(rebalanceListener.bindings.values()).containsExactly(Boolean.TRUE,
@@ -177,10 +177,11 @@ public class KafkaBinderExtendedPropertiesTest {
 			return payload -> payload;
 		}
 
-	@Bean
-	public Function<String, String> processCustom() {
-		return payload -> payload;
-	}
+		@Bean
+		public Function<String, String> processCustom() {
+			return payload -> payload;
+		}
+
 		@Bean
 		public RebalanceListener rebalanceListener() {
 			return new RebalanceListener();
@@ -196,18 +197,18 @@ public class KafkaBinderExtendedPropertiesTest {
 
 		@Override
 		public void onPartitionsRevokedBeforeCommit(String bindingName,
-				Consumer<?, ?> consumer, Collection<TopicPartition> partitions) {
+				Consumer<?, ?> consumer,Collection<TopicPartition> partitions) {
 		}
 
 		@Override
 		public void onPartitionsRevokedAfterCommit(String bindingName,
-				Consumer<?, ?> consumer, Collection<TopicPartition> partitions) {
+				Consumer<?, ?> consumer,Collection<TopicPartition> partitions) {
 		}
 
 		@Override
-		public void onPartitionsAssigned(String bindingName, Consumer<?, ?> consumer,
-				Collection<TopicPartition> partitions, boolean initial) {
-			this.bindings.put(bindingName, initial);
+		public void onPartitionsAssigned(String bindingName,Consumer<?, ?> consumer,
+				Collection<TopicPartition> partitions,boolean initial) {
+			this.bindings.put(bindingName,initial);
 			this.latch.countDown();
 		}
 	}

@@ -59,7 +59,7 @@ public class KafkaStreamsRegistry {
 	void registerKafkaStreams(StreamsBuilderFactoryBean streamsBuilderFactoryBean) {
 		final KafkaStreams kafkaStreams = streamsBuilderFactoryBean.getKafkaStreams();
 		this.kafkaStreams.add(kafkaStreams);
-		this.streamsBuilderFactoryBeanMap.put(kafkaStreams, streamsBuilderFactoryBean);
+		this.streamsBuilderFactoryBeanMap.put(kafkaStreams,streamsBuilderFactoryBean);
 	}
 
 	void unregisterKafkaStreams(KafkaStreams kafkaStreams) {

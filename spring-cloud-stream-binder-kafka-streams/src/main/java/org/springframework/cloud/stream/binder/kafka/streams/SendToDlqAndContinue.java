@@ -46,18 +46,18 @@ public class SendToDlqAndContinue implements ConsumerRecordRecoverer {
 	 * @param consumerRecord consumer record
 	 * @param exception exception
 	 */
-	public void sendToDlq(ConsumerRecord<?, ?> consumerRecord, Exception exception) {
+	public void sendToDlq(ConsumerRecord<?, ?> consumerRecord,Exception exception) {
 		DeadLetterPublishingRecoverer kafkaStreamsDlqDispatch = this.dlqDispatchers.get(consumerRecord.topic());
-		kafkaStreamsDlqDispatch.accept(consumerRecord, exception);
+		kafkaStreamsDlqDispatch.accept(consumerRecord,exception);
 	}
 
 	void addKStreamDlqDispatch(String topic,
 			DeadLetterPublishingRecoverer kafkaStreamsDlqDispatch) {
-		this.dlqDispatchers.put(topic, kafkaStreamsDlqDispatch);
+		this.dlqDispatchers.put(topic,kafkaStreamsDlqDispatch);
 	}
 
 	@Override
-	public void accept(ConsumerRecord<?, ?> consumerRecord, Exception e) {
-		this.dlqDispatchers.get(consumerRecord.topic()).accept(consumerRecord, e);
+	public void accept(ConsumerRecord<?, ?> consumerRecord,Exception e) {
+		this.dlqDispatchers.get(consumerRecord.topic()).accept(consumerRecord,e);
 	}
 }

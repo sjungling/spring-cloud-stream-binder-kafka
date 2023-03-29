@@ -74,7 +74,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 public class KafkaStreamsInteractiveQueryIntegrationTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
 			"counts-id");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule
@@ -85,12 +85,12 @@ public class KafkaStreamsInteractiveQueryIntegrationTests {
 	@BeforeClass
 	public static void setUp() throws Exception {
 		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group-id",
-				"false", embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+				"false",embeddedKafka);
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
 		DefaultKafkaConsumerFactory<String, String> cf = new DefaultKafkaConsumerFactory<>(
 				consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromAnEmbeddedTopic(consumer, "counts-id");
+		embeddedKafka.consumeFromAnEmbeddedTopic(consumer,"counts-id");
 	}
 
 	@AfterClass
@@ -108,7 +108,7 @@ public class KafkaStreamsInteractiveQueryIntegrationTests {
 		kafkaStreamsRegistry.registerKafkaStreams(mock);
 		Mockito.when(mock.isRunning()).thenReturn(true);
 		Properties mockProperties = new Properties();
-		mockProperties.put(StreamsConfig.APPLICATION_ID_CONFIG, "fooApp");
+		mockProperties.put(StreamsConfig.APPLICATION_ID_CONFIG,"fooApp");
 		Mockito.when(mock.getStreamsConfiguration()).thenReturn(mockProperties);
 		KafkaStreamsBinderConfigurationProperties binderConfigurationProperties =
 				new KafkaStreamsBinderConfigurationProperties(new KafkaProperties());
@@ -118,13 +118,13 @@ public class KafkaStreamsInteractiveQueryIntegrationTests {
 
 		QueryableStoreType<ReadOnlyKeyValueStore<Object, Object>> storeType = QueryableStoreTypes.keyValueStore();
 		try {
-			interactiveQueryService.getQueryableStore("foo", storeType);
+			interactiveQueryService.getQueryableStore("foo",storeType);
 		}
 		catch (Exception ignored) {
 
 		}
-		Mockito.verify(mockKafkaStreams, times(3))
-				.store(StoreQueryParameters.fromNameAndType("foo", storeType));
+		Mockito.verify(mockKafkaStreams,times(3))
+				.store(StoreQueryParameters.fromNameAndType("foo",storeType));
 	}
 
 	@Test
@@ -136,7 +136,7 @@ public class KafkaStreamsInteractiveQueryIntegrationTests {
 		kafkaStreamsRegistry.registerKafkaStreams(mock);
 		Mockito.when(mock.isRunning()).thenReturn(true);
 		Properties mockProperties = new Properties();
-		mockProperties.put(StreamsConfig.APPLICATION_ID_CONFIG, "foobarApp-123");
+		mockProperties.put(StreamsConfig.APPLICATION_ID_CONFIG,"foobarApp-123");
 		Mockito.when(mock.getStreamsConfiguration()).thenReturn(mockProperties);
 		KafkaStreamsBinderConfigurationProperties binderConfigurationProperties =
 				new KafkaStreamsBinderConfigurationProperties(new KafkaProperties());
@@ -147,13 +147,13 @@ public class KafkaStreamsInteractiveQueryIntegrationTests {
 		QueryableStoreType<ReadOnlyKeyValueStore<Object, Object>> storeType = QueryableStoreTypes.keyValueStore();
 		final StringSerializer serializer = new StringSerializer();
 		try {
-			interactiveQueryService.getHostInfo("foo", "foobarApp-key", serializer);
+			interactiveQueryService.getHostInfo("foo","foobarApp-key",serializer);
 		}
 		catch (Exception ignored) {
 
 		}
-		Mockito.verify(mockKafkaStreams, times(3))
-				.queryMetadataForKey("foo", "foobarApp-key", serializer);
+		Mockito.verify(mockKafkaStreams,times(3))
+				.queryMetadataForKey("foo","foobarApp-key",serializer);
 	}
 
 	@Test
@@ -188,7 +188,7 @@ public class KafkaStreamsInteractiveQueryIntegrationTests {
 		Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 		DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(
 				senderProps);
-		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 		template.setDefaultTopic("foos");
 		template.sendDefault("{\"id\":\"123\"}");
 		ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer,
@@ -208,24 +208,24 @@ public class KafkaStreamsInteractiveQueryIntegrationTests {
 				.isEqualTo(embeddedKafka.getBrokersAsString());
 
 		final KeyQueryMetadata keyQueryMetadata = interactiveQueryService.getKeyQueryMetadata("prod-id-count-store",
-				123, new IntegerSerializer());
+				123,new IntegerSerializer());
 		final HostInfo activeHost = keyQueryMetadata.getActiveHost();
 		assertThat(activeHost.host() + ":" + activeHost.port())
 				.isEqualTo(embeddedKafka.getBrokersAsString());
 
 		final KafkaStreams kafkaStreams = interactiveQueryService.getKafkaStreams("prod-id-count-store",
-				123, new IntegerSerializer());
+				123,new IntegerSerializer());
 		assertThat(kafkaStreams).isNotNull();
 		assertThat(interactiveQueryService.getKafkaStreams("non-existent-store",
-				123, new IntegerSerializer())).isNull();
+				123,new IntegerSerializer())).isNull();
 
 		HostInfo hostInfo = interactiveQueryService.getHostInfo("prod-id-count-store",
-				123, new IntegerSerializer());
+				123,new IntegerSerializer());
 		assertThat(hostInfo.host() + ":" + hostInfo.port())
 				.isEqualTo(embeddedKafka.getBrokersAsString());
 
 		assertThatThrownBy(() -> interactiveQueryService
-				.getHostInfo("prod-id-count-store-foo", 123, new IntegerSerializer()))
+				.getHostInfo("prod-id-count-store-foo",123,new IntegerSerializer()))
 				.isInstanceOf(IllegalStateException.class)
 				.hasMessageContaining("Error when retrieving state store.");
 
@@ -242,12 +242,12 @@ public class KafkaStreamsInteractiveQueryIntegrationTests {
 		@Bean
 		public Function<KStream<Object, Product>, KStream<?, String>> process() {
 
-			return input -> input.filter((key, product) -> product.getId() == 123)
-					.map((key, value) -> new KeyValue<>(value.id, value))
+			return input -> input.filter((key,product) -> product.getId() == 123)
+					.map((key,value) -> new KeyValue<>(value.id,value))
 					.groupByKey(Grouped.with(new Serdes.IntegerSerde(),
 							new JsonSerde<>(Product.class)))
 					.count(Materialized.as("prod-id-count-store")).toStream()
-					.map((key, value) -> new KeyValue<>(null,
+					.map((key,value) -> new KeyValue<>(null,
 							"Count for product with ID 123: " + value));
 		}
 
@@ -258,7 +258,7 @@ public class KafkaStreamsInteractiveQueryIntegrationTests {
 
 		@Bean
 		public CleanupConfig cleanupConfig() {
-			return new CleanupConfig(false, true);
+			return new CleanupConfig(false,true);
 		}
 
 		static class Foo {

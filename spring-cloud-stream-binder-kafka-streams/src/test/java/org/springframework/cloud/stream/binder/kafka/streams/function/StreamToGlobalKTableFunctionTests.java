@@ -65,7 +65,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class StreamToGlobalKTableFunctionTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
 			"enriched-order");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule.getEmbeddedKafka();
@@ -109,7 +109,7 @@ public class StreamToGlobalKTableFunctionTests {
 					.getBean(BinderFactory.class);
 
 			Binder<KStream, ? extends ConsumerProperties, ? extends ProducerProperties> kStreamBinder = binderFactory
-					.getBinder("kstream", KStream.class);
+					.getBinder("kstream",KStream.class);
 
 			KafkaStreamsConsumerProperties input = (KafkaStreamsConsumerProperties) ((ExtendedPropertiesBinder) kStreamBinder)
 					.getExtendedConsumerProperties("process-in-0");
@@ -118,7 +118,7 @@ public class StreamToGlobalKTableFunctionTests {
 			assertThat(cleanupPolicy).isEqualTo("compact");
 
 			Binder<GlobalKTable, ? extends ConsumerProperties, ? extends ProducerProperties> globalKTableBinder = binderFactory
-					.getBinder("globalktable", GlobalKTable.class);
+					.getBinder("globalktable",GlobalKTable.class);
 
 			KafkaStreamsConsumerProperties inputX = (KafkaStreamsConsumerProperties) ((ExtendedPropertiesBinder) globalKTableBinder)
 					.getExtendedConsumerProperties("process-in-1");
@@ -134,54 +134,54 @@ public class StreamToGlobalKTableFunctionTests {
 
 
 			Map<String, Object> senderPropsCustomer = KafkaTestUtils.producerProps(embeddedKafka);
-			senderPropsCustomer.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
+			senderPropsCustomer.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,LongSerializer.class);
 			senderPropsCustomer.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
 					JsonSerializer.class);
 
 			DefaultKafkaProducerFactory<Long, Customer> pfCustomer =
 					new DefaultKafkaProducerFactory<>(senderPropsCustomer);
-			KafkaTemplate<Long, Customer> template = new KafkaTemplate<>(pfCustomer, true);
+			KafkaTemplate<Long, Customer> template = new KafkaTemplate<>(pfCustomer,true);
 			template.setDefaultTopic("customers");
 			for (long i = 0; i < 5; i++) {
 				final Customer customer = new Customer();
 				customer.setName("customer-" + i);
-				template.sendDefault(i, customer);
+				template.sendDefault(i,customer);
 			}
 
 			Map<String, Object> senderPropsProduct = KafkaTestUtils.producerProps(embeddedKafka);
-			senderPropsProduct.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
-			senderPropsProduct.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+			senderPropsProduct.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,LongSerializer.class);
+			senderPropsProduct.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,JsonSerializer.class);
 
 			DefaultKafkaProducerFactory<Long, Product> pfProduct =
 					new DefaultKafkaProducerFactory<>(senderPropsProduct);
-			KafkaTemplate<Long, Product> productTemplate = new KafkaTemplate<>(pfProduct, true);
+			KafkaTemplate<Long, Product> productTemplate = new KafkaTemplate<>(pfProduct,true);
 			productTemplate.setDefaultTopic("products");
 
 			for (long i = 0; i < 5; i++) {
 				final Product product = new Product();
 				product.setName("product-" + i);
-				productTemplate.sendDefault(i, product);
+				productTemplate.sendDefault(i,product);
 			}
 
 			Map<String, Object> senderPropsOrder = KafkaTestUtils.producerProps(embeddedKafka);
-			senderPropsOrder.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
-			senderPropsOrder.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+			senderPropsOrder.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,LongSerializer.class);
+			senderPropsOrder.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,JsonSerializer.class);
 
 			DefaultKafkaProducerFactory<Long, Order> pfOrder = new DefaultKafkaProducerFactory<>(senderPropsOrder);
-			KafkaTemplate<Long, Order> orderTemplate = new KafkaTemplate<>(pfOrder, true);
+			KafkaTemplate<Long, Order> orderTemplate = new KafkaTemplate<>(pfOrder,true);
 			orderTemplate.setDefaultTopic("orders");
 
 			for (long i = 0; i < 5; i++) {
 				final Order order = new Order();
 				order.setCustomerId(i);
 				order.setProductId(i);
-				orderTemplate.sendDefault(i, order);
+				orderTemplate.sendDefault(i,order);
 			}
 
-			Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group", "false",
+			Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group","false",
 					embeddedKafka);
-			consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-			consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
+			consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+			consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,LongDeserializer.class);
 			consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
 					JsonDeserializer.class);
 			consumerProps.put(JsonDeserializer.VALUE_DEFAULT_TYPE,
@@ -190,7 +190,7 @@ public class StreamToGlobalKTableFunctionTests {
 			DefaultKafkaConsumerFactory<Long, EnrichedOrder> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 
 			consumer = cf.createConsumer();
-			embeddedKafka.consumeFromAnEmbeddedTopic(consumer, "enriched-order");
+			embeddedKafka.consumeFromAnEmbeddedTopic(consumer,"enriched-order");
 
 			int count = 0;
 			long start = System.currentTimeMillis();
@@ -199,7 +199,7 @@ public class StreamToGlobalKTableFunctionTests {
 				ConsumerRecords<Long, EnrichedOrder> records = KafkaTestUtils.getRecords(consumer);
 				count = count + records.count();
 				for (ConsumerRecord<Long, EnrichedOrder> record : records) {
-					enrichedOrders.add(new KeyValue<>(record.key(), record.value()));
+					enrichedOrders.add(new KeyValue<>(record.key(),record.value()));
 				}
 			} while (count < 5 && (System.currentTimeMillis() - start) < 30000);
 
@@ -259,17 +259,17 @@ public class StreamToGlobalKTableFunctionTests {
 
 			final KafkaStreamsBindingProperties kafkaStreamsBindingProperties0 = bindings.get("forTimeExtractorTest-in-0");
 			final String timestampExtractorBeanName0 = kafkaStreamsBindingProperties0.getConsumer().getTimestampExtractorBeanName();
-			final TimestampExtractor timestampExtractor0 = context.getBean(timestampExtractorBeanName0, TimestampExtractor.class);
+			final TimestampExtractor timestampExtractor0 = context.getBean(timestampExtractorBeanName0,TimestampExtractor.class);
 			assertThat(timestampExtractor0).isNotNull();
 
 			final KafkaStreamsBindingProperties kafkaStreamsBindingProperties1 = bindings.get("forTimeExtractorTest-in-1");
 			final String timestampExtractorBeanName1 = kafkaStreamsBindingProperties1.getConsumer().getTimestampExtractorBeanName();
-			final TimestampExtractor timestampExtractor1 = context.getBean(timestampExtractorBeanName1, TimestampExtractor.class);
+			final TimestampExtractor timestampExtractor1 = context.getBean(timestampExtractorBeanName1,TimestampExtractor.class);
 			assertThat(timestampExtractor1).isNotNull();
 
 			final KafkaStreamsBindingProperties kafkaStreamsBindingProperties2 = bindings.get("forTimeExtractorTest-in-2");
 			final String timestampExtractorBeanName2 = kafkaStreamsBindingProperties2.getConsumer().getTimestampExtractorBeanName();
-			final TimestampExtractor timestampExtractor2 = context.getBean(timestampExtractorBeanName2, TimestampExtractor.class);
+			final TimestampExtractor timestampExtractor2 = context.getBean(timestampExtractorBeanName2,TimestampExtractor.class);
 			assertThat(timestampExtractor2).isNotNull();
 		}
 	}
@@ -286,12 +286,12 @@ public class StreamToGlobalKTableFunctionTests {
 					customers -> (
 							products -> (
 									orderStream.join(customers,
-											(orderId, order) -> order.getCustomerId(),
-											(order, customer) -> new CustomerOrder(customer, order))
+											(orderId,order) -> order.getCustomerId(),
+											(order,customer) -> new CustomerOrder(customer,order))
 											.join(products,
-													(orderId, customerOrder) -> customerOrder
+													(orderId,customerOrder) -> customerOrder
 															.productId(),
-													(customerOrder, product) -> {
+													(customerOrder,product) -> {
 														EnrichedOrder enrichedOrder = new EnrichedOrder();
 														enrichedOrder.setProduct(product);
 														enrichedOrder.setCustomer(customerOrder.customer);
@@ -309,7 +309,7 @@ public class StreamToGlobalKTableFunctionTests {
 						Function<GlobalKTable<Long, Product>, KStream<Long, Order>>>> forTimeExtractorTest() {
 			return orderStream ->
 					customers ->
-						products -> orderStream;
+							products -> orderStream;
 		}
 
 		@Bean
@@ -401,7 +401,7 @@ public class StreamToGlobalKTableFunctionTests {
 		private final Customer customer;
 		private final Order order;
 
-		CustomerOrder(final Customer customer, final Order order) {
+		CustomerOrder(final Customer customer,final Order order) {
 			this.customer = customer;
 			this.order = order;
 		}

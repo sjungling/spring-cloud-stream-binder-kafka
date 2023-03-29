@@ -128,7 +128,7 @@ public class BinderHeaderMapper extends AbstractKafkaHeaderMapper {
 	 * {@link org.springframework.kafka.support.KafkaHeaders} are never mapped as headers since they represent data in
 	 * consumer/producer records.
 	 * @param objectMapper the object mapper.
-	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
+	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String,String)
 	 */
 	public BinderHeaderMapper(ObjectMapper objectMapper) {
 		this(objectMapper,
@@ -148,10 +148,10 @@ public class BinderHeaderMapper extends AbstractKafkaHeaderMapper {
 	 * most of the headers in {@link org.springframework.kafka.support.KafkaHeaders} are ever mapped as headers since they
 	 * represent data in consumer/producer records.
 	 * @param patterns the patterns.
-	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
+	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String,String)
 	 */
 	public BinderHeaderMapper(String... patterns) {
-		this(new ObjectMapper(), patterns);
+		this(new ObjectMapper(),patterns);
 	}
 
 	/**
@@ -164,15 +164,15 @@ public class BinderHeaderMapper extends AbstractKafkaHeaderMapper {
 	 * represent data in consumer/producer records.
 	 * @param objectMapper the object mapper.
 	 * @param patterns the patterns.
-	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
+	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String,String)
 	 */
-	public BinderHeaderMapper(ObjectMapper objectMapper, String... patterns) {
+	public BinderHeaderMapper(ObjectMapper objectMapper,String... patterns) {
 		super(patterns);
-		Assert.notNull(objectMapper, "'objectMapper' must not be null");
-		Assert.noNullElements(patterns, "'patterns' must not have null elements");
+		Assert.notNull(objectMapper,"'objectMapper' must not be null");
+		Assert.noNullElements(patterns,"'patterns' must not have null elements");
 		this.objectMapper = objectMapper;
 		this.objectMapper
-				.registerModule(new SimpleModule().addDeserializer(MimeType.class, new MimeTypeJsonDeserializer()));
+				.registerModule(new SimpleModule().addDeserializer(MimeType.class,new MimeTypeJsonDeserializer()));
 	}
 
 	/**
@@ -250,14 +250,14 @@ public class BinderHeaderMapper extends AbstractKafkaHeaderMapper {
 	}
 
 	@Override
-	public void fromHeaders(MessageHeaders headers, Headers target) {
+	public void fromHeaders(MessageHeaders headers,Headers target) {
 		final Map<String, String> jsonHeaders = new HashMap<>();
 		final ObjectMapper headerObjectMapper = getObjectMapper();
-		headers.forEach((key, rawValue) -> {
-			if (matches(key, rawValue)) {
-				Object valueToAdd = headerValueToAddOut(key, rawValue);
+		headers.forEach((key,rawValue) -> {
+			if (matches(key,rawValue)) {
+				Object valueToAdd = headerValueToAddOut(key,rawValue);
 				if (valueToAdd instanceof byte[]) {
-					target.add(new RecordHeader(key, (byte[]) valueToAdd));
+					target.add(new RecordHeader(key,(byte[]) valueToAdd));
 				}
 				else {
 					try {
@@ -269,93 +269,93 @@ public class BinderHeaderMapper extends AbstractKafkaHeaderMapper {
 						if (!this.encodeStrings
 								&& !MimeType.class.isAssignableFrom(rawValue.getClass())
 								&& valueToAdd instanceof String) {
-							target.add(new RecordHeader(key, ((String) valueToAdd).getBytes(getCharset())));
+							target.add(new RecordHeader(key,((String) valueToAdd).getBytes(getCharset())));
 							className = JAVA_LANG_STRING;
 						}
 						else {
-							target.add(new RecordHeader(key, headerObjectMapper.writeValueAsBytes(valueToAdd)));
+							target.add(new RecordHeader(key,headerObjectMapper.writeValueAsBytes(valueToAdd)));
 						}
-						jsonHeaders.put(key, className);
+						jsonHeaders.put(key,className);
 					}
 					catch (Exception e) {
-						logger.debug(e, () -> "Could not map " + key + " with type " + rawValue.getClass().getName());
+						logger.debug(e,() -> "Could not map " + key + " with type " + rawValue.getClass().getName());
 					}
 				}
 			}
 		});
 		if (jsonHeaders.size() > 0) {
 			try {
-				target.add(new RecordHeader(JSON_TYPES, headerObjectMapper.writeValueAsBytes(jsonHeaders)));
+				target.add(new RecordHeader(JSON_TYPES,headerObjectMapper.writeValueAsBytes(jsonHeaders)));
 			}
 			catch (IllegalStateException | JsonProcessingException e) {
-				logger.error(e, "Could not add json types header");
+				logger.error(e,"Could not add json types header");
 			}
 		}
 	}
 
 	@Override
-	public void toHeaders(Headers source, final Map<String, Object> headers) {
+	public void toHeaders(Headers source,final Map<String, Object> headers) {
 		final Map<String, String> jsonTypes = decodeJsonTypes(source);
 		source.forEach(header -> {
 			if (!(header.key().equals(JSON_TYPES))) {
 				if (jsonTypes != null && jsonTypes.containsKey(header.key())) {
 					String requestedType = jsonTypes.get(header.key());
-					populateJsonValueHeader(header, requestedType, headers);
+					populateJsonValueHeader(header,requestedType,headers);
 				}
 				else {
-					headers.put(header.key(), headerValueToAddIn(header));
+					headers.put(header.key(),headerValueToAddIn(header));
 				}
 			}
 		});
 	}
 
-	private void populateJsonValueHeader(Header header, String requestedType, Map<String, Object> headers) {
+	private void populateJsonValueHeader(Header header,String requestedType,Map<String, Object> headers) {
 		Class<?> type = Object.class;
 		boolean trusted = false;
 		try {
 			trusted = trusted(requestedType);
 			if (trusted) {
-				type = ClassUtils.forName(requestedType, null);
+				type = ClassUtils.forName(requestedType,null);
 			}
 		}
 		catch (Exception e) {
-			logger.error(e, () -> "Could not load class for header: " + header.key());
+			logger.error(e,() -> "Could not load class for header: " + header.key());
 		}
 		if (String.class.equals(type) && (header.value().length == 0 || header.value()[0] != '"')) {
-			headers.put(header.key(), new String(header.value(), getCharset()));
+			headers.put(header.key(),new String(header.value(),getCharset()));
 		}
 		else {
 			if (trusted) {
 				try {
-					Object value = decodeValue(header, type);
-					headers.put(header.key(), value);
+					Object value = decodeValue(header,type);
+					headers.put(header.key(),value);
 				}
 				catch (IOException e) {
-					logger.error(e, () ->
+					logger.error(e,() ->
 							"Could not decode json type: " + new String(header.value()) + " for key: "
 									+ header.key());
-					headers.put(header.key(), header.value());
+					headers.put(header.key(),header.value());
 				}
 			}
 			else {
-				headers.put(header.key(), new NonTrustedHeaderType(header.value(), requestedType));
+				headers.put(header.key(),new NonTrustedHeaderType(header.value(),requestedType));
 			}
 		}
 	}
 
-	private Object decodeValue(Header h, Class<?> type) throws IOException, LinkageError {
+	private Object decodeValue(Header h,Class<?> type) throws IOException, LinkageError {
 		ObjectMapper headerObjectMapper = getObjectMapper();
-		Object value = headerObjectMapper.readValue(h.value(), type);
+		Object value = headerObjectMapper.readValue(h.value(),type);
 		if (type.equals(NonTrustedHeaderType.class)) {
 			// Upstream NTHT propagated; may be trusted here...
 			NonTrustedHeaderType nth = (NonTrustedHeaderType) value;
 			if (trusted(nth.getUntrustedType())) {
 				try {
 					value = headerObjectMapper.readValue(nth.getHeaderValue(),
-							ClassUtils.forName(nth.getUntrustedType(), null));
+							ClassUtils.forName(nth.getUntrustedType(),null));
 				}
 				catch (Exception e) {
-					logger.error(e, () -> "Could not decode header: " + nth);
+					logger.error(e,() -> "Could not decode header: " + nth);
 				}
 			}
 		}
@@ -370,10 +370,10 @@ public class BinderHeaderMapper extends AbstractKafkaHeaderMapper {
 		if (jsonTypes != null) {
 			ObjectMapper headerObjectMapper = getObjectMapper();
 			try {
-				types = headerObjectMapper.readValue(jsonTypes.value(), Map.class);
+				types = headerObjectMapper.readValue(jsonTypes.value(),Map.class);
 			}
 			catch (IOException e) {
-				logger.error(e, () -> "Could not decode json types: " + new String(jsonTypes.value()));
+				logger.error(e,() -> "Could not decode json types: " + new String(jsonTypes.value()));
 			}
 		}
 		return types;
@@ -388,7 +388,7 @@ public class BinderHeaderMapper extends AbstractKafkaHeaderMapper {
 			if (lastDot < 0) {
 				return false;
 			}
-			String packageName = requestedType.substring(0, lastDot);
+			String packageName = requestedType.substring(0,lastDot);
 			for (String trustedPackage : this.trustedPackages) {
 				if (packageName.equals(trustedPackage) || packageName.startsWith(trustedPackage + ".")) {
 					return true;
@@ -407,10 +407,10 @@ public class BinderHeaderMapper extends AbstractKafkaHeaderMapper {
 	 */
 	public static String[] addNeverHeaderPatterns(List<String> patterns) {
 		List<String> patternsToUse = new LinkedList<>(patterns);
-		patternsToUse.add(0, NEVER_NATIVE_HEADERS_PRESENT);
-		patternsToUse.add(0, NEVER_DELIVERY_ATTEMPT);
-		patternsToUse.add(0, NEVER_TIMESTAMP);
-		patternsToUse.add(0, NEVER_ID);
+		patternsToUse.add(0,NEVER_NATIVE_HEADERS_PRESENT);
+		patternsToUse.add(0,NEVER_DELIVERY_ATTEMPT);
+		patternsToUse.add(0,NEVER_TIMESTAMP);
+		patternsToUse.add(0,NEVER_ID);
 		return patternsToUse.toArray(new String[0]);
 	}
 
@@ -440,7 +440,7 @@ public class BinderHeaderMapper extends AbstractKafkaHeaderMapper {
 		}
 
 		@Override
-		public MimeType convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+		public MimeType convert(JsonNode root,DeserializationContext ctxt) throws IOException {
 			if (root instanceof TextNode) {
 				return MimeType.valueOf(root.asText());
 			}
@@ -451,8 +451,8 @@ public class BinderHeaderMapper extends AbstractKafkaHeaderMapper {
 				Map<String, String> params =
 						BinderHeaderMapper.this.objectMapper.readValue(parameters.traverse(),
 								TypeFactory.defaultInstance()
-										.constructMapType(HashMap.class, String.class, String.class));
-				return new MimeType(type.asText(), subType.asText(), params);
+										.constructMapType(HashMap.class,String.class,String.class));
+				return new MimeType(type.asText(),subType.asText(),params);
 			}
 		}
 
@@ -471,7 +471,7 @@ public class BinderHeaderMapper extends AbstractKafkaHeaderMapper {
 			super();
 		}
 
-		NonTrustedHeaderType(byte[] headerValue, String untrustedType) { // NOSONAR
+		NonTrustedHeaderType(byte[] headerValue,String untrustedType) { // NOSONAR
 			this.headerValue = headerValue; // NOSONAR
 			this.untrustedType = untrustedType;
 		}
@@ -496,7 +496,7 @@ public class BinderHeaderMapper extends AbstractKafkaHeaderMapper {
 		@Override
 		public String toString() {
 			try {
-				return "NonTrustedHeaderType [headerValue=" + new String(this.headerValue, StandardCharsets.UTF_8)
+				return "NonTrustedHeaderType [headerValue=" + new String(this.headerValue,StandardCharsets.UTF_8)
 						+ ", untrustedType=" + this.untrustedType + "]";
 			}
 			catch (@SuppressWarnings("unused") Exception e) {

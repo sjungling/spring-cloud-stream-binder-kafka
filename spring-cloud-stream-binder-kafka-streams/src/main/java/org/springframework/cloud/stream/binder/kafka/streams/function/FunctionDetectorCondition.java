@@ -54,15 +54,15 @@ public class FunctionDetectorCondition extends SpringBootCondition {
 
 	private static final Log LOG = LogFactory.getLog(FunctionDetectorCondition.class);
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked","rawtypes"})
 	@Override
-	public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
+	public ConditionOutcome getMatchOutcome(ConditionContext context,AnnotatedTypeMetadata metadata) {
 		if (context != null &&  context.getBeanFactory() != null) {
 
-			String[] functionTypes = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context.getBeanFactory(), Function.class, true, false);
-			String[] consumerTypes = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context.getBeanFactory(), Consumer.class, true, false);
-			String[] biFunctionTypes = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context.getBeanFactory(), BiFunction.class, true, false);
-			String[] biConsumerTypes = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context.getBeanFactory(), BiConsumer.class, true, false);
+			String[] functionTypes = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context.getBeanFactory(),Function.class,true,false);
+			String[] consumerTypes = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context.getBeanFactory(),Consumer.class,true,false);
+			String[] biFunctionTypes = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context.getBeanFactory(),BiFunction.class,true,false);
+			String[] biConsumerTypes = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context.getBeanFactory(),BiConsumer.class,true,false);
 
 			List<String> functionComponents = new ArrayList<>();
 
@@ -71,7 +71,7 @@ public class FunctionDetectorCondition extends SpringBootCondition {
 			functionComponents.addAll(Arrays.asList(biFunctionTypes));
 			functionComponents.addAll(Arrays.asList(biConsumerTypes));
 
-			List<String> kafkaStreamsFunctions = pruneFunctionBeansForKafkaStreams(functionComponents, context);
+			List<String> kafkaStreamsFunctions = pruneFunctionBeansForKafkaStreams(functionComponents,context);
 			if (!CollectionUtils.isEmpty(kafkaStreamsFunctions)) {
 				return ConditionOutcome.match("Matched. Function/BiFunction/Consumer beans found");
 			}
@@ -83,7 +83,7 @@ public class FunctionDetectorCondition extends SpringBootCondition {
 	}
 
 	private static List<String> pruneFunctionBeansForKafkaStreams(List<String> functionComponents,
-																		ConditionContext context) {
+			ConditionContext context) {
 		final List<String> prunedList = new ArrayList<>();
 
 		for (String key : functionComponents) {
@@ -104,7 +104,7 @@ public class FunctionDetectorCondition extends SpringBootCondition {
 
 				if (kafkaStreamMethod.isPresent()) {
 					Method method = kafkaStreamMethod.get();
-					ResolvableType resolvableType = ResolvableType.forMethodReturnType(method, classObj);
+					ResolvableType resolvableType = ResolvableType.forMethodReturnType(method,classObj);
 					final Class<?> rawClass = resolvableType.getGeneric(0).getRawClass();
 					if (rawClass == KStream.class || rawClass == KTable.class || rawClass == GlobalKTable.class) {
 						prunedList.add(key);
@@ -117,7 +117,7 @@ public class FunctionDetectorCondition extends SpringBootCondition {
 									&& isKafkaStreamsTypeFound(m)).findFirst();
 					if (componentBeanMethod.isPresent()) {
 						Method method = componentBeanMethod.get();
-						final ResolvableType resolvableType1 = ResolvableType.forMethodParameter(method, 0);
+						final ResolvableType resolvableType1 = ResolvableType.forMethodParameter(method,0);
 						final Class<?> rawClass = resolvableType1.getRawClass();
 						if (rawClass == KStream.class || rawClass == KTable.class || rawClass == GlobalKTable.class) {
 							prunedList.add(key);
@@ -126,7 +126,7 @@ public class FunctionDetectorCondition extends SpringBootCondition {
 				}
 			}
 			catch (Exception e) {
-				LOG.error("Function not found: " + key, e);
+				LOG.error("Function not found: " + key,e);
 			}
 		}
 		return prunedList;

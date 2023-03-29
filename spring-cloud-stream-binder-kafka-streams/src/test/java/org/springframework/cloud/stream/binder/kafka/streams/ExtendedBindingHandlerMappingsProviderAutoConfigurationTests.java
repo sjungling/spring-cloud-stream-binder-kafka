@@ -46,12 +46,12 @@ class ExtendedBindingHandlerMappingsProviderAutoConfigurationTests {
 					.hasSingleBean(KafkaStreamsExtendedBindingProperties.class);
 			KafkaStreamsExtendedBindingProperties extendedBindingProperties = context.getBean(KafkaStreamsExtendedBindingProperties.class);
 			assertThat(extendedBindingProperties.getExtendedConsumerProperties("process-in-0"))
-					.hasFieldOrPropertyWithValue("applicationId", "testApp123")
-					.hasFieldOrPropertyWithValue("consumedAs", "default-consumer")
-					.hasFieldOrPropertyWithValue("materializedAs", "default-materializer");
+					.hasFieldOrPropertyWithValue("applicationId","testApp123")
+					.hasFieldOrPropertyWithValue("consumedAs","default-consumer")
+					.hasFieldOrPropertyWithValue("materializedAs","default-materializer");
 			assertThat(extendedBindingProperties.getExtendedProducerProperties("process-out-0"))
-					.hasFieldOrPropertyWithValue("producedAs", "default-producer")
-					.hasFieldOrPropertyWithValue("keySerde", "default-foo");
+					.hasFieldOrPropertyWithValue("producedAs","default-producer")
+					.hasFieldOrPropertyWithValue("keySerde","default-foo");
 		});
 	}
 
@@ -59,20 +59,20 @@ class ExtendedBindingHandlerMappingsProviderAutoConfigurationTests {
 	void defaultsRespectedWhenCustomBindingProperties() {
 		this.contextRunner
 				.withPropertyValues(
-					"spring.cloud.stream.kafka.streams.bindings.process-in-0.consumer.consumed-as: custom-consumer",
-					"spring.cloud.stream.kafka.streams.bindings.process-out-0.producer.produced-as: custom-producer")
+						"spring.cloud.stream.kafka.streams.bindings.process-in-0.consumer.consumed-as: custom-consumer",
+						"spring.cloud.stream.kafka.streams.bindings.process-out-0.producer.produced-as: custom-producer")
 				.run((context) -> {
 					assertThat(context)
 							.hasNotFailed()
 							.hasSingleBean(KafkaStreamsExtendedBindingProperties.class);
 					KafkaStreamsExtendedBindingProperties extendedBindingProperties = context.getBean(KafkaStreamsExtendedBindingProperties.class);
 					assertThat(extendedBindingProperties.getExtendedConsumerProperties("process-in-0"))
-							.hasFieldOrPropertyWithValue("applicationId", "testApp123")
-							.hasFieldOrPropertyWithValue("consumedAs", "custom-consumer")
-							.hasFieldOrPropertyWithValue("materializedAs", "default-materializer");
+							.hasFieldOrPropertyWithValue("applicationId","testApp123")
+							.hasFieldOrPropertyWithValue("consumedAs","custom-consumer")
+							.hasFieldOrPropertyWithValue("materializedAs","default-materializer");
 					assertThat(extendedBindingProperties.getExtendedProducerProperties("process-out-0"))
-							.hasFieldOrPropertyWithValue("producedAs", "custom-producer")
-							.hasFieldOrPropertyWithValue("keySerde", "default-foo");
+							.hasFieldOrPropertyWithValue("producedAs","custom-producer")
+							.hasFieldOrPropertyWithValue("keySerde","default-foo");
 				});
 	}
 

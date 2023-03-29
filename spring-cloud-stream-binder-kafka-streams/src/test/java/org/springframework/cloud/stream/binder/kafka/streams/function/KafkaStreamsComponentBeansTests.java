@@ -55,8 +55,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KafkaStreamsComponentBeansTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
-			"testFunctionComponent-out", "testBiFunctionComponent-out", "testCurriedFunctionWithFunctionTerminal-out");
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
+			"testFunctionComponent-out","testBiFunctionComponent-out","testCurriedFunctionWithFunctionTerminal-out");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule.getEmbeddedKafka();
 
@@ -70,29 +70,29 @@ public class KafkaStreamsComponentBeansTests {
 
 	@BeforeClass
 	public static void setUp() {
-		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group", "false",
+		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group","false",
 				embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,"org.apache.kafka.common.serialization.StringDeserializer");
 		DefaultKafkaConsumerFactory<String, String> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		consumer1 = cf.createConsumer();
-		embeddedKafka.consumeFromEmbeddedTopics(consumer1, "testFunctionComponent-out");
+		embeddedKafka.consumeFromEmbeddedTopics(consumer1,"testFunctionComponent-out");
 
-		Map<String, Object> consumerProps1 = KafkaTestUtils.consumerProps("group-x", "false",
+		Map<String, Object> consumerProps1 = KafkaTestUtils.consumerProps("group-x","false",
 				embeddedKafka);
-		consumerProps1.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		consumerProps1.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+		consumerProps1.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+		consumerProps1.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,"org.apache.kafka.common.serialization.StringDeserializer");
 		DefaultKafkaConsumerFactory<String, String> cf1 = new DefaultKafkaConsumerFactory<>(consumerProps1);
 		consumer2 = cf1.createConsumer();
-		embeddedKafka.consumeFromEmbeddedTopics(consumer2, "testBiFunctionComponent-out");
+		embeddedKafka.consumeFromEmbeddedTopics(consumer2,"testBiFunctionComponent-out");
 
-		Map<String, Object> consumerProps2 = KafkaTestUtils.consumerProps("group-y", "false",
+		Map<String, Object> consumerProps2 = KafkaTestUtils.consumerProps("group-y","false",
 				embeddedKafka);
-		consumerProps2.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		consumerProps2.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+		consumerProps2.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+		consumerProps2.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,"org.apache.kafka.common.serialization.StringDeserializer");
 		DefaultKafkaConsumerFactory<String, String> cf2 = new DefaultKafkaConsumerFactory<>(consumerProps2);
 		consumer3 = cf2.createConsumer();
-		embeddedKafka.consumeFromEmbeddedTopics(consumer3, "testCurriedFunctionWithFunctionTerminal-out");
+		embeddedKafka.consumeFromEmbeddedTopics(consumer3,"testCurriedFunctionWithFunctionTerminal-out");
 	}
 
 	@AfterClass
@@ -116,10 +116,10 @@ public class KafkaStreamsComponentBeansTests {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 			DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("testFunctionComponent-in");
 				template.sendDefault("foobar");
-				ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer1, "testFunctionComponent-out");
+				ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer1,"testFunctionComponent-out");
 				assertThat(cr.value().contains("foobarfoobar")).isTrue();
 			}
 			finally {
@@ -141,10 +141,10 @@ public class KafkaStreamsComponentBeansTests {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 			DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("testConsumerComponent-in");
 				template.sendDefault("foobar");
-				Assert.isTrue(LATCH_1.await(10, TimeUnit.SECONDS), "bar");
+				Assert.isTrue(LATCH_1.await(10,TimeUnit.SECONDS),"bar");
 			}
 			finally {
 				pf.destroy();
@@ -167,12 +167,12 @@ public class KafkaStreamsComponentBeansTests {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 			DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("testBiFunctionComponent-in-0");
 				template.sendDefault("foobar");
 				template.setDefaultTopic("testBiFunctionComponent-in-1");
 				template.sendDefault("foobar");
-				final ConsumerRecords<String, String> records = KafkaTestUtils.getRecords(consumer2, 10_000, 2);
+				final ConsumerRecords<String, String> records = KafkaTestUtils.getRecords(consumer2,10_000,2);
 				assertThat(records.count()).isEqualTo(2);
 				records.forEach(stringStringConsumerRecord -> assertThat(stringStringConsumerRecord.value().contains("foobar")).isTrue());
 			}
@@ -196,12 +196,12 @@ public class KafkaStreamsComponentBeansTests {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 			DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("testBiConsumerComponent-in-0");
 				template.sendDefault("foobar");
 				template.setDefaultTopic("testBiConsumerComponent-in-1");
 				template.sendDefault("foobar");
-				Assert.isTrue(LATCH_2.await(10, TimeUnit.SECONDS), "bar");
+				Assert.isTrue(LATCH_2.await(10,TimeUnit.SECONDS),"bar");
 			}
 			finally {
 				pf.destroy();
@@ -224,14 +224,14 @@ public class KafkaStreamsComponentBeansTests {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 			DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("testCurriedFunctionWithConsumerTerminal-in-0");
 				template.sendDefault("foobar");
 				template.setDefaultTopic("testCurriedFunctionWithConsumerTerminal-in-1");
 				template.sendDefault("foobar");
 				template.setDefaultTopic("testCurriedFunctionWithConsumerTerminal-in-2");
 				template.sendDefault("foobar");
-				Assert.isTrue(LATCH_3.await(10, TimeUnit.SECONDS), "bar");
+				Assert.isTrue(LATCH_3.await(10,TimeUnit.SECONDS),"bar");
 			}
 			finally {
 				pf.destroy();
@@ -255,14 +255,14 @@ public class KafkaStreamsComponentBeansTests {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 			DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("testCurriedFunctionWithFunctionTerminal-in-0");
 				template.sendDefault("foobar");
 				template.setDefaultTopic("testCurriedFunctionWithFunctionTerminal-in-1");
 				template.sendDefault("foobar");
 				template.setDefaultTopic("testCurriedFunctionWithFunctionTerminal-in-2");
 				template.sendDefault("foobar");
-				final ConsumerRecords<String, String> records = KafkaTestUtils.getRecords(consumer3, 10_000, 3);
+				final ConsumerRecords<String, String> records = KafkaTestUtils.getRecords(consumer3,10_000,3);
 				assertThat(records.count()).isEqualTo(3);
 				records.forEach(stringStringConsumerRecord -> assertThat(stringStringConsumerRecord.value().contains("foobar")).isTrue());
 			}
@@ -279,7 +279,7 @@ public class KafkaStreamsComponentBeansTests {
 
 		@Override
 		public KStream<String, String> apply(KStream<Integer, String> stringIntegerKStream) {
-			return stringIntegerKStream.map((integer, s) -> new KeyValue<>(s, s + s));
+			return stringIntegerKStream.map((integer,s) -> new KeyValue<>(s,s + s));
 		}
 	}
 
@@ -289,7 +289,7 @@ public class KafkaStreamsComponentBeansTests {
 
 		@Override
 		public void accept(KStream<Integer, String> integerStringKStream) {
-			integerStringKStream.foreach((integer, s) -> LATCH_1.countDown());
+			integerStringKStream.foreach((integer,s) -> LATCH_1.countDown());
 		}
 	}
 
@@ -298,7 +298,7 @@ public class KafkaStreamsComponentBeansTests {
 	public static class BiFunctionAsComponent implements BiFunction<KStream<String, String>, KStream<String, String>, KStream<String, String>> {
 
 		@Override
-		public KStream<String, String> apply(KStream<String, String> stringStringKStream, KStream<String, String> stringStringKStream2) {
+		public KStream<String, String> apply(KStream<String, String> stringStringKStream,KStream<String, String> stringStringKStream2) {
 			return stringStringKStream.merge(stringStringKStream2);
 		}
 	}
@@ -308,24 +308,24 @@ public class KafkaStreamsComponentBeansTests {
 	public static class BiConsumerAsComponent implements BiConsumer<KStream<String, String>, KStream<String, String>> {
 
 		@Override
-		public void accept(KStream<String, String> stringStringKStream, KStream<String, String> stringStringKStream2) {
+		public void accept(KStream<String, String> stringStringKStream,KStream<String, String> stringStringKStream2) {
 			final KStream<String, String> merged = stringStringKStream.merge(stringStringKStream2);
-			merged.foreach((s, s2) -> LATCH_2.countDown());
+			merged.foreach((s,s2) -> LATCH_2.countDown());
 		}
 	}
 
 	@Component("curriedConsumer")
 	@EnableAutoConfiguration
 	public static class CurriedFunctionWithConsumerTerminal implements Function<KStream<String, String>,
-												Function<KStream<String, String>,
-														java.util.function.Consumer<KStream<String, String>>>> {
+			Function<KStream<String, String>,
+					java.util.function.Consumer<KStream<String, String>>>> {
 
 		@Override
 		public Function<KStream<String, String>, java.util.function.Consumer<KStream<String, String>>> apply(KStream<String, String> stringStringKStream) {
 			return stringStringKStream1 -> stringStringKStream2 -> {
 				final KStream<String, String> merge1 = stringStringKStream.merge(stringStringKStream1);
 				final KStream<String, String> merged2 = merge1.merge(stringStringKStream2);
-				merged2.foreach((s1, s2) -> LATCH_3.countDown());
+				merged2.foreach((s1,s2) -> LATCH_3.countDown());
 			};
 		}
 	}

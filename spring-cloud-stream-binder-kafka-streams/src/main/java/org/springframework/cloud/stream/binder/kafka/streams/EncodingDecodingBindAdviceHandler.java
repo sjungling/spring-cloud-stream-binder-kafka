@@ -49,11 +49,11 @@ public class EncodingDecodingBindAdviceHandler implements ConfigurationPropertie
 		BindHandler handler = new AbstractBindHandler(bindHandler) {
 			@Override
 			public <T> Bindable<T> onStart(ConfigurationPropertyName name,
-										Bindable<T> target, BindContext context) {
+					Bindable<T> target,BindContext context) {
 				final String configName = name.toString();
 				if (configName.contains("use") && configName.contains("native") &&
 						(configName.contains("encoding") || configName.contains("decoding"))) {
-					BindResult<T> result = context.getBinder().bind(name, target);
+					BindResult<T> result = context.getBinder().bind(name,target);
 					if (result.isBound()) {
 						if (configName.contains("encoding")) {
 							EncodingDecodingBindAdviceHandler.this.encodingSettingProvided = true;
@@ -64,7 +64,7 @@ public class EncodingDecodingBindAdviceHandler implements ConfigurationPropertie
 						return target.withExistingValue(result.get());
 					}
 				}
-				return bindHandler.onStart(name, target, context);
+				return bindHandler.onStart(name,target,context);
 			}
 		};
 		return handler;

@@ -118,7 +118,7 @@ public class KafkaStreamsBindingInformationCatalogue {
 	void registerBindingProperties(KStream<?, ?> bindingTarget,
 			BindingProperties bindingProperties) {
 		if (bindingProperties != null) {
-			this.bindingProperties.put(bindingTarget, bindingProperties);
+			this.bindingProperties.put(bindingTarget,bindingProperties);
 		}
 	}
 
@@ -130,7 +130,7 @@ public class KafkaStreamsBindingInformationCatalogue {
 	void registerConsumerProperties(KStream<?, ?> bindingTarget,
 			KafkaStreamsConsumerProperties kafkaStreamsConsumerProperties) {
 		if (kafkaStreamsConsumerProperties != null) {
-			this.consumerProperties.put(bindingTarget, kafkaStreamsConsumerProperties);
+			this.consumerProperties.put(bindingTarget,kafkaStreamsConsumerProperties);
 		}
 	}
 
@@ -138,12 +138,12 @@ public class KafkaStreamsBindingInformationCatalogue {
 		return new HashSet<>(this.streamsBuilderFactoryBeanPerBinding.values());
 	}
 
-	void addStreamBuilderFactoryPerBinding(String binding, StreamsBuilderFactoryBean streamsBuilderFactoryBean) {
-		this.streamsBuilderFactoryBeanPerBinding.put(binding, streamsBuilderFactoryBean);
+	void addStreamBuilderFactoryPerBinding(String binding,StreamsBuilderFactoryBean streamsBuilderFactoryBean) {
+		this.streamsBuilderFactoryBeanPerBinding.put(binding,streamsBuilderFactoryBean);
 	}
 
-	void addConsumerPropertiesPerSbfb(StreamsBuilderFactoryBean streamsBuilderFactoryBean, ConsumerProperties consumerProperties) {
-		this.consumerPropertiesPerSbfb.computeIfAbsent(streamsBuilderFactoryBean, k -> new ArrayList<>());
+	void addConsumerPropertiesPerSbfb(StreamsBuilderFactoryBean streamsBuilderFactoryBean,ConsumerProperties consumerProperties) {
+		this.consumerPropertiesPerSbfb.computeIfAbsent(streamsBuilderFactoryBean,k -> new ArrayList<>());
 		this.consumerPropertiesPerSbfb.get(streamsBuilderFactoryBean).add(consumerProperties);
 	}
 
@@ -155,8 +155,8 @@ public class KafkaStreamsBindingInformationCatalogue {
 		return this.streamsBuilderFactoryBeanPerBinding;
 	}
 
-	void addOutboundKStreamResolvable(Object key, ResolvableType outboundResolvable) {
-		this.outboundKStreamResolvables.put(key, outboundResolvable);
+	void addOutboundKStreamResolvable(Object key,ResolvableType outboundResolvable) {
+		this.outboundKStreamResolvables.put(key,outboundResolvable);
 	}
 
 	ResolvableType getOutboundKStreamResolvable(Object key) {
@@ -171,8 +171,8 @@ public class KafkaStreamsBindingInformationCatalogue {
 	 * @param kStreamTarget target KStream
 	 * @param keySerde Serde used for the key
 	 */
-	void addKeySerde(KStream<?, ?> kStreamTarget, Serde<?> keySerde) {
-		this.keySerdeInfo.put(kStreamTarget, keySerde);
+	void addKeySerde(KStream<?, ?> kStreamTarget,Serde<?> keySerde) {
+		this.keySerdeInfo.put(kStreamTarget,keySerde);
 	}
 
 	Serde<?> getKeySerde(KStream<?, ?> kStreamTarget) {
@@ -188,8 +188,8 @@ public class KafkaStreamsBindingInformationCatalogue {
 		return consumerProperties;
 	}
 
-	void addBindingNamePerTarget(Object target, String bindingName) {
-		this.bindingNamesPerTarget.put(target, bindingName);
+	void addBindingNamePerTarget(Object target,String bindingName) {
+		this.bindingNamesPerTarget.put(target,bindingName);
 	}
 
 	String bindingNamePerTarget(Object target) {
@@ -208,11 +208,11 @@ public class KafkaStreamsBindingInformationCatalogue {
 	}
 
 	public void addDlqProducerFactory(StreamsBuilderFactoryBean streamsBuilderFactoryBean,
-									ProducerFactory<byte[], byte[]> producerFactory) {
+			ProducerFactory<byte[], byte[]> producerFactory) {
 		List<ProducerFactory<byte[], byte[]>> producerFactories = this.dlqProducerFactories.get(streamsBuilderFactoryBean);
 		if (CollectionUtils.isEmpty(producerFactories)) {
 			producerFactories = new ArrayList<>();
-			this.dlqProducerFactories.put(streamsBuilderFactoryBean, producerFactories);
+			this.dlqProducerFactories.put(streamsBuilderFactoryBean,producerFactories);
 		}
 		producerFactories.add(producerFactory);
 	}
@@ -224,8 +224,8 @@ public class KafkaStreamsBindingInformationCatalogue {
 	 * @param applicationId application.id
 	 * @param kafkaStreams {@link KafkaStreams} object
 	 */
-	public void addPreviousKafkaStreamsForApplicationId(String applicationId, KafkaStreams kafkaStreams) {
-		this.previousKafkaStreamsPerApplicationId.put(applicationId, kafkaStreams);
+	public void addPreviousKafkaStreamsForApplicationId(String applicationId,KafkaStreams kafkaStreams) {
+		this.previousKafkaStreamsPerApplicationId.put(applicationId,kafkaStreams);
 	}
 
 	/**

@@ -64,7 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KafkaStreamsBinderMultipleInputTopicsTest {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
 			"counts");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule
@@ -74,13 +74,13 @@ public class KafkaStreamsBinderMultipleInputTopicsTest {
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group", "false",
+		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group","false",
 				embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
 		DefaultKafkaConsumerFactory<String, String> cf = new DefaultKafkaConsumerFactory<>(
 				consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromAnEmbeddedTopic(consumer, "counts");
+		embeddedKafka.consumeFromAnEmbeddedTopic(consumer,"counts");
 	}
 
 	@AfterClass
@@ -125,7 +125,7 @@ public class KafkaStreamsBinderMultipleInputTopicsTest {
 		Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 		DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(
 				senderProps);
-		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 		template.setDefaultTopic("words1");
 		template.sendDefault("foobar1");
 		template.setDefaultTopic("words2");
@@ -153,15 +153,15 @@ public class KafkaStreamsBinderMultipleInputTopicsTest {
 			return input -> input
 					.flatMapValues(
 							value -> Arrays.asList(value.toLowerCase().split("\\W+")))
-					.map((key, value) -> new KeyValue<>(value, value))
-					.groupByKey(Grouped.with(Serdes.String(), Serdes.String()))
+					.map((key,value) -> new KeyValue<>(value,value))
+					.groupByKey(Grouped.with(Serdes.String(),Serdes.String()))
 					.count(Materialized.as("WordCounts-tKWCWSIAP0")).toStream()
-					.map((key, value) -> new KeyValue<>(null, new WordCount(key, value)));
+					.map((key,value) -> new KeyValue<>(null,new WordCount(key,value)));
 		}
 
 		@Bean
 		public CleanupConfig cleanupConfig() {
-			return new CleanupConfig(false, true);
+			return new CleanupConfig(false,true);
 		}
 
 	}
@@ -172,7 +172,7 @@ public class KafkaStreamsBinderMultipleInputTopicsTest {
 
 		private long count;
 
-		WordCount(String word, long count) {
+		WordCount(String word,long count) {
 			this.word = word;
 			this.count = count;
 		}

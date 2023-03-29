@@ -76,7 +76,7 @@ public class StreamToTableJoinFunctionTests {
 
 	@ClassRule
 	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,
-			true, "output-topic-1", "output-topic-2", "user-clicks-2", "user-regions-2");
+			true,"output-topic-1","output-topic-2","user-clicks-2","user-regions-2");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule.getEmbeddedKafka();
 
@@ -87,15 +87,15 @@ public class StreamToTableJoinFunctionTests {
 
 		Consumer<String, Long> consumer;
 		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group-1",
-				"false", embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-		consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
+				"false",embeddedKafka);
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,StringDeserializer.class);
+		consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,LongDeserializer.class);
 		DefaultKafkaConsumerFactory<String, Long> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromAnEmbeddedTopic(consumer, "output-topic-1");
+		embeddedKafka.consumeFromAnEmbeddedTopic(consumer,"output-topic-1");
 
-		runTest(app, consumer);
+		runTest(app,consumer);
 	}
 
 	@Test
@@ -105,15 +105,15 @@ public class StreamToTableJoinFunctionTests {
 
 		Consumer<String, Long> consumer;
 		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group-2",
-				"false", embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-		consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
+				"false",embeddedKafka);
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,StringDeserializer.class);
+		consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,LongDeserializer.class);
 		DefaultKafkaConsumerFactory<String, Long> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromAnEmbeddedTopic(consumer, "output-topic-1");
+		embeddedKafka.consumeFromAnEmbeddedTopic(consumer,"output-topic-1");
 
-		runTest(app, consumer);
+		runTest(app,consumer);
 	}
 
 	@Test
@@ -123,13 +123,13 @@ public class StreamToTableJoinFunctionTests {
 
 		Consumer<String, Long> consumer;
 		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group-2",
-				"false", embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-		consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
+				"false",embeddedKafka);
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,StringDeserializer.class);
+		consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,LongDeserializer.class);
 		DefaultKafkaConsumerFactory<String, Long> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromAnEmbeddedTopic(consumer, "output-topic-1");
+		embeddedKafka.consumeFromAnEmbeddedTopic(consumer,"output-topic-1");
 
 		try (ConfigurableApplicationContext ignored = app.run("--server.port=0",
 				"--spring.jmx.enabled=false",
@@ -146,39 +146,39 @@ public class StreamToTableJoinFunctionTests {
 
 			// Input 1: Region per user (multiple records allowed per user).
 			List<KeyValue<String, String>> userRegions = Arrays.asList(
-					new KeyValue<>("alice", "asia")
+					new KeyValue<>("alice","asia")
 			);
 
 			Map<String, Object> senderProps1 = KafkaTestUtils.producerProps(embeddedKafka);
-			senderProps1.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-			senderProps1.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+			senderProps1.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
+			senderProps1.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
 
 			DefaultKafkaProducerFactory<String, String> pf1 = new DefaultKafkaProducerFactory<>(senderProps1);
-			KafkaTemplate<String, String> template1 = new KafkaTemplate<>(pf1, true);
+			KafkaTemplate<String, String> template1 = new KafkaTemplate<>(pf1,true);
 			template1.setDefaultTopic("user-regions-1");
 
 			for (KeyValue<String, String> keyValue : userRegions) {
-				template1.sendDefault(keyValue.key, keyValue.value);
+				template1.sendDefault(keyValue.key,keyValue.value);
 			}
 
 			// Input 2: Clicks per user (multiple records allowed per user).
 			List<KeyValue<String, Long>> userClicks = Arrays.asList(
-					new KeyValue<>("alice", 13L)
+					new KeyValue<>("alice",13L)
 			);
 
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
-			senderProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-			senderProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
+			senderProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
+			senderProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,LongSerializer.class);
 
 			DefaultKafkaProducerFactory<String, Long> pf = new DefaultKafkaProducerFactory<>(senderProps);
-			KafkaTemplate<String, Long> template = new KafkaTemplate<>(pf, true);
+			KafkaTemplate<String, Long> template = new KafkaTemplate<>(pf,true);
 			template.setDefaultTopic("user-clicks-1");
 
 			for (KeyValue<String, Long> keyValue : userClicks) {
-				template.sendDefault(keyValue.key, keyValue.value);
+				template.sendDefault(keyValue.key,keyValue.value);
 			}
 
-			Assert.isTrue(BiConsumerApplication.latch.await(10, TimeUnit.SECONDS), "Failed to receive message");
+			Assert.isTrue(BiConsumerApplication.latch.await(10,TimeUnit.SECONDS),"Failed to receive message");
 
 		}
 		finally {
@@ -186,7 +186,7 @@ public class StreamToTableJoinFunctionTests {
 		}
 	}
 
-	private void runTest(SpringApplication app, Consumer<String, Long> consumer) {
+	private void runTest(SpringApplication app,Consumer<String, Long> consumer) {
 		try (ConfigurableApplicationContext context = app.run("--server.port=0",
 				"--spring.jmx.enabled=false",
 				"--spring.cloud.stream.bindings.process-in-0.destination=user-clicks-1",
@@ -205,55 +205,55 @@ public class StreamToTableJoinFunctionTests {
 
 			// Input 1: Region per user (multiple records allowed per user).
 			List<KeyValue<String, String>> userRegions = Arrays.asList(
-					new KeyValue<>("alice", "asia"),   /* Alice lived in Asia originally... */
-					new KeyValue<>("bob", "americas"),
-					new KeyValue<>("chao", "asia"),
-					new KeyValue<>("dave", "europe"),
-					new KeyValue<>("alice", "europe"), /* ...but moved to Europe some time later. */
-					new KeyValue<>("eve", "americas"),
-					new KeyValue<>("fang", "asia")
+					new KeyValue<>("alice","asia"),   /* Alice lived in Asia originally... */
+					new KeyValue<>("bob","americas"),
+					new KeyValue<>("chao","asia"),
+					new KeyValue<>("dave","europe"),
+					new KeyValue<>("alice","europe"), /* ...but moved to Europe some time later. */
+					new KeyValue<>("eve","americas"),
+					new KeyValue<>("fang","asia")
 			);
 
 			Map<String, Object> senderProps1 = KafkaTestUtils.producerProps(embeddedKafka);
-			senderProps1.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-			senderProps1.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+			senderProps1.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
+			senderProps1.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
 
 			DefaultKafkaProducerFactory<String, String> pf1 = new DefaultKafkaProducerFactory<>(senderProps1);
-			KafkaTemplate<String, String> template1 = new KafkaTemplate<>(pf1, true);
+			KafkaTemplate<String, String> template1 = new KafkaTemplate<>(pf1,true);
 			template1.setDefaultTopic("user-regions-1");
 
 			for (KeyValue<String, String> keyValue : userRegions) {
-				template1.sendDefault(keyValue.key, keyValue.value);
+				template1.sendDefault(keyValue.key,keyValue.value);
 			}
 
 			// Input 2: Clicks per user (multiple records allowed per user).
 			List<KeyValue<String, Long>> userClicks = Arrays.asList(
-					new KeyValue<>("alice", 13L),
-					new KeyValue<>("bob", 4L),
-					new KeyValue<>("chao", 25L),
-					new KeyValue<>("bob", 19L),
-					new KeyValue<>("dave", 56L),
-					new KeyValue<>("eve", 78L),
-					new KeyValue<>("alice", 40L),
-					new KeyValue<>("fang", 99L)
+					new KeyValue<>("alice",13L),
+					new KeyValue<>("bob",4L),
+					new KeyValue<>("chao",25L),
+					new KeyValue<>("bob",19L),
+					new KeyValue<>("dave",56L),
+					new KeyValue<>("eve",78L),
+					new KeyValue<>("alice",40L),
+					new KeyValue<>("fang",99L)
 			);
 
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
-			senderProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-			senderProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
+			senderProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
+			senderProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,LongSerializer.class);
 
 			DefaultKafkaProducerFactory<String, Long> pf = new DefaultKafkaProducerFactory<>(senderProps);
-			KafkaTemplate<String, Long> template = new KafkaTemplate<>(pf, true);
+			KafkaTemplate<String, Long> template = new KafkaTemplate<>(pf,true);
 			template.setDefaultTopic("user-clicks-1");
 
 			for (KeyValue<String, Long> keyValue : userClicks) {
-				template.sendDefault(keyValue.key, keyValue.value);
+				template.sendDefault(keyValue.key,keyValue.value);
 			}
 
 			List<KeyValue<String, Long>> expectedClicksPerRegion = Arrays.asList(
-					new KeyValue<>("americas", 101L),
-					new KeyValue<>("europe", 109L),
-					new KeyValue<>("asia", 124L)
+					new KeyValue<>("americas",101L),
+					new KeyValue<>("europe",109L),
+					new KeyValue<>("asia",124L)
 			);
 
 			//Verify that we receive the expected data
@@ -264,7 +264,7 @@ public class StreamToTableJoinFunctionTests {
 				ConsumerRecords<String, Long> records = KafkaTestUtils.getRecords(consumer);
 				count = count + records.count();
 				for (ConsumerRecord<String, Long> record : records) {
-					actualClicksPerRegion.add(new KeyValue<>(record.key(), record.value()));
+					actualClicksPerRegion.add(new KeyValue<>(record.key(),record.value()));
 				}
 			} while (count < expectedClicksPerRegion.size() && (System.currentTimeMillis() - start) < 30000);
 
@@ -277,7 +277,7 @@ public class StreamToTableJoinFunctionTests {
 					.getBean(BinderFactory.class);
 
 			Binder<KTable, ? extends ConsumerProperties, ? extends ProducerProperties> ktableBinder = binderFactory
-					.getBinder("ktable", KTable.class);
+					.getBinder("ktable",KTable.class);
 
 			KafkaStreamsConsumerProperties inputX = (KafkaStreamsConsumerProperties) ((ExtendedPropertiesBinder) ktableBinder)
 					.getExtendedConsumerProperties("process-in-1");
@@ -286,7 +286,7 @@ public class StreamToTableJoinFunctionTests {
 			assertThat(cleanupPolicyX).isEqualTo("compact");
 
 			Binder<KStream, ? extends ConsumerProperties, ? extends ProducerProperties> kStreamBinder = binderFactory
-					.getBinder("kstream", KStream.class);
+					.getBinder("kstream",KStream.class);
 
 			KafkaStreamsProducerProperties producerProperties = (KafkaStreamsProducerProperties) ((ExtendedPropertiesBinder) kStreamBinder)
 					.getExtendedProducerProperties("process-out-0");
@@ -307,40 +307,40 @@ public class StreamToTableJoinFunctionTests {
 
 		Consumer<String, Long> consumer;
 		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group-3",
-				"false", embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-		consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
+				"false",embeddedKafka);
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,StringDeserializer.class);
+		consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,LongDeserializer.class);
 		DefaultKafkaConsumerFactory<String, Long> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromAnEmbeddedTopic(consumer, "output-topic-2");
+		embeddedKafka.consumeFromAnEmbeddedTopic(consumer,"output-topic-2");
 
 		// Produce data first to the input topic to test the startOffset setting on the
 		// binding (which is set to earliest below).
 		// Input 1: Clicks per user (multiple records allowed per user).
 		List<KeyValue<String, Long>> userClicks = Arrays.asList(
-				new KeyValue<>("alice", 100L),
-				new KeyValue<>("alice", 100L),
-				new KeyValue<>("alice", 100L),
-				new KeyValue<>("alice", 100L),
-				new KeyValue<>("alice", 100L),
-				new KeyValue<>("alice", 100L),
-				new KeyValue<>("alice", 100L),
-				new KeyValue<>("alice", 100L),
-				new KeyValue<>("alice", 100L),
-				new KeyValue<>("alice", 100L)
+				new KeyValue<>("alice",100L),
+				new KeyValue<>("alice",100L),
+				new KeyValue<>("alice",100L),
+				new KeyValue<>("alice",100L),
+				new KeyValue<>("alice",100L),
+				new KeyValue<>("alice",100L),
+				new KeyValue<>("alice",100L),
+				new KeyValue<>("alice",100L),
+				new KeyValue<>("alice",100L),
+				new KeyValue<>("alice",100L)
 		);
 
 		Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
-		senderProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-		senderProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
+		senderProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
+		senderProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,LongSerializer.class);
 
 		DefaultKafkaProducerFactory<String, Long> pf = new DefaultKafkaProducerFactory<>(senderProps);
-		KafkaTemplate<String, Long> template = new KafkaTemplate<>(pf, true);
+		KafkaTemplate<String, Long> template = new KafkaTemplate<>(pf,true);
 		template.setDefaultTopic("user-clicks-2");
 
 		for (KeyValue<String, Long> keyValue : userClicks) {
-			template.sendDefault(keyValue.key, keyValue.value);
+			template.sendDefault(keyValue.key,keyValue.value);
 		}
 
 		try (ConfigurableApplicationContext context = app.run("--server.port=0",
@@ -366,50 +366,50 @@ public class StreamToTableJoinFunctionTests {
 
 			// Input 2: Region per user (multiple records allowed per user).
 			List<KeyValue<String, String>> userRegions = Arrays.asList(
-					new KeyValue<>("alice", "asia"),   /* Alice lived in Asia originally... */
-					new KeyValue<>("bob", "americas"),
-					new KeyValue<>("chao", "asia"),
-					new KeyValue<>("dave", "europe"),
-					new KeyValue<>("alice", "europe"), /* ...but moved to Europe some time later. */
-					new KeyValue<>("eve", "americas"),
-					new KeyValue<>("fang", "asia")
+					new KeyValue<>("alice","asia"),   /* Alice lived in Asia originally... */
+					new KeyValue<>("bob","americas"),
+					new KeyValue<>("chao","asia"),
+					new KeyValue<>("dave","europe"),
+					new KeyValue<>("alice","europe"), /* ...but moved to Europe some time later. */
+					new KeyValue<>("eve","americas"),
+					new KeyValue<>("fang","asia")
 			);
 
 			Map<String, Object> senderProps1 = KafkaTestUtils.producerProps(embeddedKafka);
-			senderProps1.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-			senderProps1.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+			senderProps1.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
+			senderProps1.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
 
 			DefaultKafkaProducerFactory<String, String> pf1 = new DefaultKafkaProducerFactory<>(senderProps1);
-			KafkaTemplate<String, String> template1 = new KafkaTemplate<>(pf1, true);
+			KafkaTemplate<String, String> template1 = new KafkaTemplate<>(pf1,true);
 			template1.setDefaultTopic("user-regions-2");
 
 			for (KeyValue<String, String> keyValue : userRegions) {
-				template1.sendDefault(keyValue.key, keyValue.value);
+				template1.sendDefault(keyValue.key,keyValue.value);
 			}
 
 
 			// Input 1: Clicks per user (multiple records allowed per user).
 			List<KeyValue<String, Long>> userClicks1 = Arrays.asList(
-					new KeyValue<>("bob", 4L),
-					new KeyValue<>("chao", 25L),
-					new KeyValue<>("bob", 19L),
-					new KeyValue<>("dave", 56L),
-					new KeyValue<>("eve", 78L),
-					new KeyValue<>("fang", 99L)
+					new KeyValue<>("bob",4L),
+					new KeyValue<>("chao",25L),
+					new KeyValue<>("bob",19L),
+					new KeyValue<>("dave",56L),
+					new KeyValue<>("eve",78L),
+					new KeyValue<>("fang",99L)
 			);
 
 			for (KeyValue<String, Long> keyValue : userClicks1) {
-				template.sendDefault(keyValue.key, keyValue.value);
+				template.sendDefault(keyValue.key,keyValue.value);
 			}
 
 			List<KeyValue<String, Long>> expectedClicksPerRegion = Arrays.asList(
-					new KeyValue<>("americas", 101L),
-					new KeyValue<>("europe", 56L),
-					new KeyValue<>("asia", 124L),
+					new KeyValue<>("americas",101L),
+					new KeyValue<>("europe",56L),
+					new KeyValue<>("asia",124L),
 					//1000 alice entries which were there in the topic before the consumer started.
 					//Since we set the startOffset to earliest for the topic, it will read them,
 					//but the join fails to associate with a valid region, thus UNKNOWN.
-					new KeyValue<>("UNKNOWN", 1000L)
+					new KeyValue<>("UNKNOWN",1000L)
 			);
 
 			//Verify that we receive the expected data
@@ -420,7 +420,7 @@ public class StreamToTableJoinFunctionTests {
 				ConsumerRecords<String, Long> records = KafkaTestUtils.getRecords(consumer);
 				count = count + records.count();
 				for (ConsumerRecord<String, Long> record : records) {
-					actualClicksPerRegion.add(new KeyValue<>(record.key(), record.value()));
+					actualClicksPerRegion.add(new KeyValue<>(record.key(),record.value()));
 				}
 			} while (count < expectedClicksPerRegion.size() && (System.currentTimeMillis() - start) < 30000);
 
@@ -472,7 +472,7 @@ public class StreamToTableJoinFunctionTests {
 		private final String region;
 		private final long clicks;
 
-		RegionWithClicks(String region, long clicks) {
+		RegionWithClicks(String region,long clicks) {
 			if (region == null || region.isEmpty()) {
 				throw new IllegalArgumentException("region must be set");
 			}
@@ -499,19 +499,19 @@ public class StreamToTableJoinFunctionTests {
 		@Bean
 		public Function<KStream<String, Long>, Function<KTable<String, String>, KStream<String, Long>>> process() {
 			return userClicksStream -> (userRegionsTable -> (userClicksStream
-					.leftJoin(userRegionsTable, (clicks, region) -> new RegionWithClicks(region == null ?
-									"UNKNOWN" : region, clicks),
-							Joined.with(Serdes.String(), Serdes.Long(), null))
-					.map((user, regionWithClicks) -> new KeyValue<>(regionWithClicks.getRegion(),
+					.leftJoin(userRegionsTable,(clicks,region) -> new RegionWithClicks(region == null ?
+									"UNKNOWN" : region,clicks),
+							Joined.with(Serdes.String(),Serdes.Long(),null))
+					.map((user,regionWithClicks) -> new KeyValue<>(regionWithClicks.getRegion(),
 							regionWithClicks.getClicks()))
-					.groupByKey(Grouped.with(Serdes.String(), Serdes.Long()))
-					.reduce(Long::sum, Materialized.as("CountClicks-" + UUID.randomUUID()))
+					.groupByKey(Grouped.with(Serdes.String(),Serdes.Long()))
+					.reduce(Long::sum,Materialized.as("CountClicks-" + UUID.randomUUID()))
 					.toStream()));
 		}
 
 		@Bean
 		public CleanupConfig cleanupConfig() {
-			return new CleanupConfig(false, true);
+			return new CleanupConfig(false,true);
 		}
 	}
 
@@ -520,20 +520,20 @@ public class StreamToTableJoinFunctionTests {
 
 		@Bean
 		public BiFunction<KStream<String, Long>, KTable<String, String>, KStream<String, Long>> process() {
-			return (userClicksStream, userRegionsTable) -> (userClicksStream
-					.leftJoin(userRegionsTable, (clicks, region) -> new RegionWithClicks(region == null ?
-									"UNKNOWN" : region, clicks),
-							Joined.with(Serdes.String(), Serdes.Long(), null))
-					.map((user, regionWithClicks) -> new KeyValue<>(regionWithClicks.getRegion(),
+			return (userClicksStream,userRegionsTable) -> (userClicksStream
+					.leftJoin(userRegionsTable,(clicks,region) -> new RegionWithClicks(region == null ?
+									"UNKNOWN" : region,clicks),
+							Joined.with(Serdes.String(),Serdes.Long(),null))
+					.map((user,regionWithClicks) -> new KeyValue<>(regionWithClicks.getRegion(),
 							regionWithClicks.getClicks()))
-					.groupByKey(Grouped.with(Serdes.String(), Serdes.Long()))
-					.reduce(Long::sum, Materialized.as("CountClicks-" + UUID.randomUUID()))
+					.groupByKey(Grouped.with(Serdes.String(),Serdes.Long()))
+					.reduce(Long::sum,Materialized.as("CountClicks-" + UUID.randomUUID()))
 					.toStream());
 		}
 
 		@Bean
 		public CleanupConfig cleanupConfig() {
-			return new CleanupConfig(false, true);
+			return new CleanupConfig(false,true);
 		}
 	}
 
@@ -544,9 +544,9 @@ public class StreamToTableJoinFunctionTests {
 
 		@Bean
 		public BiConsumer<KStream<String, Long>, KTable<String, String>> process() {
-			return (userClicksStream, userRegionsTable) -> {
-				userClicksStream.foreach((key, value) -> latch.countDown());
-				userRegionsTable.toStream().foreach((key, value) -> latch.countDown());
+			return (userClicksStream,userRegionsTable) -> {
+				userClicksStream.foreach((key,value) -> latch.countDown());
+				userRegionsTable.toStream().foreach((key,value) -> latch.countDown());
 			};
 		}
 	}
@@ -555,7 +555,7 @@ public class StreamToTableJoinFunctionTests {
 	public static class TrivialKTableApp {
 
 		public java.util.function.Consumer<KTable<String, String>> process() {
-			return inputTable -> inputTable.toStream().foreach((key, value) -> System.out.println("key : value " + key + " : " + value));
+			return inputTable -> inputTable.toStream().foreach((key,value) -> System.out.println("key : value " + key + " : " + value));
 		}
 	}
 
@@ -563,9 +563,9 @@ public class StreamToTableJoinFunctionTests {
 	public static class JoinProcessor {
 
 		public BiConsumer<KStream<String, String>, KStream<String, String>> testProcessor() {
-			return (input1Stream, input2Stream) -> input1Stream
+			return (input1Stream,input2Stream) -> input1Stream
 					.join(input2Stream,
-							(event1, event2) -> null,
+							(event1,event2) -> null,
 							JoinWindows.of(Duration.ofMillis(5)),
 							StreamJoined.with(
 									Serdes.String(),

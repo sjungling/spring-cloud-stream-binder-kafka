@@ -65,7 +65,7 @@ class KTableBinder extends
 
 	KTableBinder(KafkaStreamsBinderConfigurationProperties binderConfigurationProperties,
 			KafkaTopicProvisioner kafkaTopicProvisioner,
-			KafkaStreamsBindingInformationCatalogue KafkaStreamsBindingInformationCatalogue, KafkaStreamsRegistry kafkaStreamsRegistry) {
+			KafkaStreamsBindingInformationCatalogue KafkaStreamsBindingInformationCatalogue,KafkaStreamsRegistry kafkaStreamsRegistry) {
 		this.binderConfigurationProperties = binderConfigurationProperties;
 		this.kafkaTopicProvisioner = kafkaTopicProvisioner;
 		this.kafkaStreamsBindingInformationCatalogue = KafkaStreamsBindingInformationCatalogue;
@@ -74,7 +74,7 @@ class KTableBinder extends
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Binding<KTable<Object, Object>> doBindConsumer(String name, String group,
+	protected Binding<KTable<Object, Object>> doBindConsumer(String name,String group,
 			KTable<Object, Object> inputTarget,
 			// @checkstyle:off
 			ExtendedConsumerProperties<KafkaStreamsConsumerProperties> properties) {
@@ -89,13 +89,13 @@ class KTableBinder extends
 		final StreamsBuilderFactoryBean streamsBuilderFactoryBean = this.kafkaStreamsBindingInformationCatalogue
 				.getStreamsBuilderFactoryBeanPerBinding().get(bindingName);
 
-		KafkaStreamsBinderUtils.prepareConsumerBinding(name, group,
-				getApplicationContext(), this.kafkaTopicProvisioner,
-				this.binderConfigurationProperties, properties, retryTemplate, getBeanFactory(),
+		KafkaStreamsBinderUtils.prepareConsumerBinding(name,group,
+				getApplicationContext(),this.kafkaTopicProvisioner,
+				this.binderConfigurationProperties,properties,retryTemplate,getBeanFactory(),
 				this.kafkaStreamsBindingInformationCatalogue.bindingNamePerTarget(inputTarget),
-				this.kafkaStreamsBindingInformationCatalogue, streamsBuilderFactoryBean);
+				this.kafkaStreamsBindingInformationCatalogue,streamsBuilderFactoryBean);
 
-		return new DefaultBinding<KTable<Object, Object>>(bindingName, group, inputTarget, streamsBuilderFactoryBean) {
+		return new DefaultBinding<KTable<Object, Object>>(bindingName,group,inputTarget,streamsBuilderFactoryBean) {
 
 			@Override
 			public boolean isInput() {
@@ -122,11 +122,11 @@ class KTableBinder extends
 					final KafkaStreams kafkaStreams = streamsBuilderFactoryBean.getKafkaStreams();
 					super.stop();
 					KTableBinder.this.kafkaStreamsRegistry.unregisterKafkaStreams(kafkaStreams);
-					KafkaStreamsBinderUtils.closeDlqProducerFactories(kafkaStreamsBindingInformationCatalogue, streamsBuilderFactoryBean);
+					KafkaStreamsBinderUtils.closeDlqProducerFactories(kafkaStreamsBindingInformationCatalogue,streamsBuilderFactoryBean);
 					//Caching the stopped KafkaStreams for health indicator purposes on the underlying processor.
 					//See this issue for more details: https://github.com/spring-cloud/spring-cloud-stream-binder-kafka/issues/1165
 					KTableBinder.this.kafkaStreamsBindingInformationCatalogue.addPreviousKafkaStreamsForApplicationId(
-							(String) streamsBuilderFactoryBean.getStreamsConfiguration().get(StreamsConfig.APPLICATION_ID_CONFIG), kafkaStreams);
+							(String) streamsBuilderFactoryBean.getStreamsConfiguration().get(StreamsConfig.APPLICATION_ID_CONFIG),kafkaStreams);
 				}
 			}
 		};

@@ -74,8 +74,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KafkaStreamsBinderWordCountFunctionTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
-			"counts", "counts-1", "counts-2", "counts-5",  "counts-6");
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
+			"counts","counts-1","counts-2","counts-5","counts-6");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule.getEmbeddedKafka();
 
@@ -85,13 +85,13 @@ public class KafkaStreamsBinderWordCountFunctionTests {
 
 	@BeforeClass
 	public static void setUp() {
-		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group", "false",
+		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group","false",
 				embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
+		consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,"org.apache.kafka.common.serialization.StringDeserializer");
 		DefaultKafkaConsumerFactory<String, String> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromEmbeddedTopics(consumer, "counts", "counts-1", "counts-2", "counts-5",  "counts-6");
+		embeddedKafka.consumeFromEmbeddedTopics(consumer,"counts","counts-1","counts-2","counts-5","counts-6");
 	}
 
 	@AfterClass
@@ -122,7 +122,7 @@ public class KafkaStreamsBinderWordCountFunctionTests {
 				"--spring.cloud.stream.kafka.streams.bindings.process-in-0.consumer.consumedAs=custom-consumer",
 				"--spring.cloud.stream.kafka.streams.bindings.process-out-0.producer.producedAs=custom-producer",
 				"--spring.cloud.stream.kafka.streams.binder.brokers=" + embeddedKafka.getBrokersAsString())) {
-			receiveAndValidate("words", "counts");
+			receiveAndValidate("words","counts");
 
 			final MeterRegistry meterRegistry = context.getBean(MeterRegistry.class);
 			Thread.sleep(100);
@@ -132,7 +132,7 @@ public class KafkaStreamsBinderWordCountFunctionTests {
 			assertThat(meterRegistry.getMeters().stream().anyMatch(m -> m.getId().getName().equals("kafka.producer.record.send.total"))).isTrue();
 			assertThat(meterRegistry.getMeters().stream().anyMatch(m -> m.getId().getName().equals("kafka.admin.client.network.io.total"))).isTrue();
 
-			Assert.isTrue(LATCH.await(5, TimeUnit.SECONDS), "Failed to call customizers");
+			Assert.isTrue(LATCH.await(5,TimeUnit.SECONDS),"Failed to call customizers");
 			//Testing topology endpoint
 			final KafkaStreamsRegistry kafkaStreamsRegistry = context.getBean(KafkaStreamsRegistry.class);
 			final KafkaStreamsTopologyEndpoint kafkaStreamsTopologyEndpoint = new KafkaStreamsTopologyEndpoint(kafkaStreamsRegistry);
@@ -194,7 +194,7 @@ public class KafkaStreamsBinderWordCountFunctionTests {
 						+ "=org.apache.kafka.common.serialization.Serdes$StringSerde",
 				"--spring.cloud.stream.kafka.binder.brokers="
 						+ embeddedKafka.getBrokersAsString())) {
-			receiveAndValidate("words-5", "counts-5");
+			receiveAndValidate("words-5","counts-5");
 		}
 	}
 
@@ -221,14 +221,14 @@ public class KafkaStreamsBinderWordCountFunctionTests {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 			DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 			try {
-				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("words-2");
 				template.sendDefault("foo");
-				ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer, "counts-2");
+				ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer,"counts-2");
 				assertThat(cr.value().contains("\"word\":\"foo\",\"count\":1")).isTrue();
 				assertThat(cr.partition() == 0) .isTrue();
 				template.sendDefault("bar");
-				cr = KafkaTestUtils.getSingleRecord(consumer, "counts-2");
+				cr = KafkaTestUtils.getSingleRecord(consumer,"counts-2");
 				assertThat(cr.value().contains("\"word\":\"bar\",\"count\":1")).isTrue();
 				assertThat(cr.partition() == 1) .isTrue();
 			}
@@ -309,7 +309,7 @@ public class KafkaStreamsBinderWordCountFunctionTests {
 			DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(
 					senderProps);
 			try {
-				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("words-6");
 				template.sendDefault("foobar");
 				ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer,
@@ -322,14 +322,14 @@ public class KafkaStreamsBinderWordCountFunctionTests {
 		}
 	}
 
-	private void receiveAndValidate(String in, String out) {
+	private void receiveAndValidate(String in,String out) {
 		Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 		DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(senderProps);
 		try {
-			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 			template.setDefaultTopic(in);
 			template.sendDefault("foobar");
-			ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer, out);
+			ConsumerRecord<String, String> cr = KafkaTestUtils.getSingleRecord(consumer,out);
 			assertThat(cr.value().contains("\"word\":\"foobar\",\"count\":1")).isTrue();
 		}
 		finally {
@@ -347,7 +347,7 @@ public class KafkaStreamsBinderWordCountFunctionTests {
 
 		private Date end;
 
-		WordCount(String word, long count, Date start, Date end) {
+		WordCount(String word,long count,Date start,Date end) {
 			this.word = word;
 			this.count = count;
 			this.start = start;
@@ -398,20 +398,20 @@ public class KafkaStreamsBinderWordCountFunctionTests {
 
 			return input -> input
 					.flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
-					.map((key, value) -> new KeyValue<>(value, value))
-					.groupByKey(Grouped.with(Serdes.String(), Serdes.String()))
+					.map((key,value) -> new KeyValue<>(value,value))
+					.groupByKey(Grouped.with(Serdes.String(),Serdes.String()))
 					.windowedBy(TimeWindows.of(Duration.ofMillis(5000)))
 					.count(Materialized.as("foo-WordCounts"))
 					.toStream()
-					.map((key, value) -> new KeyValue<>(key.key(), new WordCount(key.key(), value,
-							new Date(key.window().start()), new Date(key.window().end()))));
+					.map((key,value) -> new KeyValue<>(key.key(),new WordCount(key.key(),value,
+							new Date(key.window().start()),new Date(key.window().end()))));
 		}
 
 		@Bean
 		public StreamsBuilderFactoryBeanConfigurer customizer() {
 			return fb -> {
 				try {
-					fb.setStateListener((newState, oldState) -> {
+					fb.setStateListener((newState,oldState) -> {
 
 					});
 					fb.getObject(); //make sure no exception is thrown at this call.
@@ -426,7 +426,7 @@ public class KafkaStreamsBinderWordCountFunctionTests {
 
 		@Bean
 		public StreamPartitioner<String, WordCount> streamPartitioner() {
-			return (t, k, v, n) -> k.equals("foo") ? 0 : 1;
+			return (t,k,v,n) -> k.equals("foo") ? 0 : 1;
 		}
 	}
 
@@ -438,11 +438,11 @@ public class KafkaStreamsBinderWordCountFunctionTests {
 			return input -> input
 					.flatMapValues(
 							value -> Arrays.asList(value.toLowerCase().split("\\W+")))
-					.map((key, value) -> new KeyValue<>(value, value))
-					.groupByKey(Grouped.with(Serdes.String(), Serdes.String()))
+					.map((key,value) -> new KeyValue<>(value,value))
+					.groupByKey(Grouped.with(Serdes.String(),Serdes.String()))
 					.windowedBy(TimeWindows.of(Duration.ofSeconds(5))).count(Materialized.as("foobar-WordCounts"))
 					.toStream()
-					.map((key, value) -> new KeyValue<>(null, null));
+					.map((key,value) -> new KeyValue<>(null,null));
 		}
 	}
 }

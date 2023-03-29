@@ -49,7 +49,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Gary Russell
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, properties = {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,properties = {
 		"spring.cloud.function.definition=retryInBinder;retryInContainer",
 		"spring.cloud.stream.bindings.retryInBinder-in-0.group=foo",
 		"spring.cloud.stream.bindings.retryInContainer-in-0.group=bar",
@@ -62,15 +62,15 @@ public class KafkaRetryDlqBinderOrContainerTests {
 	@Test
 	public void retryAndDlqInRightPlace(@Autowired BindingsLifecycleController controller) {
 		Binding<?> retryInBinder = controller.queryState("retryInBinder-in-0");
-		assertThat(KafkaTestUtils.getPropertyValue(retryInBinder, "lifecycle.retryTemplate")).isNotNull();
+		assertThat(KafkaTestUtils.getPropertyValue(retryInBinder,"lifecycle.retryTemplate")).isNotNull();
 		assertThat(KafkaTestUtils.getPropertyValue(retryInBinder,
 				"lifecycle.messageListenerContainer.commonErrorHandler")).isNull();
 		Binding<?> retryInContainer = controller.queryState("retryInContainer-in-0");
-		assertThat(KafkaTestUtils.getPropertyValue(retryInContainer, "lifecycle.retryTemplate")).isNull();
+		assertThat(KafkaTestUtils.getPropertyValue(retryInContainer,"lifecycle.retryTemplate")).isNull();
 		assertThat(KafkaTestUtils.getPropertyValue(retryInContainer,
 				"lifecycle.messageListenerContainer.commonErrorHandler")).isInstanceOf(CommonErrorHandler.class);
 		assertThat(KafkaTestUtils.getPropertyValue(retryInContainer,
-					"lifecycle.messageListenerContainer.commonErrorHandler.failureTracker.backOff"))
+				"lifecycle.messageListenerContainer.commonErrorHandler.failureTracker.backOff"))
 				.isInstanceOf(ExponentialBackOffWithMaxRetries.class);
 	}
 
@@ -79,12 +79,14 @@ public class KafkaRetryDlqBinderOrContainerTests {
 
 		@Bean
 		public Consumer<String> retryInBinder() {
-			return str -> { };
+			return str -> {
+			};
 		}
 
 		@Bean
 		public Consumer<String> retryInContainer() {
-			return str -> { };
+			return str -> {
+			};
 		}
 
 		@Bean
@@ -92,7 +94,7 @@ public class KafkaRetryDlqBinderOrContainerTests {
 			return new ListenerContainerWithDlqAndRetryCustomizer() {
 
 				@Override
-				public void configure(AbstractMessageListenerContainer<?, ?> container, String destinationName,
+				public void configure(AbstractMessageListenerContainer<?, ?> container,String destinationName,
 						String group,
 						BiFunction<ConsumerRecord<?, ?>, Exception, TopicPartition> dlqDestinationResolver,
 						@Nullable BackOff backOff) {
@@ -100,12 +102,12 @@ public class KafkaRetryDlqBinderOrContainerTests {
 					if (destinationName.contains("Container")) {
 						ConsumerRecordRecoverer dlpr = new DeadLetterPublishingRecoverer(mock(KafkaOperations.class),
 								dlqDestinationResolver);
-						container.setCommonErrorHandler(new DefaultErrorHandler(dlpr, backOff));
+						container.setCommonErrorHandler(new DefaultErrorHandler(dlpr,backOff));
 					}
 				}
 
 				@Override
-				public boolean retryAndDlqInBinding(String destinationName, String group) {
+				public boolean retryAndDlqInBinding(String destinationName,String group) {
 					return !destinationName.contains("Container");
 				}
 

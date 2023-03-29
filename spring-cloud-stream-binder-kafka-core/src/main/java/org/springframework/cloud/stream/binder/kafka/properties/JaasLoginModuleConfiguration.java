@@ -44,7 +44,7 @@ public class JaasLoginModuleConfiguration {
 	}
 
 	public void setLoginModule(String loginModule) {
-		Assert.notNull(loginModule, "cannot be null");
+		Assert.notNull(loginModule,"cannot be null");
 		this.loginModule = loginModule;
 	}
 
@@ -53,7 +53,7 @@ public class JaasLoginModuleConfiguration {
 	}
 
 	public void setControlFlag(String controlFlag) {
-		Assert.notNull(controlFlag, "cannot be null");
+		Assert.notNull(controlFlag,"cannot be null");
 		this.controlFlag = KafkaJaasLoginModuleInitializer.ControlFlag
 				.valueOf(controlFlag.toUpperCase());
 	}

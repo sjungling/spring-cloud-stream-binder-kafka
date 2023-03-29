@@ -37,7 +37,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(
 		classes = BaseKafkaBinderTopicPropertiesUpdateTest.TopicAutoConfigsTestConfig.class,
-		webEnvironment = SpringBootTest.WebEnvironment.NONE, properties = {
+		webEnvironment = SpringBootTest.WebEnvironment.NONE,properties = {
 		"spring.cloud.stream.function.bindings.process-in-0=standard-in",
 		"spring.cloud.stream.function.bindings.process-out-0=standard-out",
 		"spring.cloud.stream.kafka.bindings.standard-out.producer.topic.properties.retention.ms=9001",
@@ -51,7 +51,7 @@ public abstract class BaseKafkaBinderTopicPropertiesUpdateTest {
 	private static final String KAFKA_BROKERS_PROPERTY = "spring.cloud.stream.kafka.binder.brokers";
 
 	@ClassRule
-	public static EmbeddedKafkaRule kafkaEmbedded = new EmbeddedKafkaRule(1, true, "standard-in", "standard-out");
+	public static EmbeddedKafkaRule kafkaEmbedded = new EmbeddedKafkaRule(1,true,"standard-in","standard-out");
 
 	@BeforeClass
 	public static void setup() {

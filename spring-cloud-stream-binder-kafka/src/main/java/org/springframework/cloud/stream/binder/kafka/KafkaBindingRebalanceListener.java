@@ -38,7 +38,7 @@ public interface KafkaBindingRebalanceListener {
 	 * @param partitions the partitions.
 	 */
 	default void onPartitionsRevokedBeforeCommit(String bindingName,
-			Consumer<?, ?> consumer, Collection<TopicPartition> partitions) {
+			Consumer<?, ?> consumer,Collection<TopicPartition> partitions) {
 		// do nothing
 	}
 
@@ -49,7 +49,7 @@ public interface KafkaBindingRebalanceListener {
 	 * @param partitions the partitions.
 	 */
 	default void onPartitionsRevokedAfterCommit(String bindingName,
-			Consumer<?, ?> consumer, Collection<TopicPartition> partitions) {
+			Consumer<?, ?> consumer,Collection<TopicPartition> partitions) {
 		// do nothing
 	}
 
@@ -66,8 +66,8 @@ public interface KafkaBindingRebalanceListener {
 	 * @param partitions the partitions.
 	 * @param initial true if this is the initial assignment on the current thread.
 	 */
-	default void onPartitionsAssigned(String bindingName, Consumer<?, ?> consumer,
-			Collection<TopicPartition> partitions, boolean initial) {
+	default void onPartitionsAssigned(String bindingName,Consumer<?, ?> consumer,
+			Collection<TopicPartition> partitions,boolean initial) {
 		// do nothing
 	}
 

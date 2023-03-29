@@ -62,7 +62,7 @@ import static org.mockito.Mockito.mock;
  *
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, properties = {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,properties = {
 		"spring.kafka.consumer.properties.isolation.level=read_committed",
 		"spring.kafka.consumer.enable-auto-commit=false",
 		"spring.kafka.consumer.auto-offset-reset=earliest",
@@ -86,9 +86,9 @@ public class ConsumerProducerTransactionTests {
 	private static final String KAFKA_BROKERS_PROPERTY = "spring.cloud.stream.kafka.binder.brokers";
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1, true, "consumer.producer.txOut")
-			.brokerProperty(KafkaConfig.TransactionsTopicReplicationFactorProp(), "1")
-			.brokerProperty(KafkaConfig.TransactionsTopicMinISRProp(), "1");
+	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1,true,"consumer.producer.txOut")
+			.brokerProperty(KafkaConfig.TransactionsTopicReplicationFactorProp(),"1")
+			.brokerProperty(KafkaConfig.TransactionsTopicMinISRProp(),"1");
 
 	@Autowired
 	private Config config;
@@ -112,19 +112,19 @@ public class ConsumerProducerTransactionTests {
 
 	@Test
 	public void testProducerRunsInConsumerTransaction() throws InterruptedException {
-		assertThat(this.config.latch.await(10, TimeUnit.SECONDS)).isTrue();
-		assertThat(this.config.outs).containsExactlyInAnyOrder("ONE", "THREE");
+		assertThat(this.config.latch.await(10,TimeUnit.SECONDS)).isTrue();
+		assertThat(this.config.outs).containsExactlyInAnyOrder("ONE","THREE");
 	}
 
 	@Test
 	public void externalTM() {
 		assertThat(this.config.input2Container.getContainerProperties().getTransactionManager())
 				.isSameAs(this.config.tm);
-		final MessageChannel output2 = context.getBean("output2", MessageChannel.class);
+		final MessageChannel output2 = context.getBean("output2",MessageChannel.class);
 
-		Object handler = KafkaTestUtils.getPropertyValue(output2, "dispatcher.handlers", Set.class)
+		Object handler = KafkaTestUtils.getPropertyValue(output2,"dispatcher.handlers",Set.class)
 				.iterator().next();
-		assertThat(KafkaTestUtils.getPropertyValue(handler, "delegate.kafkaTemplate.producerFactory"))
+		assertThat(KafkaTestUtils.getPropertyValue(handler,"delegate.kafkaTemplate.producerFactory"))
 				.isSameAs(this.config.pf);
 	}
 
@@ -142,7 +142,7 @@ public class ConsumerProducerTransactionTests {
 
 		KafkaAwareTransactionManager<byte[], byte[]> tm;
 
-		@KafkaListener(id = "test.cons.prod", topics = "consumer.producer.txOut")
+		@KafkaListener(id = "test.cons.prod",topics = "consumer.producer.txOut")
 		public void listenOut(String in) {
 			this.outs.add(in);
 			this.latch.countDown();
@@ -166,23 +166,23 @@ public class ConsumerProducerTransactionTests {
 		@Bean
 		public ApplicationRunner runner(KafkaTemplate<byte[], byte[]> template) {
 			return args -> {
-				template.send("consumer.producer.txIn", "one".getBytes());
-				template.send("consumer.producer.txIn", "two".getBytes());
-				template.send("consumer.producer.txIn", "three".getBytes());
+				template.send("consumer.producer.txIn","one".getBytes());
+				template.send("consumer.producer.txIn","two".getBytes());
+				template.send("consumer.producer.txIn","three".getBytes());
 			};
 		}
 
 		@Bean
 		public ListenerContainerCustomizer<AbstractMessageListenerContainer<?, ?>> customizer() {
-			return (container, dest, group) -> {
-				container.setAfterRollbackProcessor(new DefaultAfterRollbackProcessor<>(new FixedBackOff(0L, 1L)));
+			return (container,dest,group) -> {
+				container.setAfterRollbackProcessor(new DefaultAfterRollbackProcessor<>(new FixedBackOff(0L,1L)));
 				if ("input2".equals(dest)) {
 					this.input2Container = container;
 				}
 			};
 		}
 
-		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@SuppressWarnings({"rawtypes","unchecked"})
 		@Bean
 		public KafkaAwareTransactionManager<byte[], byte[]> tm(ProducerFactory pf) {
 			KafkaAwareTransactionManager mock = mock(KafkaAwareTransactionManager.class);

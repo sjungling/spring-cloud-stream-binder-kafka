@@ -27,7 +27,7 @@ public class RawKafkaPartitionTestSupport
 		implements PartitionKeyExtractorStrategy, PartitionSelectorStrategy {
 
 	@Override
-	public int selectPartition(Object key, int divisor) {
+	public int selectPartition(Object key,int divisor) {
 		return ((byte[]) key)[0] % divisor;
 	}
 

@@ -46,8 +46,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KafkaStreamsBinderDestinationIsPatternTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
-			"in.1", "in.2", "out");
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
+			"in.1","in.2","out");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule
 			.getEmbeddedKafka();
@@ -56,12 +56,12 @@ public class KafkaStreamsBinderDestinationIsPatternTests {
 
 	@BeforeClass
 	public static void setUp() {
-		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group", "true",
+		Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("group","true",
 				embeddedKafka);
-		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+		consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
 		DefaultKafkaConsumerFactory<Integer, String> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
 		consumer = cf.createConsumer();
-		embeddedKafka.consumeFromEmbeddedTopics(consumer, "out");
+		embeddedKafka.consumeFromEmbeddedTopics(consumer,"out");
 	}
 
 	@AfterClass
@@ -83,14 +83,14 @@ public class KafkaStreamsBinderDestinationIsPatternTests {
 			Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 			DefaultKafkaProducerFactory<Integer, String> producerFactory = new DefaultKafkaProducerFactory<>(
 					senderProps);
-			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(producerFactory, true);
+			KafkaTemplate<Integer, String> template = new KafkaTemplate<>(producerFactory,true);
 
 			// send message to both topics that fit the pattern
-			template.send("in.1", "foo1");
-			assertThat(KafkaTestUtils.getSingleRecord(consumer, "out").value())
+			template.send("in.1","foo1");
+			assertThat(KafkaTestUtils.getSingleRecord(consumer,"out").value())
 					.isEqualTo("foo1");
-			template.send("in.2", "foo2");
-			assertThat(KafkaTestUtils.getSingleRecord(consumer, "out").value())
+			template.send("in.2","foo2");
+			assertThat(KafkaTestUtils.getSingleRecord(consumer,"out").value())
 					.isEqualTo("foo2");
 		}
 		finally {

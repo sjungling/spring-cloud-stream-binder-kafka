@@ -41,8 +41,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { KafkaBinderConfiguration.class,
-		BindingServiceConfiguration.class })
+@SpringBootTest(classes = {KafkaBinderConfiguration.class,
+		BindingServiceConfiguration.class})
 @TestPropertySource(properties = {
 		"spring.cloud.stream.kafka.bindings.input.consumer.topic.replication-factor=2",
 		"spring.cloud.stream.kafka.bindings.input.consumer.topic.replicas-assignments.0=0,1",
@@ -53,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		"spring.cloud.stream.kafka.bindings.output.producer.topic.replication-factor=2",
 		"spring.cloud.stream.kafka.bindings.output.producer.topic.replicas-assignments.0=0,1",
 		"spring.cloud.stream.kafka.bindings.output.producer.topic.properties.message.format.version=0.9.0.0",
-		"spring.main.allow-bean-definition-overriding=true" })
+		"spring.main.allow-bean-definition-overriding=true"})
 @EnableIntegration
 public class AdminConfigTests {
 
@@ -68,7 +68,7 @@ public class AdminConfigTests {
 
 		assertThat(kafkaTopicProperties.getReplicationFactor()).isEqualTo((short) 3);
 		assertThat(kafkaTopicProperties.getReplicasAssignments().get(0))
-				.isEqualTo(Arrays.asList(0, 1));
+				.isEqualTo(Arrays.asList(0,1));
 		assertThat(kafkaTopicProperties.getProperties().get("message.format.version"))
 				.isEqualTo("0.9.1.0");
 	}
@@ -81,7 +81,7 @@ public class AdminConfigTests {
 
 		assertThat(kafkaTopicProperties.getReplicationFactor()).isEqualTo((short) 2);
 		assertThat(kafkaTopicProperties.getReplicasAssignments().get(0))
-				.isEqualTo(Arrays.asList(0, 1));
+				.isEqualTo(Arrays.asList(0,1));
 		assertThat(kafkaTopicProperties.getProperties().get("message.format.version"))
 				.isEqualTo("0.9.0.0");
 	}

@@ -43,12 +43,12 @@ public class KafkaBinderJaasInitializerListenerTest {
 	private static final String KAFKA_BROKERS_PROPERTY = "spring.cloud.stream.kafka.binder.brokers";
 
 	@ClassRule
-	public static EmbeddedKafkaRule kafkaEmbedded = new EmbeddedKafkaRule(1, true);
+	public static EmbeddedKafkaRule kafkaEmbedded = new EmbeddedKafkaRule(1,true);
 
 	private static String JAVA_LOGIN_CONFIG_PARAM_VALUE;
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withUserConfiguration(KafkaBinderConfiguration.class, KafkaAutoConfiguration.class);
+			.withUserConfiguration(KafkaBinderConfiguration.class,KafkaAutoConfiguration.class);
 
 	@BeforeClass
 	public static void setup() {
@@ -64,7 +64,7 @@ public class KafkaBinderJaasInitializerListenerTest {
 		System.clearProperty(KAFKA_BROKERS_PROPERTY);
 		//If there was a previous value for this property, then restore it.
 		if (JAVA_LOGIN_CONFIG_PARAM_VALUE != null) {
-			System.setProperty(JaasUtils.JAVA_LOGIN_CONFIG_PARAM, JAVA_LOGIN_CONFIG_PARAM_VALUE);
+			System.setProperty(JaasUtils.JAVA_LOGIN_CONFIG_PARAM,JAVA_LOGIN_CONFIG_PARAM_VALUE);
 		}
 	}
 

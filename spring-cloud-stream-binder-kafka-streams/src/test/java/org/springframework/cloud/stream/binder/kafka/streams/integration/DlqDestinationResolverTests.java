@@ -56,7 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DlqDestinationResolverTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
 			"topic1-dlq",
 			"topic2-dlq");
 
@@ -83,7 +83,7 @@ public class DlqDestinationResolverTests {
 			DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(
 					senderProps);
 			try {
-				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+				KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 				template.setDefaultTopic("word1");
 				template.sendDefault("foobar");
 
@@ -91,12 +91,12 @@ public class DlqDestinationResolverTests {
 				template.sendDefault("foobar");
 
 				Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("some-random-group",
-						"false", embeddedKafka);
-				consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+						"false",embeddedKafka);
+				consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
 				DefaultKafkaConsumerFactory<String, String> cf = new DefaultKafkaConsumerFactory<>(
 						consumerProps);
 				Consumer<String, String> consumer1 = cf.createConsumer();
-				embeddedKafka.consumeFromEmbeddedTopics(consumer1, "topic1-dlq",
+				embeddedKafka.consumeFromEmbeddedTopics(consumer1,"topic1-dlq",
 						"topic2-dlq");
 
 				ConsumerRecord<String, String> cr1 = KafkaTestUtils.getSingleRecord(consumer1,
@@ -124,21 +124,21 @@ public class DlqDestinationResolverTests {
 			return input -> input
 					.flatMapValues(
 							value -> Arrays.asList(value.toLowerCase().split("\\W+")))
-					.map((key, value) -> new KeyValue<>(value, value))
-					.groupByKey(Grouped.with(Serdes.String(), Serdes.String()))
+					.map((key,value) -> new KeyValue<>(value,value))
+					.groupByKey(Grouped.with(Serdes.String(),Serdes.String()))
 					.windowedBy(TimeWindows.of(Duration.ofSeconds(5))).count(Materialized.as("foo-WordCounts-x"))
-					.toStream().map((key, value) -> new KeyValue<>(null,
-							"Count for " + key.key() + " : " + value));
+					.toStream().map((key,value) -> new KeyValue<>(null,
+					"Count for " + key.key() + " : " + value));
 		}
 
 		@Bean
 		public DlqPartitionFunction partitionFunction() {
-			return (group, rec, ex) -> 0;
+			return (group,rec,ex) -> 0;
 		}
 
 		@Bean
 		public DlqDestinationResolver dlqDestinationResolver() {
-			return (rec, ex) -> {
+			return (rec,ex) -> {
 				if (rec.topic().equals("word1")) {
 					return "topic1-dlq";
 				}

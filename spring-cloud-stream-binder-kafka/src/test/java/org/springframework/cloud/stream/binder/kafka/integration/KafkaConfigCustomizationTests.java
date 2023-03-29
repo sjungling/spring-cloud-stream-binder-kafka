@@ -56,7 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Based on: https://github.com/spring-projects/spring-kafka/issues/897#issuecomment-466060097
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, properties = {"spring.cloud.function.definition=process",
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,properties = {"spring.cloud.function.definition=process",
 		"spring.cloud.stream.bindings.process-in-0.group=KafkaConfigCustomizationTests.group"})
 @DirtiesContext
 public class KafkaConfigCustomizationTests {
@@ -64,7 +64,7 @@ public class KafkaConfigCustomizationTests {
 	private static final String KAFKA_BROKERS_PROPERTY = "spring.cloud.stream.kafka.binder.brokers";
 
 	@ClassRule
-	public static EmbeddedKafkaRule kafkaEmbedded = new EmbeddedKafkaRule(1, true);
+	public static EmbeddedKafkaRule kafkaEmbedded = new EmbeddedKafkaRule(1,true);
 
 	static final CountDownLatch countDownLatch = new CountDownLatch(2);
 
@@ -85,9 +85,9 @@ public class KafkaConfigCustomizationTests {
 				.producerProps(kafkaEmbedded.getEmbeddedKafka());
 		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(
 				new DefaultKafkaProducerFactory<>(producerProps));
-		template.send("process-in-0", "test-foo");
+		template.send("process-in-0","test-foo");
 		template.flush();
-		assertThat(countDownLatch.await(10, TimeUnit.SECONDS)).isTrue();
+		assertThat(countDownLatch.await(10,TimeUnit.SECONDS)).isTrue();
 	}
 
 	@SpringBootApplication
@@ -100,21 +100,21 @@ public class KafkaConfigCustomizationTests {
 
 		@Bean
 		public ConsumerConfigCustomizer consumerConfigCustomizer() {
-			return (consumerProperties, binding, destination) -> {
+			return (consumerProperties,binding,destination) -> {
 				assertThat(binding).isEqualTo("process-in-0");
 				assertThat(destination).isEqualTo("process-in-0");
-				consumerProperties.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, MyConsumerInterceptor.class.getName());
-				consumerProperties.put("foo.bean", foo());
+				consumerProperties.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG,MyConsumerInterceptor.class.getName());
+				consumerProperties.put("foo.bean",foo());
 			};
 		}
 
 		@Bean
 		public ProducerConfigCustomizer producerConfigCustomizer() {
-			return (producerProperties, binding, destination) -> {
+			return (producerProperties,binding,destination) -> {
 				assertThat(binding).isEqualTo("process-out-0");
 				assertThat(destination).isEqualTo("process-out-0");
-				producerProperties.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, MyProducerInterceptor.class.getName());
-				producerProperties.put("foo.bean", foo());
+				producerProperties.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,MyProducerInterceptor.class.getName());
+				producerProperties.put("foo.bean",foo());
 			};
 		}
 
@@ -174,7 +174,7 @@ public class KafkaConfigCustomizationTests {
 		}
 
 		@Override
-		public void onAcknowledgement(RecordMetadata metadata, Exception exception) {
+		public void onAcknowledgement(RecordMetadata metadata,Exception exception) {
 		}
 
 		@Override

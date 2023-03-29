@@ -38,7 +38,7 @@ public interface ListenerContainerWithDlqAndRetryCustomizer
 		extends ListenerContainerCustomizer<AbstractMessageListenerContainer<?, ?>> {
 
 	@Override
-	default void configure(AbstractMessageListenerContainer<?, ?> container, String destinationName, String group) {
+	default void configure(AbstractMessageListenerContainer<?, ?> container,String destinationName,String group) {
 	}
 
 	/**
@@ -49,9 +49,9 @@ public interface ListenerContainerWithDlqAndRetryCustomizer
 	 * @param dlqDestinationResolver a destination resolver for the dead letter topic (if
 	 * enableDlq).
 	 * @param backOff the backOff using retry properties (if configured).
-	 * @see #retryAndDlqInBinding(String, String)
+	 * @see #retryAndDlqInBinding(String,String)
 	 */
-	void configure(AbstractMessageListenerContainer<?, ?> container, String destinationName, String group,
+	void configure(AbstractMessageListenerContainer<?, ?> container,String destinationName,String group,
 			@Nullable BiFunction<ConsumerRecord<?, ?>, Exception, TopicPartition> dlqDestinationResolver,
 			@Nullable BackOff backOff);
 
@@ -59,12 +59,12 @@ public interface ListenerContainerWithDlqAndRetryCustomizer
 	 * Return false to move retries and DLQ from the binding to a customized error handler
 	 * using the retry metadata and/or a {@code DeadLetterPublishingRecoverer} when
 	 * configured via
-	 * {@link #configure(AbstractMessageListenerContainer, String, String, BiFunction, BackOff)}.
+	 * {@link #configure(AbstractMessageListenerContainer,String,String,BiFunction,BackOff)}.
 	 * @param destinationName the destination name.
 	 * @param group the group.
 	 * @return true to disable retrie in the binding
 	 */
-	default boolean retryAndDlqInBinding(String destinationName, String group) {
+	default boolean retryAndDlqInBinding(String destinationName,String group) {
 		return true;
 	}
 

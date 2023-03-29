@@ -59,7 +59,7 @@ public class KafkaBinderHealthIndicator implements KafkaBinderHealth, Disposable
 	private static final int DEFAULT_TIMEOUT = 60;
 
 	private final ExecutorService executor = Executors.newSingleThreadExecutor(
-		new CustomizableThreadFactory("kafka-binder-health-"));
+			new CustomizableThreadFactory("kafka-binder-health-"));
 
 	private final KafkaMessageChannelBinder binder;
 
@@ -72,7 +72,7 @@ public class KafkaBinderHealthIndicator implements KafkaBinderHealth, Disposable
 	private boolean considerDownWhenAnyPartitionHasNoLeader;
 
 	public KafkaBinderHealthIndicator(KafkaMessageChannelBinder binder,
-									ConsumerFactory<?, ?> consumerFactory) {
+			ConsumerFactory<?, ?> consumerFactory) {
 		this.binder = binder;
 		this.consumerFactory = consumerFactory;
 	}
@@ -93,12 +93,12 @@ public class KafkaBinderHealthIndicator implements KafkaBinderHealth, Disposable
 	public Health health() {
 		Health topicsHealth = safelyBuildTopicsHealth();
 		Health listenerContainersHealth = buildListenerContainersHealth();
-		return merge(topicsHealth, listenerContainersHealth);
+		return merge(topicsHealth,listenerContainersHealth);
 	}
 
-	private Health merge(Health topicsHealth, Health listenerContainersHealth) {
+	private Health merge(Health topicsHealth,Health listenerContainersHealth) {
 		Status aggregatedStatus = StatusAggregator.getDefault()
-						.getAggregateStatus(topicsHealth.getStatus(), listenerContainersHealth.getStatus());
+				.getAggregateStatus(topicsHealth.getStatus(),listenerContainersHealth.getStatus());
 		Map<String, Object> aggregatedDetails = new HashMap<>();
 		aggregatedDetails.putAll(topicsHealth.getDetails());
 		aggregatedDetails.putAll(listenerContainersHealth.getDetails());
@@ -108,7 +108,7 @@ public class KafkaBinderHealthIndicator implements KafkaBinderHealth, Disposable
 	private Health safelyBuildTopicsHealth() {
 		Future<Health> future = executor.submit(this::buildTopicsHealth);
 		try {
-			return future.get(this.timeout, TimeUnit.SECONDS);
+			return future.get(this.timeout,TimeUnit.SECONDS);
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
@@ -174,7 +174,7 @@ public class KafkaBinderHealthIndicator implements KafkaBinderHealth, Disposable
 				}
 			}
 			if (downMessages.isEmpty()) {
-				return Health.up().withDetail("topicsInUse", checkedTopics).build();
+				return Health.up().withDetail("topicsInUse",checkedTopics).build();
 			}
 			else {
 				return Health.down()
@@ -204,16 +204,16 @@ public class KafkaBinderHealthIndicator implements KafkaBinderHealth, Disposable
 			if (!isOk) {
 				status = Status.DOWN;
 			}
-			containerDetails.put("isRunning", isRunning);
-			containerDetails.put("isStoppedAbnormally", !isRunning && !isOk);
-			containerDetails.put("isPaused", container.isContainerPaused());
-			containerDetails.put("listenerId", container.getListenerId());
-			containerDetails.put("groupId", container.getGroupId());
+			containerDetails.put("isRunning",isRunning);
+			containerDetails.put("isStoppedAbnormally",!isRunning && !isOk);
+			containerDetails.put("isPaused",container.isContainerPaused());
+			containerDetails.put("listenerId",container.getListenerId());
+			containerDetails.put("groupId",container.getGroupId());
 
 			containersDetails.add(containerDetails);
 		}
 		return Health.status(status)
-				.withDetail("listenerContainers", containersDetails)
+				.withDetail("listenerContainers",containersDetails)
 				.build();
 	}
 

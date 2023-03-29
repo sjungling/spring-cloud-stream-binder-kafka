@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KafkaStreamsStateStoreIntegrationTests {
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1, true,
+	public static EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(1,true,
 			"counts-id");
 
 	private static EmbeddedKafkaBroker embeddedKafka = embeddedKafkaRule
@@ -77,7 +77,7 @@ public class KafkaStreamsStateStoreIntegrationTests {
 						+ embeddedKafka.getBrokersAsString());
 		try {
 			Thread.sleep(2000);
-			receiveAndValidateFoo(context, ProductCountApplication.class);
+			receiveAndValidateFoo(context,ProductCountApplication.class);
 		}
 		catch (Exception e) {
 			throw e;
@@ -122,12 +122,12 @@ public class KafkaStreamsStateStoreIntegrationTests {
 		}
 	}
 
-	private void receiveAndValidateFoo(ConfigurableApplicationContext context, Class<?> clazz)
+	private void receiveAndValidateFoo(ConfigurableApplicationContext context,Class<?> clazz)
 			throws Exception {
 		Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
 		DefaultKafkaProducerFactory<Integer, String> pf = new DefaultKafkaProducerFactory<>(
 				senderProps);
-		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf, true);
+		KafkaTemplate<Integer, String> template = new KafkaTemplate<>(pf,true);
 		template.setDefaultTopic("foobar");
 		template.sendDefault("{\"id\":\"123\"}");
 		Thread.sleep(1000);
@@ -166,7 +166,7 @@ public class KafkaStreamsStateStoreIntegrationTests {
 				}
 
 				@Override
-				public void process(Object s, Product product) {
+				public void process(Object s,Product product) {
 					processed = true;
 				}
 
@@ -176,14 +176,14 @@ public class KafkaStreamsStateStoreIntegrationTests {
 						state.close();
 					}
 				}
-			}, "mystate");
+			},"mystate");
 		}
 
 		@Bean
 		public StoreBuilder mystore() {
 			return Stores.windowStoreBuilder(
 					Stores.persistentWindowStore("mystate",
-							Duration.ofMillis(3), Duration.ofMillis(3), false), Serdes.String(),
+							Duration.ofMillis(3),Duration.ofMillis(3),false),Serdes.String(),
 					Serdes.String());
 		}
 	}
@@ -198,7 +198,7 @@ public class KafkaStreamsStateStoreIntegrationTests {
 		@Bean
 		public BiConsumer<KStream<Object, Product>, KStream<Object, Product>> process() {
 
-			return (input, input2) -> {
+			return (input,input2) -> {
 
 				input.process(() -> new Processor<Object, Product>() {
 
@@ -208,7 +208,7 @@ public class KafkaStreamsStateStoreIntegrationTests {
 					}
 
 					@Override
-					public void process(Object s, Product product) {
+					public void process(Object s,Product product) {
 						processed = true;
 					}
 
@@ -218,9 +218,10 @@ public class KafkaStreamsStateStoreIntegrationTests {
 							state.close();
 						}
 					}
-				}, "mystate");
+				},"mystate");
 				//simple use of input2, we are not using input2 for anything other than triggering some test behavior.
-				input2.foreach((key, value) -> { });
+				input2.foreach((key,value) -> {
+				});
 			};
 		}
 
@@ -228,7 +229,7 @@ public class KafkaStreamsStateStoreIntegrationTests {
 		public StoreBuilder mystore() {
 			return Stores.windowStoreBuilder(
 					Stores.persistentWindowStore("mystate",
-							Duration.ofMillis(3), Duration.ofMillis(3), false), Serdes.String(),
+							Duration.ofMillis(3),Duration.ofMillis(3),false),Serdes.String(),
 					Serdes.String());
 		}
 	}

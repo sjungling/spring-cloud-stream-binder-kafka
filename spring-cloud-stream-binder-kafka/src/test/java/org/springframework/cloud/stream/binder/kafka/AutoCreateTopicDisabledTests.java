@@ -49,8 +49,8 @@ public class AutoCreateTopicDisabledTests {
 	public ExpectedException expectedException = ExpectedException.none();
 
 	@ClassRule
-	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1, true, 1)
-			.brokerProperty(KafkaConfig.AutoCreateTopicsEnableProp(), "false");
+	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1,true,1)
+			.brokerProperty(KafkaConfig.AutoCreateTopicsEnableProp(),"false");
 
 	@Test
 	public void testAutoCreateTopicDisabledFailsOnConsumerIfTopicNonExistentOnBroker()
@@ -65,11 +65,11 @@ public class AutoCreateTopicDisabledTests {
 		configurationProperties.setAutoCreateTopics(false);
 
 		KafkaTopicProvisioner provisioningProvider = new KafkaTopicProvisioner(
-				configurationProperties, kafkaProperties, null);
+				configurationProperties,kafkaProperties,null);
 		provisioningProvider.setMetadataRetryOperations(new RetryTemplate());
 
 		KafkaMessageChannelBinder binder = new KafkaMessageChannelBinder(
-				configurationProperties, provisioningProvider);
+				configurationProperties,provisioningProvider);
 
 		final String testTopicName = "nonExistent" + System.currentTimeMillis();
 
@@ -78,7 +78,7 @@ public class AutoCreateTopicDisabledTests {
 
 		expectedException.expect(BinderException.class);
 		expectedException.expectCause(isA(UnknownTopicOrPartitionException.class));
-		binder.createConsumerEndpoint(() -> testTopicName, "group", properties);
+		binder.createConsumerEndpoint(() -> testTopicName,"group",properties);
 	}
 
 	@Test
@@ -94,17 +94,17 @@ public class AutoCreateTopicDisabledTests {
 		// disable auto create topic on the binder.
 		configurationProperties.setAutoCreateTopics(false);
 		// reduce the wait time on the producer blocking operations.
-		configurationProperties.getConfiguration().put("max.block.ms", "3000");
+		configurationProperties.getConfiguration().put("max.block.ms","3000");
 
 		KafkaTopicProvisioner provisioningProvider = new KafkaTopicProvisioner(
-				configurationProperties, kafkaProperties, null);
+				configurationProperties,kafkaProperties,null);
 		SimpleRetryPolicy simpleRetryPolicy = new SimpleRetryPolicy(1);
 		final RetryTemplate metadataRetryOperations = new RetryTemplate();
 		metadataRetryOperations.setRetryPolicy(simpleRetryPolicy);
 		provisioningProvider.setMetadataRetryOperations(metadataRetryOperations);
 
 		KafkaMessageChannelBinder binder = new KafkaMessageChannelBinder(
-				configurationProperties, provisioningProvider);
+				configurationProperties,provisioningProvider);
 
 		final String testTopicName = "nonExistent" + System.currentTimeMillis();
 
@@ -114,7 +114,7 @@ public class AutoCreateTopicDisabledTests {
 		expectedException.expect(BinderException.class);
 		expectedException.expectCause(isA(UnknownTopicOrPartitionException.class));
 
-		binder.bindProducer(testTopicName, new DirectChannel(), properties);
+		binder.bindProducer(testTopicName,new DirectChannel(),properties);
 
 	}
 

@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Soby Chacko
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, properties = {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,properties = {
 		"spring.kafka.consumer.auto-offset-reset=earliest",
 		"spring.cloud.stream.function.bindings.inputListen-in-0=kafkaNullInput"})
 @DirtiesContext
@@ -66,7 +66,7 @@ public class KafkaNullConverterTest {
 	private KafkaNullConverterTestConfig config;
 
 	@ClassRule
-	public static EmbeddedKafkaRule kafkaEmbedded = new EmbeddedKafkaRule(1, true);
+	public static EmbeddedKafkaRule kafkaEmbedded = new EmbeddedKafkaRule(1,true);
 
 	@BeforeClass
 	public static void setup() {
@@ -84,20 +84,20 @@ public class KafkaNullConverterTest {
 	public void testKafkaNullConverterOutput() throws InterruptedException {
 		final StreamBridge streamBridge = context.getBean(StreamBridge.class);
 
-		streamBridge.send("kafkaNullOutput", new GenericMessage<>(KafkaNull.INSTANCE));
+		streamBridge.send("kafkaNullOutput",new GenericMessage<>(KafkaNull.INSTANCE));
 
-		assertThat(this.config.countDownLatchOutput.await(10, TimeUnit.SECONDS)).isTrue();
+		assertThat(this.config.countDownLatchOutput.await(10,TimeUnit.SECONDS)).isTrue();
 		assertThat(this.config.outputPayload).isNull();
 	}
 
 	@Test
 	public void testKafkaNullConverterInput() throws InterruptedException {
 
-		final MessageChannel kafkaNullInput = context.getBean("kafkaNullInput", MessageChannel.class);
+		final MessageChannel kafkaNullInput = context.getBean("kafkaNullInput",MessageChannel.class);
 
 		kafkaNullInput.send(new GenericMessage<>(KafkaNull.INSTANCE));
 
-		assertThat(this.config.countDownLatchInput.await(10, TimeUnit.SECONDS)).isTrue();
+		assertThat(this.config.countDownLatchInput.await(10,TimeUnit.SECONDS)).isTrue();
 		assertThat(this.config.inputPayload).isNull();
 	}
 
@@ -113,7 +113,7 @@ public class KafkaNullConverterTest {
 
 		volatile byte[] inputPayload = new byte[0];
 
-		@KafkaListener(id = "foo", topics = "kafkaNullOutput")
+		@KafkaListener(id = "foo",topics = "kafkaNullOutput")
 		public void listen(@Payload(required = false) byte[] in) {
 			this.outputPayload = in;
 			countDownLatchOutput.countDown();
